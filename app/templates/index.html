@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Social Styles Assessment{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <h1 class="display-4 fw-bold text-primary mb-4">Discover Your Social Style</h1>
+            <p class="lead mb-4">The Social Styles Assessment helps you understand your behavioral preferences and how you interact with others. Discover whether you're an Analytical, Driver, Amiable, or Expressive personality type.</p>
+            
+            <div class="d-grid gap-3 d-md-flex justify-content-md-start mb-4">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('assessment.list_assessments') }}" class="btn btn-primary btn-lg px-4 me-md-2">Take Assessment</a>
+                <a href="{{ url_for('assessment.dashboard') }}" class="btn btn-outline-secondary btn-lg px-4">View Dashboard</a>
+                {% else %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4 me-md-2">Register</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-4">Login</a>
+                {% endif %}
+            </div>
+            
+            <div class="alert alert-info p-3 d-flex align-items-center" role="alert">
+                <i class="fas fa-info-circle me-3 fs-4"></i>
+                <div>
+                    <strong>What is a Social Style?</strong>
+                    <p class="mb-0">Your Social Style is determined by two key dimensions: Assertiveness and Responsiveness. The assessment measures these dimensions to identify your primary style.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="social-styles-grid-container">
+                        <img src="{{ url_for('static', filename='images/social-styles-grid.png') }}" alt="Social Styles Framework Grid" class="img-fluid rounded">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5 pt-3">
+        <div class="col-12">
+            <h2 class="text-center mb-4">The Four Social Styles</h2>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h3 class="h5 mb-0">Analytical</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="badge rounded-pill bg-primary-subtle px-3 py-2 mb-2">Asks & Controls</span>
+                    </div>
+                    <p class="card-text">Analyticals are logical, thorough, and serious. They value facts, organization, and careful analysis before making decisions.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-gradient-danger text-white">
+                    <h3 class="h5 mb-0">Driver</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="badge rounded-pill bg-danger-subtle px-3 py-2 mb-2">Tells & Controls</span>
+                    </div>
+                    <p class="card-text">Drivers are direct, decisive, and results-oriented. They focus on tasks, efficiency, and getting things done quickly.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-gradient-success text-white">
+                    <h3 class="h5 mb-0">Amiable</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="badge rounded-pill bg-success-subtle px-3 py-2 mb-2">Asks & Emotes</span>
+                    </div>
+                    <p class="card-text">Amiables are supportive, cooperative, and relationship-focused. They value harmony, stability, and helping others.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-gradient-warning text-white">
+                    <h3 class="h5 mb-0">Expressive</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="badge rounded-pill bg-warning-subtle px-3 py-2 mb-2">Tells & Emotes</span>
+                    </div>
+                    <p class="card-text">Expressives are enthusiastic, creative, and people-oriented. They enjoy socializing, sharing ideas, and inspiring others.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <p class="lead">Ready to discover your Social Style?</p>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('assessment.list_assessments') }}" class="btn btn-primary btn-lg px-5">Take the Assessment Now</a>
+            {% else %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-5">Register to Begin</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .social-styles-grid-container {
+        padding: 20px;
+        background-color: white;
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+    
+    .social-styles-grid-container:hover {
+        transform: scale(1.02);
+    }
+    
+    .bg-primary-subtle {
+        background-color: rgba(13, 110, 253, 0.15);
+        color: #0d6efd;
+    }
+    
+    .bg-danger-subtle {
+        background-color: rgba(220, 53, 69, 0.15);
+        color: #dc3545;
+    }
+    
+    .bg-success-subtle {
+        background-color: rgba(25, 135, 84, 0.15);
+        color: #198754;
+    }
+    
+    .bg-warning-subtle {
+        background-color: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+    }
+    
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #0d6efd, #0a58ca);
+    }
+    
+    .bg-gradient-danger {
+        background: linear-gradient(45deg, #dc3545, #b02a37);
+    }
+    
+    .bg-gradient-success {
+        background: linear-gradient(45deg, #198754, #157347);
+    }
+    
+    .bg-gradient-warning {
+        background: linear-gradient(45deg, #ffc107, #ffca2c);
+    }
+</style>
+{% endblock %} 

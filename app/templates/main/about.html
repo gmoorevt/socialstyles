@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}About Social Styles{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="display-4 mb-4">About Social Styles</h1>
+        <p class="lead">
+            The Social Styles framework is a powerful tool for understanding communication preferences and interpersonal behavior.
+        </p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title h3">What are Social Styles?</h2>
+                <p>
+                    Social Styles is a model for understanding how people behave and communicate in social situations. 
+                    Developed in the 1960s by David Merrill and Roger Reid, it categorizes behavior along two key dimensions:
+                </p>
+                <ul>
+                    <li><strong>Assertiveness</strong>: The degree to which a person is perceived as trying to influence the thoughts and actions of others.</li>
+                    <li><strong>Responsiveness</strong>: The degree to which a person is perceived as showing emotions and building relationships.</li>
+                </ul>
+                <p>
+                    These two dimensions create a matrix that defines four primary Social Styles:
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4 h-100">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title h5 mb-0">Driver</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>High Assertiveness, Low Responsiveness</strong></p>
+                <p>Drivers are direct, decisive, and results-oriented. They focus on tasks and outcomes rather than relationships.</p>
+                <h4 class="h6">Characteristics:</h4>
+                <ul>
+                    <li>Fast-paced and action-oriented</li>
+                    <li>Direct and straightforward communication</li>
+                    <li>Focus on results and efficiency</li>
+                    <li>May appear impatient or controlling</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4 h-100">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title h5 mb-0">Expressive</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>High Assertiveness, High Responsiveness</strong></p>
+                <p>Expressives are enthusiastic, creative, and people-oriented. They enjoy social interaction and are often persuasive communicators.</p>
+                <h4 class="h6">Characteristics:</h4>
+                <ul>
+                    <li>Energetic and enthusiastic</li>
+                    <li>Persuasive and inspiring</li>
+                    <li>Enjoys recognition and approval</li>
+                    <li>May appear disorganized or impulsive</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4 h-100">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title h5 mb-0">Amiable</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>Low Assertiveness, High Responsiveness</strong></p>
+                <p>Amiables are supportive, patient, and relationship-oriented. They value harmony and cooperation in their interactions.</p>
+                <h4 class="h6">Characteristics:</h4>
+                <ul>
+                    <li>Supportive and cooperative</li>
+                    <li>Patient and good listeners</li>
+                    <li>Values relationships and harmony</li>
+                    <li>May avoid conflict or difficult decisions</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4 h-100">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title h5 mb-0">Analytical</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>Low Assertiveness, Low Responsiveness</strong></p>
+                <p>Analyticals are logical, thorough, and detail-oriented. They focus on facts and data rather than emotions or relationships.</p>
+                <h4 class="h6">Characteristics:</h4>
+                <ul>
+                    <li>Methodical and systematic</li>
+                    <li>Detail-oriented and thorough</li>
+                    <li>Values accuracy and logic</li>
+                    <li>May appear overly cautious or indecisive</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title h3">Why Understanding Social Styles Matters</h2>
+                <p>
+                    Understanding your own Social Style and recognizing the styles of others can help you:
+                </p>
+                <ul>
+                    <li>Communicate more effectively with different types of people</li>
+                    <li>Reduce interpersonal tension and conflict</li>
+                    <li>Build stronger relationships in both professional and personal contexts</li>
+                    <li>Adapt your approach to be more effective in various situations</li>
+                    <li>Improve teamwork and collaboration</li>
+                </ul>
+                <p>
+                    The key to using Social Styles effectively is not just identifying your own style, but learning to recognize and adapt to the styles of others—a skill known as "versatility."
+                </p>
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('assessment.list_assessments') if current_user.is_authenticated else url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                        Take the Assessment
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>My Dashboard</h1>
+            <a href="{{ url_for('assessment.list_assessments') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>Take New Assessment
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h2 class="h5 mb-0">My Assessment Results</h2>
+            </div>
+            <div class="card-body p-0">
+                {% if results %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Assessment</th>
+                                <th>Date Taken</th>
+                                <th>Social Style</th>
+                                <th>Assertiveness</th>
+                                <th>Responsiveness</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                            <tr>
+                                <td>{{ result.assessment.name }}</td>
+                                <td>{{ result.created_at.strftime('%b %d, %Y') }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ result.social_style }}</span>
+                                </td>
+                                <td>{{ "%.1f"|format(result.assertiveness_score) }}/5.0</td>
+                                <td>{{ "%.1f"|format(result.responsiveness_score) }}/5.0</td>
+                                <td>
+                                    <a href="{{ url_for('assessment.results', result_id=result.id) }}" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <a href="{{ url_for('assessment.download_report', result_id=result.id) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-download"></i> PDF
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="p-4 text-center">
+                    <p class="mb-4">You haven't taken any assessments yet.</p>
+                    <a href="{{ url_for('assessment.list_assessments') }}" class="btn btn-primary">
+                        <i class="fas fa-clipboard-list me-2"></i>Take Your First Assessment
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if results %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h2 class="h5 mb-0">Your Latest Social Style</h2>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <span class="badge bg-primary fs-5 px-4 py-2">{{ results[0].social_style }}</span>
+                </div>
+                <p>Your most recent assessment shows that your primary social style is <strong>{{ results[0].social_style }}</strong>.</p>
+                <p>This means you tend to be:</p>
+                <ul>
+                    {% if results[0].social_style == 'Driver' %}
+                    <li>Direct and decisive</li>
+                    <li>Results-oriented</li>
+                    <li>Task-focused rather than people-focused</li>
+                    <li>Efficient and action-oriented</li>
+                    {% elif results[0].social_style == 'Expressive' %}
+                    <li>Enthusiastic and energetic</li>
+                    <li>People-oriented and sociable</li>
+                    <li>Creative and spontaneous</li>
+                    <li>Persuasive and inspiring</li>
+                    {% elif results[0].social_style == 'Amiable' %}
+                    <li>Supportive and cooperative</li>
+                    <li>Relationship-focused</li>
+                    <li>Patient and empathetic</li>
+                    <li>Team-oriented and harmonious</li>
+                    {% elif results[0].social_style == 'Analytical' %}
+                    <li>Logical and methodical</li>
+                    <li>Detail-oriented and thorough</li>
+                    <li>Careful and precise</li>
+                    <li>Thoughtful and systematic</li>
+                    {% endif %}
+                </ul>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('assessment.results', result_id=results[0].id) }}" class="btn btn-primary">
+                        <i class="fas fa-chart-bar me-2"></i>View Detailed Results
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h2 class="h5 mb-0">Assessment History</h2>
+            </div>
+            <div class="card-body">
+                {% if results|length > 1 %}
+                <p>You have taken {{ results|length }} assessments. Here's how your social style has evolved:</p>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Social Style</th>
+                                <th>Assertiveness</th>
+                                <th>Responsiveness</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results[:5] %}
+                            <tr>
+                                <td>{{ result.created_at.strftime('%b %d, %Y') }}</td>
+                                <td>{{ result.social_style }}</td>
+                                <td>{{ "%.1f"|format(result.assertiveness_score) }}</td>
+                                <td>{{ "%.1f"|format(result.responsiveness_score) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p>You have taken 1 assessment so far. Take the assessment again in the future to track how your social style evolves over time.</p>
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('assessment.list_assessments') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-redo me-2"></i>Take Assessment Again
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %} 

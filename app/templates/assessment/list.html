@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Available Assessments{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mb-4">Available Assessments</h1>
+        <p class="lead mb-4">Select an assessment to take from the list below.</p>
+    </div>
+</div>
+
+<div class="row">
+    {% for assessment in assessments %}
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title h4">{{ assessment.name }}</h2>
+                <p class="card-text">{{ assessment.description }}</p>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="{{ url_for('assessment.take_assessment', assessment_id=assessment.id) }}" class="btn btn-primary">
+                    <i class="fas fa-clipboard-list me-2"></i>Take Assessment
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-md-12">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>No assessments are currently available.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 

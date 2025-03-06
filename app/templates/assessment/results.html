@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment Results{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header Section -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold text-primary mb-3">Your Social Style Results</h1>
+                <p class="lead text-muted">Completed on {{ result.created_at.strftime('%B %d, %Y') }}</p>
+                
+                <div class="d-flex justify-content-center mt-4">
+                    <a href="{{ url_for('assessment.download_report', result_id=result.id) }}" class="btn btn-primary me-2">
+                        <i class="fas fa-file-pdf me-2"></i>Download PDF Report
+                    </a>
+                    <a href="{{ url_for('assessment.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-chart-line me-2"></i>View Dashboard
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Results Summary Card -->
+            <div class="card border-0 shadow-sm mb-5">
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-4 mb-md-0">
+                            <h2 class="h4 mb-4">Your Primary Style: <span class="{{ result.social_style.lower() }}-color fw-bold">{{ result.social_style }}</span></h2>
+                            
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="me-4">
+                                    <div class="score-circle assertiveness-score">
+                                        <span>{{ result.assertiveness_score }}</span>
+                                    </div>
+                                    <p class="text-center mt-2 mb-0"><small>Assertiveness</small></p>
+                                </div>
+                                
+                                <div>
+                                    <div class="score-circle responsiveness-score">
+                                        <span>{{ result.responsiveness_score }}</span>
+                                    </div>
+                                    <p class="text-center mt-2 mb-0"><small>Responsiveness</small></p>
+                                </div>
+                            </div>
+                            
+                            <div class="style-description p-3 rounded-3 bg-light">
+                                {% if result.social_style == 'ANALYTICAL' %}
+                                <p>As an <strong>Analytical</strong>, you tend to be thoughtful, methodical, and detail-oriented. You value accuracy, logic, and facts. You prefer to ask questions rather than make statements, and you tend to control your emotions in social situations.</p>
+                                {% elif result.social_style == 'DRIVER' %}
+                                <p>As a <strong>Driver</strong>, you tend to be direct, decisive, and results-oriented. You value efficiency, action, and getting to the point. You prefer to tell rather than ask, and you tend to control your emotions in social situations.</p>
+                                {% elif result.social_style == 'AMIABLE' %}
+                                <p>As an <strong>Amiable</strong>, you tend to be supportive, cooperative, and relationship-focused. You value harmony, stability, and helping others. You prefer to ask questions rather than make statements, and you tend to express your emotions in social situations.</p>
+                                {% elif result.social_style == 'EXPRESSIVE' %}
+                                <p>As an <strong>Expressive</strong>, you tend to be enthusiastic, creative, and people-oriented. You value recognition, approval, and social interaction. You prefer to tell rather than ask, and you tend to express your emotions in social situations.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="position-relative">
+                                <div class="social-styles-grid-container">
+                                    <img src="{{ url_for('static', filename='images/social-styles-grid.png') }}" alt="Social Styles Grid" class="img-fluid rounded">
+                                    
+                                    <!-- Plot user's position on the grid -->
+                                    <div class="user-position" style="left: {{ (result.assertiveness_score / 60 * 100) }}%; top: {{ 100 - (result.responsiveness_score / 60 * 100) }}%;">
+                                        <div class="position-marker"></div>
+                                        <div class="position-label">You</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detailed Scores -->
+            <div class="row mb-5">
+                <div class="col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-gradient-primary text-white p-3">
+                            <h3 class="h5 mb-0">Assertiveness Breakdown</h3>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span>Low Assertiveness</span>
+                                <span>High Assertiveness</span>
+                            </div>
+                            <div class="progress mb-4" style="height: 20px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ (result.assertiveness_score / 60 * 100) }}%;" aria-valuenow="{{ result.assertiveness_score }}" aria-valuemin="0" aria-valuemax="60">{{ result.assertiveness_score }}/60</div>
+                            </div>
+                            
+                            <h4 class="h6 mb-3">Key Assertiveness Traits:</h4>
+                            <ul class="trait-list">
+                                {% if result.assertiveness_score < 30 %}
+                                <li>You tend to ask rather than tell</li>
+                                <li>You may prefer to listen before speaking</li>
+                                <li>You consider options carefully before deciding</li>
+                                <li>You may avoid confrontation</li>
+                                {% else %}
+                                <li>You tend to tell rather than ask</li>
+                                <li>You're comfortable expressing your opinions</li>
+                                <li>You make decisions quickly</li>
+                                <li>You're willing to confront issues directly</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-gradient-success text-white p-3">
+                            <h3 class="h5 mb-0">Responsiveness Breakdown</h3>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span>Low Responsiveness</span>
+                                <span>High Responsiveness</span>
+                            </div>
+                            <div class="progress mb-4" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ (result.responsiveness_score / 60 * 100) }}%;" aria-valuenow="{{ result.responsiveness_score }}" aria-valuemin="0" aria-valuemax="60">{{ result.responsiveness_score }}/60</div>
+                            </div>
+                            
+                            <h4 class="h6 mb-3">Key Responsiveness Traits:</h4>
+                            <ul class="trait-list">
+                                {% if result.responsiveness_score < 30 %}
+                                <li>You tend to control your emotions</li>
+                                <li>You focus more on tasks than relationships</li>
+                                <li>You prefer logical, fact-based discussions</li>
+                                <li>You may appear reserved in social situations</li>
+                                {% else %}
+                                <li>You tend to express your emotions</li>
+                                <li>You focus more on relationships than tasks</li>
+                                <li>You value personal connection in discussions</li>
+                                <li>You're often animated in social situations</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Working with Others Section -->
+            <div class="card border-0 shadow-sm mb-5">
+                <div class="card-header bg-gradient-info text-white p-3">
+                    <h3 class="h5 mb-0">Working with Others</h3>
+                </div>
+                <div class="card-body p-4">
+                    <h4 class="h6 mb-3">How to Interact with Different Styles:</h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="interaction-card p-3 rounded-3 bg-light">
+                                <h5 class="h6 mb-2 analytical-color">Working with Analyticals</h5>
+                                <ul class="small mb-0">
+                                    <li>Be prepared with facts and details</li>
+                                    <li>Allow time for questions and analysis</li>
+                                    <li>Present information in a logical order</li>
+                                    <li>Avoid rushing decisions</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="interaction-card p-3 rounded-3 bg-light">
+                                <h5 class="h6 mb-2 driver-color">Working with Drivers</h5>
+                                <ul class="small mb-0">
+                                    <li>Be direct and get to the point</li>
+                                    <li>Focus on results and outcomes</li>
+                                    <li>Provide options and recommendations</li>
+                                    <li>Respect their time</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="interaction-card p-3 rounded-3 bg-light">
+                                <h5 class="h6 mb-2 amiable-color">Working with Amiables</h5>
+                                <ul class="small mb-0">
+                                    <li>Build personal connection first</li>
+                                    <li>Show how ideas benefit the team</li>
+                                    <li>Provide reassurance and support</li>
+                                    <li>Avoid forcing quick decisions</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="interaction-card p-3 rounded-3 bg-light">
+                                <h5 class="h6 mb-2 expressive-color">Working with Expressives</h5>
+                                <ul class="small mb-0">
+                                    <li>Allow time for discussion and brainstorming</li>
+                                    <li>Recognize their ideas and contributions</li>
+                                    <li>Keep the conversation engaging</li>
+                                    <li>Provide the big picture</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Next Steps -->
+            <div class="text-center mb-5">
+                <h3 class="h4 mb-4">Next Steps</h3>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('assessment.take_assessment', assessment_id=result.assessment_id) }}" class="btn btn-outline-primary me-md-2">
+                        <i class="fas fa-redo me-2"></i>Retake Assessment
+                    </a>
+                    <a href="{{ url_for('assessment.download_report', result_id=result.id) }}" class="btn btn-primary">
+                        <i class="fas fa-file-pdf me-2"></i>Download Full Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .score-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+    }
+    
+    .assertiveness-score {
+        background: linear-gradient(45deg, #0d6efd, #0a58ca);
+    }
+    
+    .responsiveness-score {
+        background: linear-gradient(45deg, #198754, #157347);
+    }
+    
+    .analytical-color {
+        color: #0d6efd;
+    }
+    
+    .driver-color {
+        color: #dc3545;
+    }
+    
+    .amiable-color {
+        color: #198754;
+    }
+    
+    .expressive-color {
+        color: #ffc107;
+    }
+    
+    .trait-list li {
+        margin-bottom: 8px;
+    }
+    
+    .interaction-card {
+        height: 100%;
+        transition: transform 0.2s;
+    }
+    
+    .interaction-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .social-styles-grid-container {
+        position: relative;
+        padding: 10px;
+        background-color: white;
+        border-radius: 8px;
+    }
+    
+    .user-position {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+    }
+    
+    .position-marker {
+        width: 20px;
+        height: 20px;
+        background-color: #ff5722;
+        border: 3px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        animation: pulse 2s infinite;
+    }
+    
+    .position-label {
+        position: absolute;
+        top: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #ff5722;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+    
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(255, 87, 34, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 87, 34, 0);
+        }
+    }
+    
+    .bg-gradient-info {
+        background: linear-gradient(45deg, #0dcaf0, #0aa2c0);
+    }
+</style>
+{% endblock %} 

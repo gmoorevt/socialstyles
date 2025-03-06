@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Social Styles Assessment - Home{% endblock %}
+
+{% block content %}
+<div class="row align-items-center">
+    <div class="col-lg-6">
+        <h1 class="display-4 fw-bold mb-4">Discover Your Social Style</h1>
+        <p class="lead mb-4">
+            The Social Styles Assessment helps you understand your communication preferences and how you interact with others. Discover your social style and learn how to adapt your approach for more effective relationships.
+        </p>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('assessment.list_assessments') }}" class="btn btn-primary btn-lg px-4 me-md-2">Take Assessment</a>
+            <a href="{{ url_for('assessment.dashboard') }}" class="btn btn-outline-secondary btn-lg px-4">View Results</a>
+            {% else %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4 me-md-2">Get Started</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-4">Login</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <img src="{{ url_for('static', filename='images/social-styles-grid.png') }}" alt="Social Styles Grid" class="img-fluid rounded shadow-lg">
+    </div>
+</div>
+
+<hr class="my-5">
+
+<div class="row g-4 py-4">
+    <div class="col-md-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                <h3 class="card-title h5">Driver</h3>
+                <p class="card-text">Task-focused and assertive. Values results and efficiency.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                <h3 class="card-title h5">Expressive</h3>
+                <p class="card-text">People-focused and assertive. Values recognition and approval.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-handshake fa-3x text-primary mb-3"></i>
+                <h3 class="card-title h5">Amiable</h3>
+                <p class="card-text">People-focused and less assertive. Values cooperation and security.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                <h3 class="card-title h5">Analytical</h3>
+                <p class="card-text">Task-focused and less assertive. Values accuracy and logic.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h2 class="card-title h4">Why Take the Social Styles Assessment?</h2>
+                <ul class="list-group list-group-flush mt-3">
+                    <li class="list-group-item bg-transparent">Understand your natural communication style</li>
+                    <li class="list-group-item bg-transparent">Improve your interactions with colleagues and friends</li>
+                    <li class="list-group-item bg-transparent">Learn how to adapt your style to different situations</li>
+                    <li class="list-group-item bg-transparent">Enhance your leadership and teamwork capabilities</li>
+                    <li class="list-group-item bg-transparent">Reduce conflict and improve relationships</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
