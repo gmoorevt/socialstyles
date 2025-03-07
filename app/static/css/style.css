@@ -337,17 +337,23 @@ footer {
     height: 2px;
     background: linear-gradient(to right, #dee2e6, #0d6efd, #dee2e6);
     transform: translateY(-50%);
+    z-index: 0;
 }
 
 .scale-points-container {
     position: relative;
     z-index: 1;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
 }
 
 .scale-point-modern {
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+    z-index: 2;
 }
 
 .scale-circle {
@@ -363,6 +369,7 @@ footer {
     font-weight: 600;
     transition: all 0.2s ease;
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 8px;
 }
 
 .scale-circle.active-point {
