@@ -49,7 +49,7 @@ def generate_social_style_chart(assertiveness_score, responsiveness_score):
     ax.text(
         assertiveness_score, 
         responsiveness_score + 0.2, 
-        f'({assertiveness_score:.1f}, {responsiveness_score:.1f})', 
+        f'({assertiveness_score:.2f}, {responsiveness_score:.2f})', 
         ha='center', 
         va='bottom', 
         fontsize=10
@@ -234,8 +234,8 @@ def generate_pdf_report(result, chart_img, user):
     # Results summary
     content.append(Paragraph("Assessment Results", heading2_style))
     content.append(Paragraph(f"Your Social Style: <b>{result.social_style}</b>", normal_style))
-    content.append(Paragraph(f"Assertiveness Score: {result.assertiveness_score:.1f}/5.0", normal_style))
-    content.append(Paragraph(f"Responsiveness Score: {result.responsiveness_score:.1f}/5.0", normal_style))
+    content.append(Paragraph(f"Assertiveness Score: {result.assertiveness_score:.2f}/4.0", normal_style))
+    content.append(Paragraph(f"Responsiveness Score: {result.responsiveness_score:.2f}/4.0", normal_style))
     content.append(Spacer(1, 0.25*inch))
     
     # Convert chart image from base64 to Image
