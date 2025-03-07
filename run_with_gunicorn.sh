@@ -41,6 +41,6 @@ echo -e "${GREEN}Starting Social Styles Assessment with Gunicorn...${NC}"
 echo -e "${YELLOW}The application will be available at:${NC} http://localhost:8000"
 echo -e "${YELLOW}Press Ctrl+C to stop the server${NC}"
 
-# Run with gunicorn using the config file
-# Using wsgi.py as the entry point
-gunicorn -c gunicorn_config.py wsgi:app 
+# Run with gunicorn directly using app.py
+# This avoids the module import error
+python -m gunicorn --bind 0.0.0.0:8000 --workers 4 "app:app" 

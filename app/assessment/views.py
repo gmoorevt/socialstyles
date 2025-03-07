@@ -26,14 +26,36 @@ def take_assessment(assessment_id):
     assessment_obj = Assessment.query.get_or_404(assessment_id)
     questions = assessment_obj.get_questions()
     
+    # Separate questions by category
+    assertiveness_questions = []
+    responsiveness_questions = []
+    
+    for question in questions:
+        # Rename keys to match template expectations
+        question['left_characteristic'] = question.get('left_label', '')
+        question['right_characteristic'] = question.get('right_label', '')
+        
+        if question.get('category') == 'assertiveness':
+            assertiveness_questions.append(question)
+        elif question.get('category') == 'responsiveness':
+            responsiveness_questions.append(question)
+    
     form = AssessmentForm()
     
     if form.validate_on_submit():
         # Process form data
         responses = {}
-        for question in questions:
+        
+        # Process assertiveness questions
+        for question in assertiveness_questions:
             question_id = str(question['id'])
-            response_value = int(request.form.get(f'question_{question_id}', 0))
+            response_value = int(request.form.get(f'assertiveness_{question_id}', 0))
+            responses[question_id] = response_value
+        
+        # Process responsiveness questions
+        for question in responsiveness_questions:
+            question_id = str(question['id'])
+            response_value = int(request.form.get(f'responsiveness_{question_id}', 0))
             responses[question_id] = response_value
         
         # Create new assessment result
@@ -52,7 +74,8 @@ def take_assessment(assessment_id):
     
     return render_template('assessment/take.html', 
                           assessment=assessment_obj, 
-                          questions=questions,
+                          assertiveness_questions=assertiveness_questions,
+                          responsiveness_questions=responsiveness_questions,
                           form=form)
 
 @assessment.route('/results/<int:result_id>')
