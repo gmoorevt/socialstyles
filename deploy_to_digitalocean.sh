@@ -149,6 +149,7 @@ cp -r app deploy_tmp/
 cp -r static deploy_tmp/
 cp app.py deploy_tmp/
 cp wsgi.py deploy_tmp/  # Add wsgi.py file
+cp config.py deploy_tmp/  # Add config.py file
 cp requirements.txt deploy_tmp/
 cp .env.production deploy_tmp/.env
 cp initialize_assessment.py deploy_tmp/
