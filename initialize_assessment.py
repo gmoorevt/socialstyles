@@ -3,19 +3,28 @@ from app import create_app, db
 from app.models.assessment import Assessment, AssessmentResult
 
 def initialize_assessment():
+    """Initialize the database with the Social Styles Assessment."""
     app = create_app()
+    
     with app.app_context():
-        # Check if assessment already exists
-        existing_assessment = Assessment.query.first()
-        if existing_assessment:
-            # Delete any assessment results that reference this assessment
-            AssessmentResult.query.filter_by(assessment_id=existing_assessment.id).delete()
-            db.session.commit()
+        # Create all tables if they don't exist
+        db.create_all()
+        
+        try:
+            # Check if assessment already exists
+            existing_assessment = Assessment.query.first()
             
-            # Now delete the assessment
-            db.session.delete(existing_assessment)
-            db.session.commit()
-            print("Deleted existing assessment and related results.")
+            if existing_assessment:
+                # Delete any existing assessment results that reference this assessment
+                AssessmentResult.query.filter_by(assessment_id=existing_assessment.id).delete()
+                # Delete the existing assessment
+                db.session.delete(existing_assessment)
+                db.session.commit()
+                print("Existing assessment and related results deleted.")
+        except Exception as e:
+            # Handle the case where the table doesn't exist yet
+            print(f"Note: {e}")
+            db.session.rollback()
         
         # Create the Social Styles assessment with the exact format from the image
         questions = [
