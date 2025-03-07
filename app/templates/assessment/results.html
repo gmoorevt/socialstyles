@@ -64,7 +64,7 @@
                                     <img src="{{ url_for('static', filename='images/social-styles-grid.png') }}" alt="Social Styles Grid" class="img-fluid rounded">
                                     
                                     <!-- Plot user's position on the grid -->
-                                    <div class="user-position" style="left: {{ (result.assertiveness_score / 4 * 100) }}%; top: {{ 100 - (result.responsiveness_score / 4 * 100) }}%;">
+                                    <div class="user-position" id="user-position-marker">
                                         <div class="position-marker"></div>
                                         <div class="position-label">You</div>
                                     </div>
@@ -88,7 +88,7 @@
                                 <span>High Assertiveness</span>
                             </div>
                             <div class="progress mb-3" style="height: 20px;">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ (result.assertiveness_score / 4 * 100) }}%;" aria-valuenow="{{ result.assertiveness_score }}" aria-valuemin="0" aria-valuemax="4">{{ "%.2f"|format(result.assertiveness_score) }}/4</div>
+                                <div class="progress-bar bg-primary" role="progressbar" id="assertiveness-progress-bar" aria-valuenow="{{ result.assertiveness_score }}" aria-valuemin="0" aria-valuemax="4">{{ "%.2f"|format(result.assertiveness_score) }}/4</div>
                             </div>
                             
                             <h4 class="h6 mb-2">Key Assertiveness Traits:</h4>
@@ -120,7 +120,7 @@
                                 <span>High Responsiveness</span>
                             </div>
                             <div class="progress mb-3" style="height: 20px;">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ (result.responsiveness_score / 4 * 100) }}%;" aria-valuenow="{{ result.responsiveness_score }}" aria-valuemin="0" aria-valuemax="4">{{ "%.2f"|format(result.responsiveness_score) }}/4</div>
+                                <div class="progress-bar bg-success" role="progressbar" id="responsiveness-progress-bar" aria-valuenow="{{ result.responsiveness_score }}" aria-valuemin="0" aria-valuemax="4">{{ "%.2f"|format(result.responsiveness_score) }}/4</div>
                             </div>
                             
                             <h4 class="h6 mb-2">Key Responsiveness Traits:</h4>
@@ -216,6 +216,13 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Hidden data for JavaScript -->
+<div id="result-data" 
+     data-assertiveness="{{ result.assertiveness_score }}" 
+     data-responsiveness="{{ result.responsiveness_score }}"
+     style="display: none;">
 </div>
 {% endblock %}
 
@@ -339,4 +346,27 @@
         box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
     }
 </style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the result data
+        const resultData = document.getElementById('result-data');
+        const assertivenessScore = parseFloat(resultData.dataset.assertiveness);
+        const responsivenessScore = parseFloat(resultData.dataset.responsiveness);
+        
+        // Set the user position on the grid
+        const userPosition = document.getElementById('user-position-marker');
+        userPosition.style.left = (assertivenessScore / 4 * 100) + '%';
+        userPosition.style.top = (100 - responsivenessScore / 4 * 100) + '%';
+        
+        // Set the progress bar widths
+        const assertivenessBar = document.getElementById('assertiveness-progress-bar');
+        assertivenessBar.style.width = (assertivenessScore / 4 * 100) + '%';
+        
+        const responsivenessBar = document.getElementById('responsiveness-progress-bar');
+        responsivenessBar.style.width = (responsivenessScore / 4 * 100) + '%';
+    });
+</script>
 {% endblock %} 
