@@ -27,19 +27,19 @@
                             <div class="scale-points-container d-flex justify-content-between">
                                 <div class="scale-point-modern">
                                     <div class="scale-circle active-point">1</div>
-                                    <div class="scale-label mt-2">Strongly left</div>
+                                    <div class="scale-label mt-2">Strongly identify with left</div>
                                 </div>
                                 <div class="scale-point-modern">
                                     <div class="scale-circle">2</div>
-                                    <div class="scale-label mt-2">Somewhat left</div>
+                                    <div class="scale-label mt-2">Somewhat identify with left</div>
                                 </div>
                                 <div class="scale-point-modern">
                                     <div class="scale-circle">3</div>
-                                    <div class="scale-label mt-2">Somewhat right</div>
+                                    <div class="scale-label mt-2">Somewhat identify with right</div>
                                 </div>
                                 <div class="scale-point-modern">
                                     <div class="scale-circle active-point">4</div>
-                                    <div class="scale-label mt-2">Strongly right</div>
+                                    <div class="scale-label mt-2">Strongly identify with right</div>
                                 </div>
                             </div>
                         </div>
@@ -72,7 +72,7 @@
                             </div>
                             
                             <div class="question-content">
-                                <div class="d-flex align-items-center justify-content-between">
+                                <div class="paired-opposites-container">
                                     <div class="characteristic-box">
                                         {{ question.left_label }}
                                     </div>
@@ -116,13 +116,13 @@
                         <div class="question-card mb-5 p-4 rounded-3">
                             <div class="question-header mb-4">
                                 <div class="question-number-circle">
-                                    {{ loop.index - 15 }}
+                                    {{ loop.index - (questions|selectattr('category', 'equalto', 'assertiveness')|list|length) }}
                                 </div>
                                 <h4 class="question-title text-center mt-3">I perceive myself as:</h4>
                             </div>
                             
                             <div class="question-content">
-                                <div class="d-flex align-items-center justify-content-between">
+                                <div class="paired-opposites-container">
                                     <div class="characteristic-box">
                                         {{ question.left_label }}
                                     </div>
