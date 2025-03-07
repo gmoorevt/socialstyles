@@ -4,8 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
 from dotenv import load_dotenv
-from app import create_app, db
-from app.models import User, Assessment, AssessmentResult
 from flask_migrate import Migrate
 
 # Load environment variables
@@ -54,8 +52,12 @@ def create_app():
     
     return app
 
-app = create_app(os.getenv('FLASK_CONFIG') or 'default')
+# Create the application instance
+app = create_app()
 migrate = Migrate(app, db)
+
+# Import models after app is created to avoid circular imports
+from app.models import User, Assessment, AssessmentResult
 
 @app.shell_context_processor
 def make_shell_context():

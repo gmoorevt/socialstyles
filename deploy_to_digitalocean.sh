@@ -6,18 +6,18 @@
 # Exit on error
 set -e
 
-# Configuration variables - CHANGE THESE
-DROPLET_IP=""
-SSH_USER="root"
-APP_NAME="social-styles"
-DOMAIN_NAME=""  # Optional: your domain name if you have one
-SSH_KEY_PATH="$HOME/.ssh/id_rsa"  # Path to your SSH key
-
 # Colors for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
+
+# Configuration variables - CHANGE THESE
+DROPLET_IP=""
+SSH_USER="root"
+APP_NAME="socialstyles"
+DOMAIN_NAME=""  # Optional: your domain name if you have one
+SSH_KEY_PATH="$HOME/.ssh/id_rsa"  # Path to your SSH key
 
 # Helper functions
 print_step() {
@@ -32,24 +32,59 @@ print_error() {
     echo -e "${RED}ERROR:${NC} $1"
 }
 
-check_variables() {
-    if [ -z "$DROPLET_IP" ]; then
-        print_error "Please set the DROPLET_IP variable in the script"
-        exit 1
-    fi
+print_info() {
+    echo -e "${YELLOW}INFO:${NC} $1"
 }
 
-# Check if required variables are set
-check_variables
+# Display instructions
+echo "============================================================"
+echo -e "${GREEN}Social Styles Assessment - Digital Ocean Deployment${NC}"
+echo "============================================================"
+echo ""
+echo -e "${YELLOW}Before deploying, you need to:${NC}"
+echo "1. Create a Digital Ocean account if you don't have one"
+echo "2. Create a new Droplet (Basic plan with Ubuntu is recommended)"
+echo "3. Make sure you have SSH access to your Droplet"
+echo ""
+echo -e "${YELLOW}Enter your Digital Ocean Droplet information:${NC}"
+echo ""
+
+# Get Droplet IP
+while [ -z "$DROPLET_IP" ]; do
+    read -p "Enter your Droplet IP address: " DROPLET_IP
+    if [ -z "$DROPLET_IP" ]; then
+        print_error "Droplet IP cannot be empty"
+    fi
+done
+
+# Confirm SSH user
+read -p "SSH user (default: root): " SSH_USER_INPUT
+if [ ! -z "$SSH_USER_INPUT" ]; then
+    SSH_USER="$SSH_USER_INPUT"
+fi
+
+# Ask for domain name (optional)
+read -p "Domain name (optional, press Enter to skip): " DOMAIN_NAME_INPUT
+if [ ! -z "$DOMAIN_NAME_INPUT" ]; then
+    DOMAIN_NAME="$DOMAIN_NAME_INPUT"
+fi
+
+# Ask for SSH key path
+read -p "Path to SSH key (default: $SSH_KEY_PATH): " SSH_KEY_PATH_INPUT
+if [ ! -z "$SSH_KEY_PATH_INPUT" ]; then
+    SSH_KEY_PATH="$SSH_KEY_PATH_INPUT"
+fi
 
 # Confirm deployment
-echo -e "${YELLOW}This script will deploy the Social Styles Assessment application to:${NC}"
+echo ""
+echo -e "${YELLOW}Deployment Configuration:${NC}"
 echo "  - Droplet IP: $DROPLET_IP"
 echo "  - SSH User: $SSH_USER"
 echo "  - App Name: $APP_NAME"
 if [ ! -z "$DOMAIN_NAME" ]; then
     echo "  - Domain: $DOMAIN_NAME"
 fi
+echo "  - SSH Key: $SSH_KEY_PATH"
 echo ""
 read -p "Continue with deployment? (y/n) " -n 1 -r
 echo ""
@@ -75,8 +110,15 @@ if [ ! -f "requirements.txt" ]; then
     pip freeze > requirements.txt
 fi
 
-# Step 2: Set up the server
-print_step "Setting up the server"
+# Step 2: Test SSH connection
+print_step "Testing SSH connection to your Droplet"
+if ! ssh -i "$SSH_KEY_PATH" -o ConnectTimeout=10 "$SSH_USER@$DROPLET_IP" echo "SSH connection successful"; then
+    print_error "Failed to connect to your Droplet. Please check your SSH key and Droplet IP."
+    exit 1
+fi
+
+# Step 3: Set up the server
+print_step "Setting up the server (this may take a few minutes)"
 
 ssh -i "$SSH_KEY_PATH" "$SSH_USER@$DROPLET_IP" << 'ENDSSH'
 # Update package lists
@@ -86,19 +128,19 @@ apt-get update
 apt-get install -y python3-pip python3-venv nginx supervisor
 
 # Create app directory
-mkdir -p /var/www/social-styles
+mkdir -p /var/www/socialstyles
 
 # Create a user for the application
-if ! id -u social-styles &>/dev/null; then
-    useradd -m -s /bin/bash social-styles
-    echo "Created user: social-styles"
+if ! id -u socialstyles &>/dev/null; then
+    useradd -m -s /bin/bash socialstyles
+    echo "Created user: socialstyles"
 fi
 
 # Give ownership of the app directory to the new user
-chown -R social-styles:social-styles /var/www/social-styles
+chown -R socialstyles:socialstyles /var/www/socialstyles
 ENDSSH
 
-# Step 3: Copy application files
+# Step 4: Copy application files
 print_step "Copying application files to the server"
 
 # Create a temporary directory for files to transfer
@@ -106,9 +148,11 @@ mkdir -p deploy_tmp
 cp -r app deploy_tmp/
 cp -r static deploy_tmp/
 cp app.py deploy_tmp/
+cp wsgi.py deploy_tmp/  # Add wsgi.py file
 cp requirements.txt deploy_tmp/
 cp .env.production deploy_tmp/.env
 cp initialize_assessment.py deploy_tmp/
+cp gunicorn_config.py deploy_tmp/  # Add Gunicorn config file
 
 # Transfer files to the server
 rsync -avz --exclude venv --exclude __pycache__ --exclude .git \
@@ -118,7 +162,7 @@ rsync -avz --exclude venv --exclude __pycache__ --exclude .git \
 # Clean up temporary directory
 rm -rf deploy_tmp
 
-# Step 4: Set up the Python environment and install dependencies
+# Step 5: Set up the Python environment and install dependencies
 print_step "Setting up Python environment and installing dependencies"
 
 ssh -i "$SSH_KEY_PATH" "$SSH_USER@$DROPLET_IP" << ENDSSH
@@ -136,10 +180,10 @@ pip install gunicorn
 python initialize_assessment.py
 
 # Set proper permissions
-chown -R social-styles:social-styles /var/www/$APP_NAME
+chown -R socialstyles:socialstyles /var/www/$APP_NAME
 ENDSSH
 
-# Step 5: Configure Supervisor
+# Step 6: Configure Supervisor
 print_step "Configuring Supervisor"
 
 ssh -i "$SSH_KEY_PATH" "$SSH_USER@$DROPLET_IP" << ENDSSH
@@ -147,20 +191,20 @@ ssh -i "$SSH_KEY_PATH" "$SSH_USER@$DROPLET_IP" << ENDSSH
 cat > /etc/supervisor/conf.d/$APP_NAME.conf << EOF
 [program:$APP_NAME]
 directory=/var/www/$APP_NAME
-command=/var/www/$APP_NAME/venv/bin/gunicorn --workers 3 --bind unix:/var/www/$APP_NAME/$APP_NAME.sock -m 007 app:app
-user=social-styles
+command=/var/www/$APP_NAME/venv/bin/gunicorn -c gunicorn_config.py wsgi:app
+user=socialstyles
 autostart=true
 autorestart=true
 stopasgroup=true
 killasgroup=true
 stderr_logfile=/var/log/$APP_NAME/gunicorn.err.log
 stdout_logfile=/var/log/$APP_NAME/gunicorn.out.log
-environment=PATH="/var/www/$APP_NAME/venv/bin"
+environment=PATH="/var/www/$APP_NAME/venv/bin",FLASK_ENV="production",FLASK_DEBUG="0",GUNICORN_BIND="unix:/var/www/$APP_NAME/$APP_NAME.sock"
 EOF
 
 # Create log directory
 mkdir -p /var/log/$APP_NAME
-chown -R social-styles:social-styles /var/log/$APP_NAME
+chown -R socialstyles:socialstyles /var/log/$APP_NAME
 
 # Reload Supervisor
 supervisorctl reread
@@ -168,7 +212,7 @@ supervisorctl update
 supervisorctl restart $APP_NAME
 ENDSSH
 
-# Step 6: Configure Nginx
+# Step 7: Configure Nginx
 print_step "Configuring Nginx"
 
 if [ -z "$DOMAIN_NAME" ]; then
@@ -239,7 +283,7 @@ if command -v ufw &> /dev/null; then
 fi
 ENDSSH
 
-# Step 7: Set up SSL with Let's Encrypt (if domain is provided)
+# Step 8: Set up SSL with Let's Encrypt (if domain is provided)
 if [ ! -z "$DOMAIN_NAME" ]; then
     print_step "Setting up SSL with Let's Encrypt"
     
@@ -255,7 +299,7 @@ if [ ! -z "$DOMAIN_NAME" ]; then
 ENDSSH
 fi
 
-# Step 8: Final checks
+# Step 9: Final checks
 print_step "Performing final checks"
 
 ssh -i "$SSH_KEY_PATH" "$SSH_USER@$DROPLET_IP" << ENDSSH
@@ -275,8 +319,15 @@ else
     echo -e "Your Social Styles Assessment application is now available at: ${YELLOW}https://$DOMAIN_NAME${NC}"
 fi
 echo ""
-echo "To make changes to your deployment:"
+echo -e "${YELLOW}Troubleshooting:${NC}"
+echo "If you encounter any issues, check the logs on your server:"
+echo "  - Application logs: /var/log/$APP_NAME/gunicorn.err.log"
+echo "  - Nginx logs: /var/log/nginx/error.log"
+echo ""
+echo -e "${YELLOW}Maintenance:${NC}"
+echo "To update your application in the future:"
 echo "1. SSH into your server: ssh $SSH_USER@$DROPLET_IP"
 echo "2. Navigate to the app directory: cd /var/www/$APP_NAME"
-echo "3. Restart the application: sudo supervisorctl restart $APP_NAME"
+echo "3. Pull the latest changes: git pull (if using git)"
+echo "4. Restart the application: sudo supervisorctl restart $APP_NAME"
 echo "" 
