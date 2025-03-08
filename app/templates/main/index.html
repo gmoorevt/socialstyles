@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row align-items-center">
     <div class="col-lg-6">
-        <h1 class="display-4 fw-bold mb-4">Discover Your Social Style</h1>
+        <h1 class="display-5 fw-bold mb-4">Discover Your Social Style</h1>
         <p class="lead mb-4">
             The Social Styles Assessment helps you understand your communication preferences and how you interact with others. Discover your social style and learn how to adapt your approach for more effective relationships.
         </p>
@@ -20,8 +20,89 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <!-- Include the modern SVG-based social styles grid -->
-        {% include 'partials/_social_styles_grid.html' %}
+        <!-- Custom social styles grid for home page without legend -->
+        <div class="social-styles-grid-container">
+            <h4 class="text-center mb-3">Social Styles Framework</h4>
+            <div class="position-relative">
+                <div class="social-styles-grid">
+                    <svg width="100%" height="100%" viewBox="0 0 400 400" class="social-styles-svg">
+                        <defs>
+                            <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.07" />
+                            </filter>
+                        </defs>
+                        
+                        <!-- Main background -->
+                        <rect x="0" y="0" width="400" height="400" fill="#ffffff" rx="4" ry="4" filter="url(#dropShadow)" />
+                        
+                        <!-- Grid background with subtle grid lines -->
+                        <g class="grid-background">
+                            <!-- Horizontal grid lines -->
+                            <line x1="50" y1="125" x2="350" y2="125" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                            <line x1="50" y1="275" x2="350" y2="275" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                            
+                            <!-- Vertical grid lines -->
+                            <line x1="125" y1="50" x2="125" y2="350" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                            <line x1="275" y1="50" x2="275" y2="350" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                            
+                            <!-- Main axes -->
+                            <line x1="200" y1="50" x2="200" y2="350" stroke="#9e9e9e" stroke-width="1.5" />
+                            <line x1="50" y1="200" x2="350" y2="200" stroke="#9e9e9e" stroke-width="1.5" />
+                        </g>
+                        
+                        <!-- Quadrant backgrounds with solid colors -->
+                        <rect x="50" y="50" width="150" height="150" fill="#ffffff" stroke="#2e7d32" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="AMIABLE" />
+                        <rect x="200" y="50" width="150" height="150" fill="#ffffff" stroke="#f57c00" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="EXPRESSIVE" />
+                        <rect x="50" y="200" width="150" height="150" fill="#ffffff" stroke="#1565c0" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="ANALYTICAL" />
+                        <rect x="200" y="200" width="150" height="150" fill="#ffffff" stroke="#c62828" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="DRIVER" />
+                        
+                        <!-- Quadrant labels with professional styling -->
+                        <g class="quadrant-labels">
+                            <!-- Amiable -->
+                            <g class="quadrant-label-group" data-quadrant="AMIABLE">
+                                <text x="125" y="110" text-anchor="middle" class="quadrant-label amiable-color">AMIABLE</text>
+                                <text x="125" y="130" text-anchor="middle" class="quadrant-description">Supportive & Cooperative</text>
+                            </g>
+                            
+                            <!-- Expressive -->
+                            <g class="quadrant-label-group" data-quadrant="EXPRESSIVE">
+                                <text x="275" y="110" text-anchor="middle" class="quadrant-label expressive-color">EXPRESSIVE</text>
+                                <text x="275" y="130" text-anchor="middle" class="quadrant-description">Enthusiastic & Creative</text>
+                            </g>
+                            
+                            <!-- Analytical -->
+                            <g class="quadrant-label-group" data-quadrant="ANALYTICAL">
+                                <text x="125" y="260" text-anchor="middle" class="quadrant-label analytical-color">ANALYTICAL</text>
+                                <text x="125" y="280" text-anchor="middle" class="quadrant-description">Logical & Methodical</text>
+                            </g>
+                            
+                            <!-- Driver -->
+                            <g class="quadrant-label-group" data-quadrant="DRIVER">
+                                <text x="275" y="260" text-anchor="middle" class="quadrant-label driver-color">DRIVER</text>
+                                <text x="275" y="280" text-anchor="middle" class="quadrant-description">Direct & Decisive</text>
+                            </g>
+                        </g>
+                        
+                        <!-- Axis labels with arrows -->
+                        <g class="axis-labels">
+                            <!-- Responsiveness (vertical) axis -->
+                            <text x="200" y="30" text-anchor="middle" class="axis-label axis-title">RESPONSIVENESS</text>
+                            <text x="125" y="40" text-anchor="middle" class="axis-label">High</text>
+                            <text x="275" y="40" text-anchor="middle" class="axis-label">High</text>
+                            <text x="125" y="370" text-anchor="middle" class="axis-label">Low</text>
+                            <text x="275" y="370" text-anchor="middle" class="axis-label">Low</text>
+                            
+                            <!-- Assertiveness (horizontal) axis -->
+                            <text x="30" y="200" text-anchor="middle" transform="rotate(270,30,200)" class="axis-label axis-title">ASSERTIVENESS</text>
+                            <text x="40" y="125" text-anchor="middle" transform="rotate(270,40,125)" class="axis-label">Low</text>
+                            <text x="40" y="275" text-anchor="middle" transform="rotate(270,40,275)" class="axis-label">Low</text>
+                            <text x="370" y="125" text-anchor="middle" transform="rotate(90,370,125)" class="axis-label">High</text>
+                            <text x="370" y="275" text-anchor="middle" transform="rotate(90,370,275)" class="axis-label">High</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -31,36 +112,36 @@
     <div class="col-md-3">
         <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-                <i class="fas fa-rocket fa-3x driver-color mb-3"></i>
+                <i class="fas fa-arrow-right fa-3x driver-color mb-3"></i>
                 <h3 class="card-title h5 driver-color">Driver</h3>
-                <p class="card-text">Task-focused and assertive. Values results and efficiency.</p>
+                <p class="card-text text-muted">Task-focused and assertive. Values results and efficiency.</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-                <i class="fas fa-lightbulb fa-3x expressive-color mb-3"></i>
+                <i class="fas fa-comment fa-3x expressive-color mb-3"></i>
                 <h3 class="card-title h5 expressive-color">Expressive</h3>
-                <p class="card-text">People-focused and assertive. Values recognition and approval.</p>
+                <p class="card-text text-muted">People-focused and assertive. Values recognition and approval.</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-                <i class="fas fa-hands-helping fa-3x amiable-color mb-3"></i>
+                <i class="fas fa-handshake fa-3x amiable-color mb-3"></i>
                 <h3 class="card-title h5 amiable-color">Amiable</h3>
-                <p class="card-text">People-focused and less assertive. Values cooperation and security.</p>
+                <p class="card-text text-muted">People-focused and less assertive. Values cooperation and security.</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-                <i class="fas fa-book fa-3x analytical-color mb-3"></i>
+                <i class="fas fa-chart-line fa-3x analytical-color mb-3"></i>
                 <h3 class="card-title h5 analytical-color">Analytical</h3>
-                <p class="card-text">Task-focused and less assertive. Values accuracy and logic.</p>
+                <p class="card-text text-muted">Task-focused and less assertive. Values accuracy and logic.</p>
             </div>
         </div>
     </div>
@@ -90,28 +171,35 @@
 <style>
     /* Additional home page styles */
     .card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: none;
     }
     
     .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.15) !important;
+        transform: translateY(-3px);
+        box-shadow: 0 .25rem .75rem rgba(0,0,0,.1) !important;
     }
     
+    /* Use the updated professional color palette */
     .driver-color {
-        color: #dc3545;
+        color: #c62828;
     }
     
     .expressive-color {
-        color: #ffc107;
+        color: #f57c00;
     }
     
     .amiable-color {
-        color: #198754;
+        color: #2e7d32;
     }
     
     .analytical-color {
-        color: #0d6efd;
+        color: #1565c0;
+    }
+    
+    /* Custom styles for the home page grid */
+    .home-page-grid .social-styles-grid {
+        margin-bottom: 0;
     }
 </style>
 {% endblock %}
