@@ -108,6 +108,10 @@ step6() {
     print_message "Initializing the database..."
     run_remote "cd $APP_DIR && \
                 sudo -u $APP_NAME venv/bin/python initialize_assessment.py"
+                
+    print_message "Running database migrations..."
+    run_remote "cd $APP_DIR && \
+                sudo -u $APP_NAME venv/bin/flask db upgrade"
 }
 
 # Step 7: Configure Nginx
