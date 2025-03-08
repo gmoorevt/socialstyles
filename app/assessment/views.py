@@ -127,4 +127,26 @@ def download_report(result_id):
 def list_assessments():
     """List available assessments."""
     assessments = Assessment.query.all()
-    return render_template('assessment/list.html', assessments=assessments) 
+    return render_template('assessment/list.html', assessments=assessments)
+
+@assessment.route('/delete_result/<int:result_id>', methods=['POST'])
+@login_required
+def delete_result(result_id):
+    """Delete an assessment result."""
+    result = AssessmentResult.query.get_or_404(result_id)
+    
+    # Ensure the user can only delete their own results
+    if result.user_id != current_user.id:
+        flash('You do not have permission to delete this result.', 'danger')
+        return redirect(url_for('assessment.dashboard'))
+    
+    # Store information for the flash message
+    assessment_name = result.assessment.name
+    date_taken = result.created_at.strftime('%b %d, %Y')
+    
+    # Delete the result
+    db.session.delete(result)
+    db.session.commit()
+    
+    flash(f'Your assessment result for "{assessment_name}" taken on {date_taken} has been deleted.', 'success')
+    return redirect(url_for('assessment.dashboard')) 
