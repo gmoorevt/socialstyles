@@ -35,4 +35,11 @@ def create_app(config_name='default'):
     from app.assessment import assessment as assessment_blueprint
     app.register_blueprint(assessment_blueprint, url_prefix='/assessment')
     
+    # Add version info to template context
+    from app.utils import get_version_info
+    
+    @app.context_processor
+    def inject_version():
+        return get_version_info()
+    
     return app
