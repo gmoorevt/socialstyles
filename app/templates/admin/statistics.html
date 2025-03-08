@@ -141,15 +141,23 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // User Growth Chart
+        // User Growth Chart - Use actual data from the server
         const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
-        new Chart(userGrowthCtx, {
+        const userGrowthChart = new Chart(userGrowthCtx, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                labels: [
+                    {% for month, count in results_by_month %}
+                        '{{ month }}'{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
                 datasets: [{
                     label: 'New Users',
-                    data: [12, 19, 15, 25, 22, 30],
+                    data: [
+                        {% for month, count in results_by_month %}
+                            {{ count }}{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
                     borderColor: '#0d6efd',
                     backgroundColor: 'rgba(13, 110, 253, 0.1)',
                     tension: 0.3,
@@ -177,13 +185,21 @@
         
         // Assessment Results Chart
         const assessmentResultsCtx = document.getElementById('assessmentResultsChart').getContext('2d');
-        new Chart(assessmentResultsCtx, {
+        const assessmentResultsChart = new Chart(assessmentResultsCtx, {
             type: 'bar',
             data: {
-                labels: [{% for month, count in results_by_month %}'{{ month }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+                labels: [
+                    {% for month, count in results_by_month %}
+                        '{{ month }}'{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
                 datasets: [{
                     label: 'Assessment Results',
-                    data: [{% for month, count in results_by_month %}{{ count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    data: [
+                        {% for month, count in results_by_month %}
+                            {{ count }}{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
                     backgroundColor: 'rgba(13, 202, 240, 0.7)'
                 }]
             },
@@ -208,12 +224,20 @@
         
         // Social Style Distribution Chart
         const socialStyleCtx = document.getElementById('socialStyleChart').getContext('2d');
-        new Chart(socialStyleCtx, {
+        const socialStyleChart = new Chart(socialStyleCtx, {
             type: 'pie',
             data: {
-                labels: [{% for style, count in style_distribution %}'{{ style }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+                labels: [
+                    {% for style, count in style_distribution %}
+                        '{{ style }}'{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
                 datasets: [{
-                    data: [{% for style, count in style_distribution %}{{ count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    data: [
+                        {% for style, count in style_distribution %}
+                            {{ count }}{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
                     backgroundColor: [
                         'rgba(220, 53, 69, 0.7)',  // Driver
                         'rgba(255, 193, 7, 0.7)',  // Expressive
@@ -230,13 +254,17 @@
         
         // Active Users by Day Chart
         const activeUsersCtx = document.getElementById('activeUsersChart').getContext('2d');
-        new Chart(activeUsersCtx, {
+        const activeUsersChart = new Chart(activeUsersCtx, {
             type: 'bar',
             data: {
                 labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
                 datasets: [{
                     label: 'Active Users',
-                    data: [65, 59, 80, 81, 56, 40, 30],
+                    data: [
+                        {% for day in range(7) %}
+                            {{ active_users_by_day[day] if active_users_by_day and day < active_users_by_day|length else 0 }}{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
                     backgroundColor: 'rgba(13, 110, 253, 0.7)'
                 }]
             },

@@ -177,7 +177,12 @@
             data: {
                 labels: ['DRIVER', 'EXPRESSIVE', 'AMIABLE', 'ANALYTICAL'],
                 datasets: [{
-                    data: [25, 30, 20, 25],
+                    data: [
+                        {{ assessment_stats.style_counts.DRIVER }},
+                        {{ assessment_stats.style_counts.EXPRESSIVE }},
+                        {{ assessment_stats.style_counts.AMIABLE }},
+                        {{ assessment_stats.style_counts.ANALYTICAL }}
+                    ],
                     backgroundColor: [
                         'rgba(220, 53, 69, 0.7)',  // Driver
                         'rgba(255, 193, 7, 0.7)',  // Expressive

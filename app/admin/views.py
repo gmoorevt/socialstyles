@@ -118,7 +118,33 @@ def delete_user(user_id):
 def assessments():
     """List all assessments with management options."""
     assessments = Assessment.query.order_by(Assessment.created_at.desc()).all()
-    return render_template('admin/assessments.html', assessments=assessments)
+    
+    # Get social style distribution for all assessments
+    style_distribution = db.session.query(
+        AssessmentResult.social_style,
+        func.count(AssessmentResult.id)
+    ).group_by(AssessmentResult.social_style).all()
+    
+    # Convert to a dictionary for easier access in the template
+    style_counts = {
+        'DRIVER': 0,
+        'EXPRESSIVE': 0,
+        'AMIABLE': 0,
+        'ANALYTICAL': 0
+    }
+    
+    for style, count in style_distribution:
+        if style in style_counts:
+            style_counts[style] = count
+    
+    # Format for the template
+    assessment_stats = {
+        'style_counts': style_counts
+    }
+    
+    return render_template('admin/assessments.html', 
+                          assessments=assessments,
+                          assessment_stats=assessment_stats)
 
 @admin.route('/assessments/<int:assessment_id>')
 @login_required
@@ -230,6 +256,22 @@ def statistics():
         func.count(AssessmentResult.id)
     ).group_by(AssessmentResult.social_style).all()
     
+    # User activity by day of week
+    # Extract day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+    active_users_by_day = [0] * 7  # Initialize with zeros for all days
+    
+    # Query active users by day of week
+    day_counts = db.session.query(
+        func.strftime('%w', User.last_login).label('day_of_week'),
+        func.count(User.id).label('count')
+    ).filter(User.last_login.isnot(None)).group_by('day_of_week').all()
+    
+    # Fill in the counts
+    for day, count in day_counts:
+        if day is not None:
+            day_index = int(day)
+            active_users_by_day[day_index] = count
+    
     return render_template('admin/statistics.html',
                           total_users=total_users,
                           active_users_30d=active_users_30d,
@@ -237,4 +279,5 @@ def statistics():
                           total_assessments=total_assessments,
                           total_results=total_results,
                           results_by_month=results_by_month,
-                          style_distribution=style_distribution) 
+                          style_distribution=style_distribution,
+                          active_users_by_day=active_users_by_day) 
