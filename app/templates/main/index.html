@@ -20,7 +20,8 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <img src="{{ url_for('static', filename='images/social-styles-grid.png') }}" alt="Social Styles Grid" class="img-fluid rounded shadow-lg">
+        <!-- Include the modern SVG-based social styles grid -->
+        {% include 'partials/_social_styles_grid.html' %}
     </div>
 </div>
 
@@ -30,8 +31,8 @@
     <div class="col-md-3">
         <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-                <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
-                <h3 class="card-title h5">Driver</h3>
+                <i class="fas fa-rocket fa-3x driver-color mb-3"></i>
+                <h3 class="card-title h5 driver-color">Driver</h3>
                 <p class="card-text">Task-focused and assertive. Values results and efficiency.</p>
             </div>
         </div>
@@ -39,8 +40,8 @@
     <div class="col-md-3">
         <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-                <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                <h3 class="card-title h5">Expressive</h3>
+                <i class="fas fa-lightbulb fa-3x expressive-color mb-3"></i>
+                <h3 class="card-title h5 expressive-color">Expressive</h3>
                 <p class="card-text">People-focused and assertive. Values recognition and approval.</p>
             </div>
         </div>
@@ -48,8 +49,8 @@
     <div class="col-md-3">
         <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-                <i class="fas fa-handshake fa-3x text-primary mb-3"></i>
-                <h3 class="card-title h5">Amiable</h3>
+                <i class="fas fa-hands-helping fa-3x amiable-color mb-3"></i>
+                <h3 class="card-title h5 amiable-color">Amiable</h3>
                 <p class="card-text">People-focused and less assertive. Values cooperation and security.</p>
             </div>
         </div>
@@ -57,8 +58,8 @@
     <div class="col-md-3">
         <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-                <i class="fas fa-brain fa-3x text-primary mb-3"></i>
-                <h3 class="card-title h5">Analytical</h3>
+                <i class="fas fa-book fa-3x analytical-color mb-3"></i>
+                <h3 class="card-title h5 analytical-color">Analytical</h3>
                 <p class="card-text">Task-focused and less assertive. Values accuracy and logic.</p>
             </div>
         </div>
@@ -81,4 +82,41 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block styles %}
+<!-- Include the social styles grid CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/social_styles_grid.css') }}">
+<style>
+    /* Additional home page styles */
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.15) !important;
+    }
+    
+    .driver-color {
+        color: #dc3545;
+    }
+    
+    .expressive-color {
+        color: #ffc107;
+    }
+    
+    .amiable-color {
+        color: #198754;
+    }
+    
+    .analytical-color {
+        color: #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<!-- Include the social styles grid JavaScript -->
+<script src="{{ url_for('static', filename='js/social_styles_grid.js') }}"></script>
 {% endblock %} 

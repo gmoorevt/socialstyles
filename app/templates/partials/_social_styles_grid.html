@@ -1,0 +1,169 @@
+<!-- Social Styles Grid SVG Component -->
+<div class="social-styles-grid-container">
+    <h4 class="text-center mb-3">Social Styles Framework</h4>
+    <div class="position-relative">
+        <!-- SVG-based grid -->
+        <div class="social-styles-grid">
+            <!-- SVG Grid -->
+            <svg width="100%" height="100%" viewBox="0 0 400 400" class="social-styles-svg">
+                <!-- Background with subtle gradient -->
+                <defs>
+                    <linearGradient id="gridBackground" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ffffff" />
+                        <stop offset="100%" stop-color="#f8f9fa" />
+                    </linearGradient>
+                    
+                    <!-- Gradient definitions for quadrants with more vibrant colors -->
+                    <linearGradient id="amiableGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#198754" stop-opacity="0.1" />
+                        <stop offset="100%" stop-color="#198754" stop-opacity="0.25" />
+                    </linearGradient>
+                    
+                    <linearGradient id="expressiveGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ffc107" stop-opacity="0.1" />
+                        <stop offset="100%" stop-color="#ffc107" stop-opacity="0.25" />
+                    </linearGradient>
+                    
+                    <linearGradient id="analyticalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#0d6efd" stop-opacity="0.1" />
+                        <stop offset="100%" stop-color="#0d6efd" stop-opacity="0.25" />
+                    </linearGradient>
+                    
+                    <linearGradient id="driverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#dc3545" stop-opacity="0.1" />
+                        <stop offset="100%" stop-color="#dc3545" stop-opacity="0.25" />
+                    </linearGradient>
+                    
+                    <!-- Filter for drop shadow -->
+                    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.1" />
+                    </filter>
+                    
+                    <!-- Patterns for quadrant backgrounds -->
+                    <pattern id="amiablePattern" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+                        <rect width="10" height="10" fill="url(#amiableGradient)"/>
+                        <path d="M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2" stroke="#198754" stroke-width="0.5" stroke-opacity="0.2"/>
+                    </pattern>
+                    
+                    <pattern id="expressivePattern" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+                        <rect width="10" height="10" fill="url(#expressiveGradient)"/>
+                        <path d="M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2" stroke="#ffc107" stroke-width="0.5" stroke-opacity="0.2"/>
+                    </pattern>
+                    
+                    <pattern id="analyticalPattern" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+                        <rect width="10" height="10" fill="url(#analyticalGradient)"/>
+                        <path d="M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2" stroke="#0d6efd" stroke-width="0.5" stroke-opacity="0.2"/>
+                    </pattern>
+                    
+                    <pattern id="driverPattern" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+                        <rect width="10" height="10" fill="url(#driverGradient)"/>
+                        <path d="M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2" stroke="#dc3545" stroke-width="0.5" stroke-opacity="0.2"/>
+                    </pattern>
+                </defs>
+                
+                <!-- Main background -->
+                <rect x="0" y="0" width="400" height="400" fill="url(#gridBackground)" rx="8" ry="8" filter="url(#dropShadow)" />
+                
+                <!-- Grid background with subtle grid lines -->
+                <g class="grid-background">
+                    <!-- Horizontal grid lines -->
+                    <line x1="50" y1="125" x2="350" y2="125" stroke="#dee2e6" stroke-width="1" stroke-dasharray="2" />
+                    <line x1="50" y1="275" x2="350" y2="275" stroke="#dee2e6" stroke-width="1" stroke-dasharray="2" />
+                    
+                    <!-- Vertical grid lines -->
+                    <line x1="125" y1="50" x2="125" y2="350" stroke="#dee2e6" stroke-width="1" stroke-dasharray="2" />
+                    <line x1="275" y1="50" x2="275" y2="350" stroke="#dee2e6" stroke-width="1" stroke-dasharray="2" />
+                    
+                    <!-- Main axes -->
+                    <line x1="200" y1="50" x2="200" y2="350" stroke="#adb5bd" stroke-width="2" />
+                    <line x1="50" y1="200" x2="350" y2="200" stroke="#adb5bd" stroke-width="2" />
+                </g>
+                
+                <!-- Quadrant backgrounds with patterns and gradients -->
+                <rect x="50" y="50" width="150" height="150" fill="url(#amiablePattern)" rx="4" class="quadrant-bg" data-quadrant="AMIABLE" />
+                <rect x="200" y="50" width="150" height="150" fill="url(#expressivePattern)" rx="4" class="quadrant-bg" data-quadrant="EXPRESSIVE" />
+                <rect x="50" y="200" width="150" height="150" fill="url(#analyticalPattern)" rx="4" class="quadrant-bg" data-quadrant="ANALYTICAL" />
+                <rect x="200" y="200" width="150" height="150" fill="url(#driverPattern)" rx="4" class="quadrant-bg" data-quadrant="DRIVER" />
+                
+                <!-- Quadrant icons -->
+                <circle cx="125" y="80" r="15" fill="#198754" fill-opacity="0.2" stroke="#198754" stroke-width="1" />
+                <text x="125" y="85" text-anchor="middle" class="quadrant-icon" fill="#198754">
+                    <tspan font-family="FontAwesome">&#xf500;</tspan>
+                </text>
+                
+                <circle cx="275" y="80" r="15" fill="#ffc107" fill-opacity="0.2" stroke="#ffc107" stroke-width="1" />
+                <text x="275" y="85" text-anchor="middle" class="quadrant-icon" fill="#ffc107">
+                    <tspan font-family="FontAwesome">&#xf0eb;</tspan>
+                </text>
+                
+                <circle cx="125" y="230" r="15" fill="#0d6efd" fill-opacity="0.2" stroke="#0d6efd" stroke-width="1" />
+                <text x="125" y="235" text-anchor="middle" class="quadrant-icon" fill="#0d6efd">
+                    <tspan font-family="FontAwesome">&#xf02d;</tspan>
+                </text>
+                
+                <circle cx="275" y="230" r="15" fill="#dc3545" fill-opacity="0.2" stroke="#dc3545" stroke-width="1" />
+                <text x="275" y="235" text-anchor="middle" class="quadrant-icon" fill="#dc3545">
+                    <tspan font-family="FontAwesome">&#xf135;</tspan>
+                </text>
+                
+                <!-- Quadrant labels with icons -->
+                <g class="quadrant-labels">
+                    <!-- Amiable -->
+                    <g class="quadrant-label-group" data-quadrant="AMIABLE">
+                        <text x="125" y="110" text-anchor="middle" class="quadrant-label amiable-color">AMIABLE</text>
+                        <text x="125" y="130" text-anchor="middle" class="quadrant-description">Supportive & Cooperative</text>
+                    </g>
+                    
+                    <!-- Expressive -->
+                    <g class="quadrant-label-group" data-quadrant="EXPRESSIVE">
+                        <text x="275" y="110" text-anchor="middle" class="quadrant-label expressive-color">EXPRESSIVE</text>
+                        <text x="275" y="130" text-anchor="middle" class="quadrant-description">Enthusiastic & Creative</text>
+                    </g>
+                    
+                    <!-- Analytical -->
+                    <g class="quadrant-label-group" data-quadrant="ANALYTICAL">
+                        <text x="125" y="260" text-anchor="middle" class="quadrant-label analytical-color">ANALYTICAL</text>
+                        <text x="125" y="280" text-anchor="middle" class="quadrant-description">Logical & Methodical</text>
+                    </g>
+                    
+                    <!-- Driver -->
+                    <g class="quadrant-label-group" data-quadrant="DRIVER">
+                        <text x="275" y="260" text-anchor="middle" class="quadrant-label driver-color">DRIVER</text>
+                        <text x="275" y="280" text-anchor="middle" class="quadrant-description">Direct & Decisive</text>
+                    </g>
+                </g>
+                
+                <!-- Axis labels with arrows -->
+                <g class="axis-labels">
+                    <!-- Responsiveness (vertical) axis -->
+                    <text x="200" y="30" text-anchor="middle" class="axis-label axis-title">RESPONSIVENESS</text>
+                    <text x="125" y="40" text-anchor="middle" class="axis-label">High</text>
+                    <text x="275" y="40" text-anchor="middle" class="axis-label">High</text>
+                    <text x="125" y="370" text-anchor="middle" class="axis-label">Low</text>
+                    <text x="275" y="370" text-anchor="middle" class="axis-label">Low</text>
+                    
+                    <!-- Assertiveness (horizontal) axis -->
+                    <text x="30" y="200" text-anchor="middle" transform="rotate(270,30,200)" class="axis-label axis-title">ASSERTIVENESS</text>
+                    <text x="40" y="125" text-anchor="middle" transform="rotate(270,40,125)" class="axis-label">Low</text>
+                    <text x="40" y="275" text-anchor="middle" transform="rotate(270,40,275)" class="axis-label">Low</text>
+                    <text x="370" y="125" text-anchor="middle" transform="rotate(90,370,125)" class="axis-label">High</text>
+                    <text x="370" y="275" text-anchor="middle" transform="rotate(90,370,275)" class="axis-label">High</text>
+                </g>
+                
+                <!-- User position marker will be added via JavaScript if needed -->
+            </svg>
+            
+            <!-- Legend -->
+            <div class="grid-legend mt-3">
+                <div class="d-flex justify-content-between">
+                    <span class="small">Low Assertiveness</span>
+                    <span class="small">High Assertiveness</span>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <span class="small">Low Responsiveness</span>
+                    <span class="small">High Responsiveness</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
