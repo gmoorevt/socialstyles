@@ -6,14 +6,17 @@
 set -e  # Exit on error
 
 # Configuration - MODIFY THESE VALUES
-DROPLET_IP="your_droplet_ip"  # e.g., "67.205.184.178"
+DROPLET_IP="134.209.128.212"  # e.g., "67.205.184.178"
 DOMAIN_NAME="teamsocialstyles.com"
-SSH_KEY_PATH="~/.ssh/id_rsa"  # Path to your SSH key
+SSH_KEY_PATH="~/.ssh/id_ed25519"  # Updated to use your actual SSH key
 APP_NAME="socialstyles"
 APP_DIR="/var/www/$APP_NAME"
 GITHUB_REPO="https://github.com/gmoorevt/socialstyles.git"
 USE_CLOUDFLARE=true           # Using Cloudflare for DNS and SSL
 USE_SSL=false                 # Set to false since Cloudflare will handle SSL
+
+# SSH options to make connections more reliable
+SSH_OPTS="-o ConnectTimeout=30 -o ServerAliveInterval=60 -o ServerAliveCountMax=30"
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -42,12 +45,12 @@ fi
 
 # Function to run commands on the remote server
 run_remote() {
-    ssh -i "$SSH_KEY_PATH" root@"$DROPLET_IP" "$1"
+    ssh $SSH_OPTS -i "$SSH_KEY_PATH" root@"$DROPLET_IP" "$1"
 }
 
 # Function to copy files to the remote server
 copy_to_remote() {
-    scp -i "$SSH_KEY_PATH" "$1" root@"$DROPLET_IP":"$2"
+    scp $SSH_OPTS -i "$SSH_KEY_PATH" "$1" root@"$DROPLET_IP":"$2"
 }
 
 # Main deployment process
@@ -149,7 +152,7 @@ run_remote "ln -sf /etc/nginx/sites-available/$APP_NAME.conf /etc/nginx/sites-en
             systemctl restart nginx"
 rm nginx_config.conf
 
-# 9. Create systemd service file
+# 8. Create systemd service file
 print_message "Setting up systemd service..."
 cat > socialstyles.service << EOF
 [Unit]
@@ -176,7 +179,7 @@ run_remote "systemctl daemon-reload && \
             systemctl start socialstyles.service"
 rm socialstyles.service
 
-# 10. Create a script to check and restart the service if needed
+# 9. Create a script to check and restart the service if needed
 print_message "Setting up service monitoring..."
 cat > check_and_restart_service.sh << EOF
 #!/bin/bash
@@ -194,7 +197,7 @@ run_remote "chmod +x /usr/local/bin/check_and_restart_service.sh && \
             (crontab -l 2>/dev/null; echo '*/5 * * * * /usr/local/bin/check_and_restart_service.sh') | crontab -"
 rm check_and_restart_service.sh
 
-# 11. Final status check
+# 10. Final status check
 print_message "Checking deployment status..."
 run_remote "systemctl status socialstyles.service --no-pager"
 

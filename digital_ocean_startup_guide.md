@@ -136,3 +136,16 @@ This configuration ensures that:
 - The service runs as the socialstyles user
 - The service automatically restarts if it crashes
 - The service starts automatically on boot 
+
+## Deployment Script
+
+You can use the deployment script to deploy your application to Digital Ocean:
+
+```bash
+./deploy_to_digitalocean.sh
+```
+
+This script will:
+- Deploy your application to Digital Ocean
+- Set up the necessary environment and configurations
+- Ensure your application starts automatically on boot 
