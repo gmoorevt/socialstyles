@@ -74,6 +74,10 @@ run_remote "rm -rf $APP_DIR && \
             git clone $GITHUB_REPO $APP_DIR && \
             chown -R $APP_NAME:www-data $APP_DIR"
 
+# Copy version.txt file to ensure it's available
+copy_to_remote "version.txt" "$APP_DIR/version.txt"
+run_remote "chown $APP_NAME:www-data $APP_DIR/version.txt"
+
 # 4. Set up Python virtual environment
 print_message "Setting up Python virtual environment..."
 run_remote "cd $APP_DIR && \
