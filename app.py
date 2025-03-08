@@ -5,6 +5,7 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from dotenv import load_dotenv
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
 
 # Load environment variables
 load_dotenv()
@@ -13,6 +14,7 @@ load_dotenv()
 db = SQLAlchemy()
 login_manager = LoginManager()
 mail = Mail()
+csrf = CSRFProtect()
 
 def create_app():
     app = Flask(__name__)
@@ -21,6 +23,11 @@ def create_app():
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-for-development')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///social_styles.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # CSRF Configuration
+    app.config['WTF_CSRF_CHECK_DEFAULT'] = True
+    app.config['WTF_CSRF_SSL_STRICT'] = False  # Disable strict referrer checking
+    app.config['WTF_CSRF_TIME_LIMIT'] = 3600   # 1 hour token expiration
     
     # Email configuration
     app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
@@ -35,6 +42,7 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     mail.init_app(app)
+    csrf.init_app(app)
     
     # Register blueprints
     from app.main import main as main_blueprint
