@@ -2,6 +2,32 @@
 
 {% block title %}My Dashboard{% endblock %}
 
+{% block styles %}
+<style>
+    /* Fix for modal flashing issue */
+    .modal {
+        pointer-events: none;
+    }
+    .modal-dialog {
+        pointer-events: all;
+    }
+    
+    /* Prevent table hover effects from affecting modals */
+    .modal-backdrop {
+        z-index: 1040;
+    }
+    .modal {
+        z-index: 1050;
+    }
+    
+    /* Make sure buttons in modals are clickable */
+    .modal-footer .btn {
+        position: relative;
+        z-index: 1060;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col-md-12">
@@ -53,40 +79,15 @@
                                     </a>
                                     <button type="button" class="btn btn-sm btn-outline-danger" 
                                             data-bs-toggle="modal" data-bs-target="#deleteModal{{ result.id }}">
-                                        <i class="fas fa-trash"></i>
+                                        <i class="fas fa-trash me-1"></i> Delete
                                     </button>
-                                    
-                                    <!-- Delete Confirmation Modal -->
-                                    <div class="modal fade" id="deleteModal{{ result.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <p>Are you sure you want to delete this assessment result?</p>
-                                                    <p class="text-danger"><strong>This action cannot be undone.</strong></p>
-                                                    <p>Assessment: {{ result.assessment.name }}<br>
-                                                    Date: {{ result.created_at.strftime('%b %d, %Y') }}<br>
-                                                    Social Style: {{ result.social_style }}</p>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                    <form action="{{ url_for('assessment.delete_result', result_id=result.id) }}" method="POST">
-                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+                
                 {% else %}
                 <div class="p-4 text-center">
                     <p class="mb-4">You haven't taken any assessments yet.</p>
@@ -187,4 +188,89 @@
     </div>
 </div>
 {% endif %}
+
+<!-- Delete Confirmation Modals - Moved to the end of the content block -->
+{% if results %}
+    {% for result in results %}
+    <div class="modal fade" id="deleteModal{{ result.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ result.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel{{ result.id }}">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-trash-alt text-danger" style="font-size: 3rem;"></i>
+                    </div>
+                    <p>Are you sure you want to delete this assessment result?</p>
+                    <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                    <p>Assessment: {{ result.assessment.name }}<br>
+                    Date: {{ result.created_at.strftime('%b %d, %Y') }}<br>
+                    Social Style: {{ result.social_style }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </button>
+                    <form action="{{ url_for('assessment.delete_result', result_id=result.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash-alt me-1"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize all modals properly
+        const deleteModals = document.querySelectorAll('.modal');
+        deleteModals.forEach(modalElement => {
+            const modal = new bootstrap.Modal(modalElement, {
+                backdrop: 'static',  // Prevent closing when clicking outside
+                keyboard: true       // Allow ESC key to close
+            });
+            
+            // Store the modal instance for later use
+            modalElement._bsModal = modal;
+        });
+        
+        // Handle delete button clicks
+        const deleteButtons = document.querySelectorAll('[data-bs-toggle="modal"]');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                // Prevent event bubbling
+                event.stopPropagation();
+                event.preventDefault();
+                
+                // Get the target modal ID and show it
+                const targetModalId = this.getAttribute('data-bs-target');
+                const modalElement = document.querySelector(targetModalId);
+                
+                if (modalElement && modalElement._bsModal) {
+                    modalElement._bsModal.show();
+                }
+            });
+        });
+        
+        // Ensure table row hover doesn't affect modals
+        const tableRows = document.querySelectorAll('table tr');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                document.querySelectorAll('.modal.show').forEach(modal => {
+                    modal.style.pointerEvents = 'auto';
+                });
+            });
+        });
+    });
+</script>
 {% endblock %} 
