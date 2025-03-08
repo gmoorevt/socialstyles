@@ -70,13 +70,13 @@ def get_social_style_description(social_style):
     """Get a description of the social style.
     
     Args:
-        social_style (str): The social style (Driver, Expressive, Amiable, Analytical)
+        social_style (str): The social style (DRIVER, EXPRESSIVE, AMIABLE, ANALYTICAL)
         
     Returns:
         dict: A dictionary with description, strengths, challenges, and tips
     """
     descriptions = {
-        'Driver': {
+        'DRIVER': {
             'description': 'Drivers are characterized by high assertiveness and low responsiveness. They are direct, decisive, and results-oriented.',
             'strengths': [
                 'Strong decision-making skills',
@@ -100,7 +100,7 @@ def get_social_style_description(social_style):
                 'Consider the human element in decision-making'
             ]
         },
-        'Expressive': {
+        'EXPRESSIVE': {
             'description': 'Expressives are characterized by high assertiveness and high responsiveness. They are enthusiastic, creative, and people-oriented.',
             'strengths': [
                 'Naturally charismatic and engaging',
@@ -124,7 +124,7 @@ def get_social_style_description(social_style):
                 'Be mindful of others who need time to process information'
             ]
         },
-        'Amiable': {
+        'AMIABLE': {
             'description': 'Amiables are characterized by low assertiveness and high responsiveness. They are supportive, patient, and relationship-oriented.',
             'strengths': [
                 'Strong team player and collaborator',
@@ -148,7 +148,7 @@ def get_social_style_description(social_style):
                 'Balance relationship concerns with task completion'
             ]
         },
-        'Analytical': {
+        'ANALYTICAL': {
             'description': 'Analyticals are characterized by low assertiveness and low responsiveness. They are logical, thorough, and detail-oriented.',
             'strengths': [
                 'Thorough and detail-oriented approach',

@@ -84,22 +84,22 @@
                 <p>Your most recent assessment shows that your primary social style is <strong>{{ results[0].social_style }}</strong>.</p>
                 <p>This means you tend to be:</p>
                 <ul>
-                    {% if results[0].social_style == 'Driver' %}
+                    {% if results[0].social_style == 'DRIVER' %}
                     <li>Direct and decisive</li>
                     <li>Results-oriented</li>
                     <li>Task-focused rather than people-focused</li>
                     <li>Efficient and action-oriented</li>
-                    {% elif results[0].social_style == 'Expressive' %}
+                    {% elif results[0].social_style == 'EXPRESSIVE' %}
                     <li>Enthusiastic and energetic</li>
                     <li>People-oriented and sociable</li>
                     <li>Creative and spontaneous</li>
                     <li>Persuasive and inspiring</li>
-                    {% elif results[0].social_style == 'Amiable' %}
+                    {% elif results[0].social_style == 'AMIABLE' %}
                     <li>Supportive and cooperative</li>
                     <li>Relationship-focused</li>
                     <li>Patient and empathetic</li>
                     <li>Team-oriented and harmonious</li>
-                    {% elif results[0].social_style == 'Analytical' %}
+                    {% elif results[0].social_style == 'ANALYTICAL' %}
                     <li>Logical and methodical</li>
                     <li>Detail-oriented and thorough</li>
                     <li>Careful and precise</li>
