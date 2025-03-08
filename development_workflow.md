@@ -27,6 +27,18 @@ This document outlines the recommended development workflow for the Social Style
    - Create a `.env` file for local development
    - Include database connection, secret key, and other configuration
 
+5. **Initialize the database and migrations**:
+   ```bash
+   # Initialize the migration repository (first time only)
+   flask db init
+   
+   # Create initial migration
+   flask db migrate -m "Initial migration"
+   
+   # Apply migrations to the database
+   flask db upgrade
+   ```
+
 ### Development Cycle
 
 1. **Run the application locally**:
@@ -41,8 +53,16 @@ This document outlines the recommended development workflow for the Social Style
 
 3. **Database migrations** (when changing models):
    ```bash
-   flask db migrate -m "Description of changes"
+   # After changing models, generate a new migration
+   flask db migrate -m "Description of database changes"
+   
+   # Review the generated migration script in migrations/versions/
+   
+   # Apply the migration to update the database schema
    flask db upgrade
+   
+   # If you need to revert a migration
+   flask db downgrade
    ```
 
 4. **Testing**:
@@ -213,4 +233,69 @@ For smaller updates, you can manually update the server:
 4. **Create tags for each release**
 5. **Keep deployment scripts updated**
 6. **Monitor logs after deployment**
-7. **Back up the database regularly** 
+7. **Back up the database regularly**
+
+## 7. Database Migration Management
+
+The project uses Flask-Migrate (based on Alembic) for database migrations. This allows you to make changes to your database schema in a controlled and reversible way.
+
+### Migration Commands
+
+1. **Initialize migrations** (only needed once per project):
+   ```bash
+   flask db init
+   ```
+
+2. **Create a new migration** after changing models:
+   ```bash
+   flask db migrate -m "Description of changes"
+   ```
+
+3. **Apply migrations** to update the database:
+   ```bash
+   flask db upgrade
+   ```
+
+4. **Revert migrations** if needed:
+   ```bash
+   flask db downgrade
+   ```
+
+5. **View migration history**:
+   ```bash
+   flask db history
+   ```
+
+6. **View current migration**:
+   ```bash
+   flask db current
+   ```
+
+### Migration Workflow
+
+1. **Make changes to your models** in the application code
+2. **Generate a migration** using `flask db migrate -m "Description"`
+3. **Review the generated migration script** in the `migrations/versions/` directory
+4. **Edit the migration script if necessary** to handle complex changes
+5. **Apply the migration** using `flask db upgrade`
+6. **Test the changes** to ensure they work as expected
+7. **Commit both the model changes and migration scripts** to version control
+
+### Handling Migration Conflicts
+
+If multiple developers are working on the database schema:
+
+1. **Communicate changes** to avoid conflicts
+2. **Pull and merge changes** before creating new migrations
+3. **Resolve conflicts** in migration scripts if they occur
+4. **Test migrations** thoroughly after resolving conflicts
+
+### Production Migrations
+
+When deploying to production:
+
+1. **Always back up the database** before applying migrations
+2. **Test migrations** in a staging environment first
+3. **Include migrations** in your deployment process
+4. **Monitor the migration process** for any errors
+5. **Have a rollback plan** in case of issues 

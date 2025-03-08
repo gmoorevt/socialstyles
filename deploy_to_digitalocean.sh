@@ -96,6 +96,11 @@ print_message "Initializing the database..."
 run_remote "cd $APP_DIR && \
             sudo -u $APP_NAME venv/bin/python initialize_assessment.py"
 
+# Run database migrations
+print_message "Running database migrations..."
+run_remote "cd $APP_DIR && \
+            sudo -u $APP_NAME venv/bin/flask db upgrade"
+
 # 7. Set up Nginx for Cloudflare
 print_message "Configuring Nginx for Cloudflare..."
 
