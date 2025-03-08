@@ -38,6 +38,13 @@ def create_app(config_name='default'):
     from app.assessment import assessment as assessment_blueprint
     app.register_blueprint(assessment_blueprint, url_prefix='/assessment')
     
+    from app.admin import admin as admin_blueprint
+    app.register_blueprint(admin_blueprint, url_prefix='/admin')
+    
+    # Register custom commands
+    from app.commands import register_commands
+    register_commands(app)
+    
     # Add version info to template context
     from app.utils import get_version_info
     

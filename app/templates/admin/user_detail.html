@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}User Details - {{ user.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">User Details</h1>
+        <div>
+            <a href="{{ url_for('admin.users') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Users
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="avatar-placeholder mb-3">
+                            <span class="display-4">{{ user.name[0] }}</span>
+                        </div>
+                        <h4>{{ user.name }}</h4>
+                        <p class="text-muted">{{ user.email }}</p>
+                        {% if user.is_admin %}
+                        <span class="badge bg-success">Administrator</span>
+                        {% endif %}
+                    </div>
+                    
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Member Since</span>
+                            <span class="text-muted">{{ user.created_at.strftime('%Y-%m-%d') }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Last Login</span>
+                            <span class="text-muted">{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Total Assessments</span>
+                            <span class="badge bg-primary rounded-pill">{{ results|length }}</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid gap-2">
+                        <form action="{{ url_for('admin.toggle_admin', user_id=user.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                {% if user.is_admin %}
+                                <i class="bi bi-person-dash"></i> Remove Admin Status
+                                {% else %}
+                                <i class="bi bi-person-plus"></i> Grant Admin Status
+                                {% endif %}
+                            </button>
+                        </form>
+                        <form action="{{ url_for('admin.reset_password', user_id=user.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-outline-warning btn-sm w-100">
+                                <i class="bi bi-key"></i> Reset Password
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                            <i class="bi bi-trash"></i> Delete User
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Assessment History</h5>
+                </div>
+                <div class="card-body">
+                    {% if results %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Assessment</th>
+                                    <th>Date</th>
+                                    <th>Social Style</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                <tr>
+                                    <td>{{ result.assessment.name }}</td>
+                                    <td>{{ result.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ result.social_style }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('assessment.results', result_id=result.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-clipboard-data display-4 text-muted"></i>
+                        <p class="mt-3">No assessments completed yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Activity Log</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="timeline">
+                        <li class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h5 class="timeline-title">Account Created</h5>
+                                <p class="timeline-text">{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                            </div>
+                        </li>
+                        {% if user.last_login %}
+                        <li class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h5 class="timeline-title">Last Login</h5>
+                                <p class="timeline-text">{{ user.last_login.strftime('%Y-%m-%d %H:%M') }}</p>
+                            </div>
+                        </li>
+                        {% endif %}
+                        {% for result in results %}
+                        <li class="timeline-item">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <h5 class="timeline-title">Completed Assessment</h5>
+                                <p class="timeline-text">{{ result.assessment.name }} - {{ result.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete user <strong>{{ user.name }}</strong>?</p>
+                <p class="text-danger">This action cannot be undone. All user data, including assessment results, will be permanently deleted.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">Delete User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .avatar-placeholder {
+        width: 80px;
+        height: 80px;
+        background-color: #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    
+    /* Timeline styles */
+    .timeline {
+        list-style: none;
+        padding: 0;
+        position: relative;
+    }
+    
+    .timeline:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
+        left: 16px;
+        margin-left: -1px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-left: 40px;
+        margin-bottom: 20px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #6c757d;
+        left: 10px;
+        top: 6px;
+    }
+    
+    .timeline-content {
+        padding-bottom: 10px;
+    }
+    
+    .timeline-title {
+        margin-top: 0;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    
+    .timeline-text {
+        margin-bottom: 0;
+        color: #6c757d;
+    }
+</style>
+{% endblock %} 

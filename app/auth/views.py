@@ -16,6 +16,7 @@ def login():
         user = User.query.filter_by(email=form.email.data.lower()).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
+            user.update_last_login()  # Update last login time
             next_page = request.args.get('next')
             if next_page is None or not next_page.startswith('/'):
                 next_page = url_for('main.index')
