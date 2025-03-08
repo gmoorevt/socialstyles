@@ -61,13 +61,90 @@
                             <div class="social-styles-grid-container">
                                 <h4 class="text-center mb-3">Social Styles Framework</h4>
                                 <div class="position-relative">
-                                    <!-- Replace with the partial template -->
-                                    {% include 'partials/_social_styles_grid.html' %}
-                                    
-                                    <!-- User position marker -->
-                                    <div class="user-position" id="user-position-marker">
-                                        <div class="position-marker"></div>
-                                        <div class="position-label">You</div>
+                                    <!-- Custom professional grid for results page -->
+                                    <div class="social-styles-grid">
+                                        <svg width="100%" height="100%" viewBox="0 0 400 400" class="social-styles-svg">
+                                            <defs>
+                                                <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                                    <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.07" />
+                                                </filter>
+                                            </defs>
+                                            
+                                            <!-- Main background -->
+                                            <rect x="0" y="0" width="400" height="400" fill="#ffffff" rx="4" ry="4" filter="url(#dropShadow)" />
+                                            
+                                            <!-- Grid background with subtle grid lines -->
+                                            <g class="grid-background">
+                                                <!-- Horizontal grid lines -->
+                                                <line x1="50" y1="125" x2="350" y2="125" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                                                <line x1="50" y1="275" x2="350" y2="275" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                                                
+                                                <!-- Vertical grid lines -->
+                                                <line x1="125" y1="50" x2="125" y2="350" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                                                <line x1="275" y1="50" x2="275" y2="350" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                                                
+                                                <!-- Main axes -->
+                                                <line x1="200" y1="50" x2="200" y2="350" stroke="#9e9e9e" stroke-width="1.5" />
+                                                <line x1="50" y1="200" x2="350" y2="200" stroke="#9e9e9e" stroke-width="1.5" />
+                                            </g>
+                                            
+                                            <!-- Quadrant backgrounds with solid colors -->
+                                            <rect x="50" y="50" width="150" height="150" fill="#ffffff" stroke="#2e7d32" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="AMIABLE" />
+                                            <rect x="200" y="50" width="150" height="150" fill="#ffffff" stroke="#f57c00" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="EXPRESSIVE" />
+                                            <rect x="50" y="200" width="150" height="150" fill="#ffffff" stroke="#1565c0" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="ANALYTICAL" />
+                                            <rect x="200" y="200" width="150" height="150" fill="#ffffff" stroke="#c62828" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="DRIVER" />
+                                            
+                                            <!-- Quadrant labels with professional styling -->
+                                            <g class="quadrant-labels">
+                                                <!-- Amiable -->
+                                                <g class="quadrant-label-group" data-quadrant="AMIABLE">
+                                                    <text x="125" y="110" text-anchor="middle" class="quadrant-label amiable-color">AMIABLE</text>
+                                                    <text x="125" y="130" text-anchor="middle" class="quadrant-description">Supportive & Cooperative</text>
+                                                </g>
+                                                
+                                                <!-- Expressive -->
+                                                <g class="quadrant-label-group" data-quadrant="EXPRESSIVE">
+                                                    <text x="275" y="110" text-anchor="middle" class="quadrant-label expressive-color">EXPRESSIVE</text>
+                                                    <text x="275" y="130" text-anchor="middle" class="quadrant-description">Enthusiastic & Creative</text>
+                                                </g>
+                                                
+                                                <!-- Analytical -->
+                                                <g class="quadrant-label-group" data-quadrant="ANALYTICAL">
+                                                    <text x="125" y="260" text-anchor="middle" class="quadrant-label analytical-color">ANALYTICAL</text>
+                                                    <text x="125" y="280" text-anchor="middle" class="quadrant-description">Logical & Methodical</text>
+                                                </g>
+                                                
+                                                <!-- Driver -->
+                                                <g class="quadrant-label-group" data-quadrant="DRIVER">
+                                                    <text x="275" y="260" text-anchor="middle" class="quadrant-label driver-color">DRIVER</text>
+                                                    <text x="275" y="280" text-anchor="middle" class="quadrant-description">Direct & Decisive</text>
+                                                </g>
+                                            </g>
+                                            
+                                            <!-- Axis labels with arrows -->
+                                            <g class="axis-labels">
+                                                <!-- Responsiveness (vertical) axis -->
+                                                <text x="200" y="30" text-anchor="middle" class="axis-label axis-title">RESPONSIVENESS</text>
+                                                <text x="125" y="40" text-anchor="middle" class="axis-label">High</text>
+                                                <text x="275" y="40" text-anchor="middle" class="axis-label">High</text>
+                                                <text x="125" y="370" text-anchor="middle" class="axis-label">Low</text>
+                                                <text x="275" y="370" text-anchor="middle" class="axis-label">Low</text>
+                                                
+                                                <!-- Assertiveness (horizontal) axis -->
+                                                <text x="30" y="200" text-anchor="middle" transform="rotate(270,30,200)" class="axis-label axis-title">ASSERTIVENESS</text>
+                                                <text x="40" y="125" text-anchor="middle" transform="rotate(270,40,125)" class="axis-label">Low</text>
+                                                <text x="40" y="275" text-anchor="middle" transform="rotate(270,40,275)" class="axis-label">Low</text>
+                                                <text x="370" y="125" text-anchor="middle" transform="rotate(90,370,125)" class="axis-label">High</text>
+                                                <text x="370" y="275" text-anchor="middle" transform="rotate(90,370,275)" class="axis-label">High</text>
+                                            </g>
+                                            
+                                            <!-- User position marker will be added via JavaScript -->
+                                            <g id="user-marker-svg" class="user-marker-group">
+                                                <circle id="user-pulse-animation" cx="200" cy="200" r="8" fill="#ff5722" opacity="0.6" class="pulse-animation" />
+                                                <circle id="user-marker" cx="200" cy="200" r="8" fill="#ff5722" stroke="white" stroke-width="2" />
+                                                <text id="user-label" x="200" y="185" text-anchor="middle" fill="#ff5722" font-weight="bold" font-size="12">YOU</text>
+                                            </g>
+                                        </svg>
                                     </div>
                                 </div>
                             </div>
@@ -203,6 +280,145 @@
                 </div>
             </div>
             
+            <!-- NEW SECTION: Style Interactions -->
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-gradient-primary text-white p-3">
+                    <h3 class="h5 mb-0">How Your Style Interacts with Others</h3>
+                </div>
+                <div class="card-body p-3">
+                    <p class="mb-3">Understanding how your {{ result.social_style|lower }} style typically interacts with other styles can help you build more effective relationships:</p>
+                    
+                    <div class="row">
+                        {% if result.social_style == 'DRIVER' %}
+                            <!-- Driver interactions -->
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 driver-color">Driver + Analytical</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> Both are task-focused and value efficiency</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> You may become impatient with their detailed analysis</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Allow time for Analyticals to process information and consider all angles</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 driver-color">Driver + Expressive</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> Both are assertive and quick to make decisions</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> You focus on tasks while they prioritize relationships</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Acknowledge their creative ideas and enthusiasm before moving to action</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 driver-color">Driver + Amiable</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> Complementary skills—you provide direction, they provide support</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> You may appear too forceful; they may seem too slow to decide</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Soften your approach and show appreciation for their supportive nature</p>
+                                </div>
+                            </div>
+                        
+                        {% elif result.social_style == 'ANALYTICAL' %}
+                            <!-- Analytical interactions -->
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 analytical-color">Analytical + Driver</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> You provide thorough information they can use to make decisions</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> You may provide too much detail for their preference</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Lead with conclusions and recommendations, then provide details as needed</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 analytical-color">Analytical + Expressive</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> You bring precision while they bring creativity</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> You prefer facts while they prefer concepts</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Acknowledge their enthusiasm while gently asking for supporting data</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 analytical-color">Analytical + Amiable</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> Both are thoughtful and careful in approach</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> Together you may avoid making quick decisions</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Set deadlines for decisions and focus on practical applications</p>
+                                </div>
+                            </div>
+                            
+                        {% elif result.social_style == 'EXPRESSIVE' %}
+                            <!-- Expressive interactions -->
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 expressive-color">Expressive + Driver</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> You generate ideas that Drivers can implement</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> You may seem unfocused to them</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Be concise and results-oriented when working with Drivers</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 expressive-color">Expressive + Analytical</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> Your creativity complements their precision</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> You may find them too rigid; they may find you disorganized</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Provide data points to support your creative ideas</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 expressive-color">Expressive + Amiable</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> Both are people-oriented and value relationships</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> Your energy may overwhelm quieter Amiables</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Create space for Amiables to contribute their thoughts</p>
+                                </div>
+                            </div>
+                            
+                        {% elif result.social_style == 'AMIABLE' %}
+                            <!-- Amiable interactions -->
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 amiable-color">Amiable + Driver</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> You support implementation of their decisions</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> You may feel rushed; they may feel slowed down</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Establish clear timelines and expectations upfront</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 amiable-color">Amiable + Analytical</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> Both are careful and methodical</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> Together you may get stuck in analysis</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Focus on practical applications and set decision deadlines</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="interaction-card p-3 rounded-3 bg-light h-100">
+                                    <h5 class="h6 mb-2 amiable-color">Amiable + Expressive</h5>
+                                    <p class="small mb-2"><strong>Strengths:</strong> Both value personal connections and harmony</p>
+                                    <p class="small mb-2"><strong>Challenges:</strong> You may be overwhelmed by their energy</p>
+                                    <p class="small mb-0"><strong>Tip:</strong> Share your perspectives confidently; they'll appreciate your input</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="alert alert-info mt-3 mb-0">
+                        <h5 class="h6 mb-2">Adaptation Strategies</h5>
+                        <p class="small mb-0">
+                            <strong>1.</strong> Recognize others' styles through their communication patterns<br>
+                            <strong>2.</strong> Temporarily adjust your approach to better connect with different styles<br>
+                            <strong>3.</strong> Find common ground rather than expecting others to fully adapt to you<br>
+                            <strong>4.</strong> Remember that diverse styles bring complementary strengths to teams
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Next Steps -->
             <div class="text-center mb-4">
                 <h3 class="h4 mb-3">Next Steps</h3>
@@ -244,27 +460,28 @@
     }
     
     .assertiveness-score {
-        background: linear-gradient(45deg, #0d6efd, #0a58ca);
+        background: linear-gradient(45deg, #1565c0, #0d47a1);
     }
     
     .responsiveness-score {
-        background: linear-gradient(45deg, #198754, #157347);
+        background: linear-gradient(45deg, #2e7d32, #1b5e20);
     }
     
+    /* Use the updated professional color palette */
     .analytical-color {
-        color: #0d6efd;
+        color: #1565c0;
     }
     
     .driver-color {
-        color: #dc3545;
+        color: #c62828;
     }
     
     .amiable-color {
-        color: #198754;
+        color: #2e7d32;
     }
     
     .expressive-color {
-        color: #ffc107;
+        color: #f57c00;
     }
     
     .trait-list li {
@@ -272,32 +489,33 @@
     }
     
     .interaction-card {
-        transition: transform 0.2s;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid rgba(0,0,0,0.05);
     }
     
     .interaction-card:hover {
         transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
     }
     
     .social-styles-grid-container {
         position: relative;
         padding: 10px;
         background-color: white;
-        border-radius: 8px;
+        border-radius: 4px;
     }
     
     .social-styles-grid {
         position: relative;
         width: 100%;
-        border-radius: 12px;
+        border-radius: 4px;
         overflow: hidden;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: box-shadow 0.2s ease;
     }
     
     .social-styles-grid:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
     
     .social-styles-svg {
@@ -381,24 +599,29 @@
     }
     
     .bg-gradient-info {
-        background: linear-gradient(45deg, #0dcaf0, #0aa2c0);
+        background: linear-gradient(45deg, #0288d1, #0277bd);
     }
     
     .bg-gradient-primary {
-        background: linear-gradient(45deg, #0d6efd, #0a58ca);
+        background: linear-gradient(45deg, #1565c0, #0d47a1);
     }
     
     .bg-gradient-success {
-        background: linear-gradient(45deg, #198754, #157347);
+        background: linear-gradient(45deg, #2e7d32, #1b5e20);
     }
     
-    /* Improved spacing */
+    /* Improved spacing and styling */
     .card {
         margin-bottom: 1.5rem;
+        border: none;
     }
     
     .shadow {
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+        box-shadow: 0 .25rem .75rem rgba(0,0,0,.1) !important;
+    }
+    
+    .card-header {
+        border-bottom: none;
     }
 </style>
 {% endblock %}
@@ -413,31 +636,67 @@
         const assertivenessScore = parseFloat(resultData.dataset.assertiveness);
         const responsivenessScore = parseFloat(resultData.dataset.responsiveness);
         
-        // Set the user position on the grid
-        const userPosition = document.getElementById('user-position-marker');
+        // Calculate which quadrant the user falls into
+        const midpoint = 2.5;
+        let quadrantName;
+        if (assertivenessScore < midpoint && responsivenessScore < midpoint) {
+            quadrantName = 'ANALYTICAL';
+        } else if (assertivenessScore >= midpoint && responsivenessScore < midpoint) {
+            quadrantName = 'DRIVER';
+        } else if (assertivenessScore < midpoint && responsivenessScore >= midpoint) {
+            quadrantName = 'AMIABLE';
+        } else {
+            quadrantName = 'EXPRESSIVE';
+        }
+        
+        // Highlight the active quadrant
+        document.querySelectorAll('.quadrant-bg').forEach(quadrant => {
+            if (quadrant.getAttribute('data-quadrant') === quadrantName) {
+                quadrant.setAttribute('stroke-width', '1.5');
+                quadrant.setAttribute('stroke-opacity', '0.7');
+                
+                // Add subtle fill color
+                const strokeColor = quadrant.getAttribute('stroke');
+                quadrant.setAttribute('fill', strokeColor);
+                quadrant.setAttribute('fill-opacity', '0.05');
+            }
+        });
         
         // Map scores to SVG coordinates (50-350 range for both axes)
         // For assertiveness (horizontal): 1=50, 4=350
         // For responsiveness (vertical): 1=350, 4=50 (inverted because SVG y-axis is top-down)
-        const xPosition = 50 + ((assertivenessScore - 1) / 3) * 300;
-        const yPosition = 350 - ((responsivenessScore - 1) / 3) * 300;
         
-        // Convert SVG coordinates to percentage for the container
-        const svgWidth = 400; // From viewBox
-        const svgHeight = 400; // From viewBox
-        const leftPercent = (xPosition / svgWidth) * 100;
-        const topPercent = (yPosition / svgHeight) * 100;
+        // Ensure scores are within valid range (1-4)
+        const clampedAssertiveness = Math.max(1, Math.min(4, assertivenessScore));
+        const clampedResponsiveness = Math.max(1, Math.min(4, responsivenessScore));
         
-        // Update CSS marker position
-        userPosition.style.left = leftPercent + '%';
-        userPosition.style.top = topPercent + '%';
+        // Calculate position with clamped values
+        const xPosition = 50 + ((clampedAssertiveness - 1) / 3) * 300;
+        const yPosition = 350 - ((clampedResponsiveness - 1) / 3) * 300;
+        
+        // Update SVG marker position
+        const userMarker = document.getElementById('user-marker');
+        const pulseAnimation = document.getElementById('user-pulse-animation');
+        const userLabel = document.getElementById('user-label');
+        
+        userMarker.setAttribute('cx', xPosition);
+        userMarker.setAttribute('cy', yPosition);
+        pulseAnimation.setAttribute('cx', xPosition);
+        pulseAnimation.setAttribute('cy', yPosition);
+        userLabel.setAttribute('x', xPosition);
+        userLabel.setAttribute('y', yPosition - 15);
         
         // Set the progress bar widths
         const assertivenessBar = document.getElementById('assertiveness-progress-bar');
-        assertivenessBar.style.width = ((assertivenessScore - 1) / 3 * 100) + '%';
+        assertivenessBar.style.width = ((clampedAssertiveness - 1) / 3 * 100) + '%';
         
         const responsivenessBar = document.getElementById('responsiveness-progress-bar');
-        responsivenessBar.style.width = ((responsivenessScore - 1) / 3 * 100) + '%';
+        responsivenessBar.style.width = ((clampedResponsiveness - 1) / 3 * 100) + '%';
+        
+        console.log('Assertiveness Score:', assertivenessScore, 'Clamped:', clampedAssertiveness);
+        console.log('Responsiveness Score:', responsivenessScore, 'Clamped:', clampedResponsiveness);
+        console.log('SVG Position:', xPosition, yPosition);
+        console.log('Quadrant:', quadrantName);
     });
 </script>
 {% endblock %} 
