@@ -213,6 +213,14 @@ def generate_pdf_report(result, chart_img, user):
         spaceAfter=6
     )
     
+    heading3_style = ParagraphStyle(
+        'Heading3',
+        parent=styles['Heading3'],
+        fontSize=12,
+        spaceBefore=8,
+        spaceAfter=4
+    )
+    
     normal_style = styles['Normal']
     
     # Get social style description
@@ -269,6 +277,106 @@ def generate_pdf_report(result, chart_img, user):
     content.append(Paragraph("Development Tips:", heading2_style))
     for tip in style_info['tips']:
         content.append(Paragraph(f"• {tip}", normal_style))
+    content.append(Spacer(1, 0.25*inch))
+    
+    # Add style interactions section
+    content.append(Paragraph("How Your Style Interacts with Others", heading2_style))
+    content.append(Paragraph(f"Understanding how your {result.social_style.lower()} style typically interacts with other styles can help you build more effective relationships:", normal_style))
+    content.append(Spacer(1, 0.15*inch))
+    
+    # Add interaction details based on the user's style
+    if result.social_style == 'DRIVER':
+        # Driver + Analytical
+        content.append(Paragraph("Driver + Analytical", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> Both are task-focused and value efficiency", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> You may become impatient with their detailed analysis", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Allow time for Analyticals to process information and consider all angles", normal_style))
+        content.append(Spacer(1, 0.1*inch))
+        
+        # Driver + Expressive
+        content.append(Paragraph("Driver + Expressive", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> Both are assertive and quick to make decisions", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> You focus on tasks while they prioritize relationships", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Acknowledge their creative ideas and enthusiasm before moving to action", normal_style))
+        content.append(Spacer(1, 0.1*inch))
+        
+        # Driver + Amiable
+        content.append(Paragraph("Driver + Amiable", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> Complementary skills—you provide direction, they provide support", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> You may appear too forceful; they may seem too slow to decide", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Soften your approach and show appreciation for their supportive nature", normal_style))
+        
+    elif result.social_style == 'ANALYTICAL':
+        # Analytical + Driver
+        content.append(Paragraph("Analytical + Driver", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> You provide thorough information they can use to make decisions", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> You may provide too much detail for their preference", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Lead with conclusions and recommendations, then provide details as needed", normal_style))
+        content.append(Spacer(1, 0.1*inch))
+        
+        # Analytical + Expressive
+        content.append(Paragraph("Analytical + Expressive", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> You bring precision while they bring creativity", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> You prefer facts while they prefer concepts", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Acknowledge their enthusiasm while gently asking for supporting data", normal_style))
+        content.append(Spacer(1, 0.1*inch))
+        
+        # Analytical + Amiable
+        content.append(Paragraph("Analytical + Amiable", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> Both are thoughtful and careful in approach", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> Together you may avoid making quick decisions", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Set deadlines for decisions and focus on practical applications", normal_style))
+        
+    elif result.social_style == 'EXPRESSIVE':
+        # Expressive + Driver
+        content.append(Paragraph("Expressive + Driver", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> You generate ideas that Drivers can implement", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> You may seem unfocused to them", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Be concise and results-oriented when working with Drivers", normal_style))
+        content.append(Spacer(1, 0.1*inch))
+        
+        # Expressive + Analytical
+        content.append(Paragraph("Expressive + Analytical", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> Your creativity complements their precision", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> You may find them too rigid; they may find you disorganized", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Provide data points to support your creative ideas", normal_style))
+        content.append(Spacer(1, 0.1*inch))
+        
+        # Expressive + Amiable
+        content.append(Paragraph("Expressive + Amiable", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> Both are people-oriented and value relationships", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> Your energy may overwhelm quieter Amiables", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Create space for Amiables to contribute their thoughts", normal_style))
+        
+    elif result.social_style == 'AMIABLE':
+        # Amiable + Driver
+        content.append(Paragraph("Amiable + Driver", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> You support implementation of their decisions", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> You may feel rushed; they may feel slowed down", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Establish clear timelines and expectations upfront", normal_style))
+        content.append(Spacer(1, 0.1*inch))
+        
+        # Amiable + Analytical
+        content.append(Paragraph("Amiable + Analytical", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> Both are careful and methodical", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> Together you may get stuck in analysis", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Focus on practical applications and set decision deadlines", normal_style))
+        content.append(Spacer(1, 0.1*inch))
+        
+        # Amiable + Expressive
+        content.append(Paragraph("Amiable + Expressive", heading3_style))
+        content.append(Paragraph("<b>Strengths:</b> Both value personal connections and harmony", normal_style))
+        content.append(Paragraph("<b>Challenges:</b> You may be overwhelmed by their energy", normal_style))
+        content.append(Paragraph("<b>Tip:</b> Share your perspectives confidently; they'll appreciate your input", normal_style))
+    
+    content.append(Spacer(1, 0.2*inch))
+    
+    # Add adaptation strategies
+    content.append(Paragraph("Adaptation Strategies", heading3_style))
+    content.append(Paragraph("1. Recognize others' styles through their communication patterns", normal_style))
+    content.append(Paragraph("2. Temporarily adjust your approach to better connect with different styles", normal_style))
+    content.append(Paragraph("3. Find common ground rather than expecting others to fully adapt to you", normal_style))
+    content.append(Paragraph("4. Remember that diverse styles bring complementary strengths to teams", normal_style))
     
     # Build the PDF
     doc.build(content)
