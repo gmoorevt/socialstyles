@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment Details - {{ assessment.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">Assessment Details</h1>
+        <div>
+            <a href="{{ url_for('admin.assessments') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Assessments
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Assessment Information</h5>
+                </div>
+                <div class="card-body">
+                    <h4>{{ assessment.name }}</h4>
+                    <p class="text-muted">{{ assessment.description }}</p>
+                    
+                    <ul class="list-group list-group-flush mt-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Created</span>
+                            <span class="text-muted">{{ assessment.created_at.strftime('%Y-%m-%d') }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Status</span>
+                            {% if assessment.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Total Results</span>
+                            <span class="badge bg-primary rounded-pill">{{ total_results }}</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid gap-2">
+                        <form action="{{ url_for('admin.toggle_assessment_active', assessment_id=assessment.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-outline-{{ 'warning' if assessment.is_active else 'success' }} btn-sm w-100">
+                                {% if assessment.is_active %}
+                                <i class="bi bi-pause-fill"></i> Deactivate Assessment
+                                {% else %}
+                                <i class="bi bi-play-fill"></i> Activate Assessment
+                                {% endif %}
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editAssessmentModal">
+                            <i class="bi bi-pencil"></i> Edit Assessment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Social Style Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="styleDistributionChart" height="250"></canvas>
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Results</h5>
+                        <div class="input-group" style="max-width: 200px;">
+                            <input type="text" id="resultSearch" class="form-control form-control-sm" placeholder="Search...">
+                            <button class="btn btn-outline-secondary btn-sm" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="resultsTable">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    <th>Social Style</th>
+                                    <th>Assertiveness</th>
+                                    <th>Responsiveness</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in recent_results %}
+                                <tr>
+                                    <td>{{ result.user.name }}</td>
+                                    <td>{{ result.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ result.social_style }}</span>
+                                    </td>
+                                    <td>{{ "%.2f"|format(result.assertiveness_score) }}</td>
+                                    <td>{{ "%.2f"|format(result.responsiveness_score) }}</td>
+                                    <td>
+                                        <a href="{{ url_for('assessment.results', result_id=result.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Assessment Modal -->
+<div class="modal fade" id="editAssessmentModal" tabindex="-1" aria-labelledby="editAssessmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editAssessmentModalLabel">Edit Assessment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('admin.edit_assessment', assessment_id=assessment.id) }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label for="assessmentName" class="form-label">Assessment Name</label>
+                        <input type="text" class="form-control" id="assessmentName" name="name" value="{{ assessment.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="assessmentDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="assessmentDescription" name="description" rows="3" required>{{ assessment.description }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Style Distribution Chart
+        const styleDistributionCtx = document.getElementById('styleDistributionChart').getContext('2d');
+        new Chart(styleDistributionCtx, {
+            type: 'pie',
+            data: {
+                labels: [{% for style, count in style_distribution %}'{{ style }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for style, count in style_distribution %}{{ count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: [
+                        'rgba(220, 53, 69, 0.7)',  // Driver
+                        'rgba(255, 193, 7, 0.7)',  // Expressive
+                        'rgba(25, 135, 84, 0.7)',  // Amiable
+                        'rgba(13, 110, 253, 0.7)'  // Analytical
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('resultSearch');
+        const table = document.getElementById('resultsTable');
+        const rows = table.getElementsByTagName('tr');
+        
+        searchInput.addEventListener('keyup', function() {
+            const query = searchInput.value.toLowerCase();
+            
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName('td');
+                let found = false;
+                
+                for (let j = 0; j < cells.length - 1; j++) {
+                    const cellText = cells[j].textContent.toLowerCase();
+                    if (cellText.indexOf(query) > -1) {
+                        found = true;
+                        break;
+                    }
+                }
+                
+                row.style.display = found ? '' : 'none';
+            }
+        });
+    });
+</script>
+{% endblock %} 
