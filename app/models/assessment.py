@@ -60,14 +60,15 @@ class AssessmentResult(db.Model):
     
     def determine_social_style(self):
         """Determine the social style based on assertiveness and responsiveness scores."""
-        if self.assertiveness_score > 3 and self.responsiveness_score > 3:
-            self.social_style = "Expressive"
-        elif self.assertiveness_score > 3 and self.responsiveness_score <= 3:
-            self.social_style = "Driver"
-        elif self.assertiveness_score <= 3 and self.responsiveness_score > 3:
-            self.social_style = "Amiable"
-        else:  # assertiveness <= 3 and responsiveness <= 3
-            self.social_style = "Analytical"
+        # Using 2.5 as the cutoff point (midpoint of 1-4 scale)
+        if self.assertiveness_score >= 2.5 and self.responsiveness_score >= 2.5:
+            self.social_style = "EXPRESSIVE"
+        elif self.assertiveness_score >= 2.5 and self.responsiveness_score < 2.5:
+            self.social_style = "DRIVER"
+        elif self.assertiveness_score < 2.5 and self.responsiveness_score >= 2.5:
+            self.social_style = "AMIABLE"
+        else:  # assertiveness < 2.5 and responsiveness < 2.5
+            self.social_style = "ANALYTICAL"
         
         return self.social_style
     

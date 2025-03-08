@@ -358,15 +358,127 @@
         
         // Set the user position on the grid
         const userPosition = document.getElementById('user-position-marker');
-        userPosition.style.left = (assertivenessScore / 4 * 100) + '%';
-        userPosition.style.top = (100 - responsivenessScore / 4 * 100) + '%';
+        const gridImage = document.querySelector('.social-styles-grid-container img');
+        const gridContainer = document.querySelector('.social-styles-grid-container .position-relative');
+        
+        // Wait for the image to load to get its dimensions
+        function positionMarker() {
+            // Based on the grid image with 4 quadrants:
+            // - Analytical: Bottom-left (Low Assertiveness, Low Responsiveness)
+            // - Driver: Bottom-right (High Assertiveness, Low Responsiveness)
+            // - Amiable: Top-left (Low Assertiveness, High Responsiveness)
+            // - Expressive: Top-right (High Assertiveness, High Responsiveness)
+            
+            // Define the quadrant boundaries
+            // Using 2.5 as the midpoint on a 1-4 scale
+            const midpoint = 2.5;
+            
+            // Calculate which quadrant the user falls into
+            let quadrantName;
+            if (assertivenessScore < midpoint && responsivenessScore < midpoint) {
+                quadrantName = 'ANALYTICAL';
+            } else if (assertivenessScore >= midpoint && responsivenessScore < midpoint) {
+                quadrantName = 'DRIVER';
+            } else if (assertivenessScore < midpoint && responsivenessScore >= midpoint) {
+                quadrantName = 'AMIABLE';
+            } else {
+                quadrantName = 'EXPRESSIVE';
+            }
+            
+            console.log('User Quadrant:', quadrantName);
+            
+            // Define the grid layout
+            // Adjusted to account for the title and other elements in the grid image
+            const gridLayout = {
+                // Horizontal divisions
+                horizontal: {
+                    min: 5,     // Left edge (%)
+                    center: 50,  // Center vertical line (%)
+                    max: 95     // Right edge (%)
+                },
+                // Vertical divisions - adjusted to account for the title area
+                vertical: {
+                    min: 30,    // Top edge (%) - increased to account for title
+                    center: 60, // Center horizontal line (%) - adjusted to be in the middle of the actual grid
+                    max: 90     // Bottom edge (%) - adjusted to account for bottom labels
+                }
+            };
+            
+            // Fine-tuning offsets - adjust these values based on visual inspection
+            const finetuning = {
+                // Offset for each quadrant (left, top)
+                ANALYTICAL: { left: 0, top: 0 },
+                DRIVER: { left: 0, top: 0 },
+                AMIABLE: { left: 0, top: -5 },  // Move Amiable markers up slightly
+                EXPRESSIVE: { left: 0, top: -5 }, // Move Expressive markers up slightly
+                // Global offset applied to all positions
+                global: { left: 0, top: 0 }
+            };
+            
+            // Calculate position within the appropriate quadrant
+            let leftPosition, topPosition;
+            
+            // For assertiveness (horizontal axis)
+            // Map the 1-4 scale to the grid
+            const minScore = 1;  // Minimum possible score
+            const maxScore = 4;  // Maximum possible score
+            const scoreRange = maxScore - minScore;
+            
+            // Map assertiveness score (1-4) to horizontal position
+            if (assertivenessScore < midpoint) {
+                // Left half of the grid (1-2.5 maps to min-center)
+                const leftHalfWidth = gridLayout.horizontal.center - gridLayout.horizontal.min;
+                const normalizedScore = (assertivenessScore - minScore) / (midpoint - minScore);
+                leftPosition = gridLayout.horizontal.min + normalizedScore * leftHalfWidth;
+            } else {
+                // Right half of the grid (2.5-4 maps to center-max)
+                const rightHalfWidth = gridLayout.horizontal.max - gridLayout.horizontal.center;
+                const normalizedScore = (assertivenessScore - midpoint) / (maxScore - midpoint);
+                leftPosition = gridLayout.horizontal.center + normalizedScore * rightHalfWidth;
+            }
+            
+            // For responsiveness (vertical axis)
+            if (responsivenessScore < midpoint) {
+                // Bottom half of the grid (1-2.5 maps to center-max)
+                const bottomHalfHeight = gridLayout.vertical.max - gridLayout.vertical.center;
+                const normalizedScore = (midpoint - responsivenessScore) / (midpoint - minScore);
+                topPosition = gridLayout.vertical.center + normalizedScore * bottomHalfHeight;
+            } else {
+                // Top half of the grid (2.5-4 maps to min-center)
+                const topHalfHeight = gridLayout.vertical.center - gridLayout.vertical.min;
+                const normalizedScore = (responsivenessScore - midpoint) / (maxScore - midpoint);
+                topPosition = gridLayout.vertical.center - normalizedScore * topHalfHeight;
+            }
+            
+            // Apply quadrant-specific fine-tuning
+            leftPosition += finetuning[quadrantName].left + finetuning.global.left;
+            topPosition += finetuning[quadrantName].top + finetuning.global.top;
+            
+            // Set the position
+            userPosition.style.left = leftPosition + '%';
+            userPosition.style.top = topPosition + '%';
+            
+            // Debug info
+            console.log('Assertiveness Score:', assertivenessScore);
+            console.log('Responsiveness Score:', responsivenessScore);
+            console.log('Position Left:', leftPosition + '%');
+            console.log('Position Top:', topPosition + '%');
+            console.log('Quadrant:', quadrantName);
+        }
+        
+        // Position marker when image is loaded or immediately if already loaded
+        if (gridImage.complete) {
+            positionMarker();
+        } else {
+            gridImage.onload = positionMarker;
+        }
         
         // Set the progress bar widths
         const assertivenessBar = document.getElementById('assertiveness-progress-bar');
-        assertivenessBar.style.width = (assertivenessScore / 4 * 100) + '%';
+        assertivenessBar.style.width = ((assertivenessScore - 1) / 3 * 100) + '%';
         
         const responsivenessBar = document.getElementById('responsiveness-progress-bar');
-        responsivenessBar.style.width = (responsivenessScore / 4 * 100) + '%';
+        responsivenessBar.style.width = ((responsivenessScore - 1) / 3 * 100) + '%';
     });
 </script>
 {% endblock %} 
