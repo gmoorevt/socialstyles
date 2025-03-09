@@ -41,6 +41,9 @@ def create_app(config_name='default'):
     from app.admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint, url_prefix='/admin')
     
+    from app.team import team as team_blueprint
+    app.register_blueprint(team_blueprint, url_prefix='/team')
+    
     # Register custom commands
     from app.commands import register_commands
     register_commands(app)

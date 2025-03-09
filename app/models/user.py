@@ -21,6 +21,13 @@ class User(UserMixin, db.Model):
     # Relationship with assessment results
     assessment_results = db.relationship('AssessmentResult', backref='user', lazy='dynamic')
     
+    # Team relationships
+    owned_teams = db.relationship('Team', foreign_keys='Team.owner_id', 
+                                 backref=db.backref('owner_relation', uselist=False),
+                                 lazy='dynamic', cascade='all, delete-orphan')
+    team_memberships = db.relationship('TeamMember', backref='user', lazy='dynamic', 
+                                      cascade='all, delete-orphan')
+    
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
@@ -57,6 +64,16 @@ class User(UserMixin, db.Model):
         except:
             return None
         return User.query.get(id)
+    
+    def get_teams(self):
+        """Get all teams the user is a member of."""
+        from app.models.team import Team, TeamMember
+        team_ids = db.session.query(TeamMember.team_id).filter_by(user_id=self.id).all()
+        return Team.query.filter(Team.id.in_([t[0] for t in team_ids])).all()
+    
+    def get_latest_assessment_result(self):
+        """Get the user's most recent assessment result."""
+        return self.assessment_results.order_by(db.desc('created_at')).first()
     
     def __repr__(self):
         return f'<User {self.email}>'

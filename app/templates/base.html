@@ -37,6 +37,11 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'assessment.list_assessments' %}active{% endif %}" href="{{ url_for('assessment.list_assessments') }}">Take Assessment</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint.startswith('team.') %}active{% endif %}" href="{{ url_for('team.list_teams') }}">
+                            <i class="bi bi-people me-1"></i>Teams
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
@@ -47,6 +52,9 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ url_for('assessment.dashboard') }}">My Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('team.list_teams') }}">
+                                <i class="bi bi-people me-1"></i>My Teams
+                            </a></li>
                             {% if current_user.is_admin %}
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">
