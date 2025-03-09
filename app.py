@@ -2,7 +2,6 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-from flask_mail import Mail
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
@@ -32,7 +31,6 @@ logger.info(f"MAIL_DEFAULT_SENDER: {os.environ.get('MAIL_DEFAULT_SENDER')}")
 # Initialize extensions
 db = SQLAlchemy()
 login_manager = LoginManager()
-mail = Mail()
 csrf = CSRFProtect()
 
 def create_app():
@@ -49,23 +47,18 @@ def create_app():
     app.config['WTF_CSRF_TIME_LIMIT'] = 3600   # 1 hour token expiration
     
     # Email configuration
-    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
-    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() in ['true', 'yes', '1']
-    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
     
     # AWS SES Configuration
-    use_ses = os.environ.get('USE_SES', 'False').lower() in ['true', 'yes', '1']
-    app.config['USE_SES'] = use_ses
+    app.config['USE_SES'] = os.environ.get('USE_SES')
     app.config['AWS_REGION'] = os.environ.get('AWS_REGION')
     app.config['AWS_ACCESS_KEY_ID'] = os.environ.get('AWS_ACCESS_KEY_ID')
     app.config['AWS_SECRET_ACCESS_KEY'] = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+    
     
     # Log configuration
     logger.info(f"App configuration:")
-    logger.info(f"USE_SES: {use_ses}")
+    logger.info(f"USE_SES: {app.config.get('USE_SES')}")
     logger.info(f"AWS_REGION: {app.config.get('AWS_REGION')}")
     logger.info(f"AWS_ACCESS_KEY_ID: {app.config.get('AWS_ACCESS_KEY_ID', 'Not set')[:4] if app.config.get('AWS_ACCESS_KEY_ID') else 'Not set'}...")
     logger.info(f"MAIL_DEFAULT_SENDER: {app.config.get('MAIL_DEFAULT_SENDER')}")
@@ -74,7 +67,6 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
-    mail.init_app(app)
     csrf.init_app(app)
     
     # Register blueprints
