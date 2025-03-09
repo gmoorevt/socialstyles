@@ -102,8 +102,10 @@ step4() {
 # Step 5: Set up production environment
 step5() {
     print_message "Setting up production environment..."
-    copy_to_remote ".env.production" "$APP_DIR/.env"
-    run_remote "chown $APP_NAME:www-data $APP_DIR/.env"
+    print_message "Skipping .env file update as requested."
+    # The following lines are commented out to prevent updating the .env file
+    # copy_to_remote ".env.production" "$APP_DIR/.env"
+    # run_remote "chown $APP_NAME:www-data $APP_DIR/.env"
 }
 
 # Step 6: Initialize database
@@ -303,7 +305,7 @@ step14() {
 step15() {
     step3  # Clone repository
     step4  # Set up Python virtual environment
-    step5  # Set up production environment
+    # step5 is skipped to prevent updating the .env file
     step13 # Install PostgreSQL driver
     step14 # Run database migrations
     step8  # Set up systemd service (restart application)
@@ -316,7 +318,7 @@ run_all() {
     step2
     step3
     step4
-    step5
+    # step5 is skipped to prevent updating the .env file
     step6
     step7
     step8
