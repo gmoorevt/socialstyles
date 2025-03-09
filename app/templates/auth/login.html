@@ -34,6 +34,9 @@
                             {% endfor %}
                         </div>
                         {% endif %}
+                        <div class="text-end mt-1">
+                            <a href="{{ url_for('auth.reset_request') }}" class="small">Forgot Password?</a>
+                        </div>
                     </div>
                     <div class="mb-3 form-check">
                         {{ form.remember_me(class="form-check-input") }}
