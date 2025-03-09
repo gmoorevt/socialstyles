@@ -55,6 +55,9 @@ show_menu() {
     echo "10. Check deployment status"
     echo "11. Show Cloudflare setup instructions"
     echo "12. Run all steps (1-10)"
+    echo "13. Install PostgreSQL driver"
+    echo "14. Run database migrations"
+    echo "15. Full deploy with database setup"
     echo "0. Exit"
     echo "=================================="
 }
@@ -278,6 +281,35 @@ journalctl -u socialstyles.service -f
 EOF
 }
 
+# Step 13: Install PostgreSQL driver
+step13() {
+    print_message "Installing PostgreSQL driver..."
+    run_remote "cd $APP_DIR && \
+                sudo -u $APP_NAME venv/bin/pip install psycopg2-binary"
+}
+
+# Step 14: Run database migrations
+step14() {
+    print_message "Running database migrations..."
+    run_remote "cd $APP_DIR && \
+                sudo -u $APP_NAME venv/bin/flask db upgrade"
+    
+    print_message "Initializing assessment data..."
+    run_remote "cd $APP_DIR && \
+                sudo -u $APP_NAME venv/bin/python initialize_assessment.py"
+}
+
+# Step 15: Full deploy with database setup
+step15() {
+    step3  # Clone repository
+    step4  # Set up Python virtual environment
+    step5  # Set up production environment
+    step13 # Install PostgreSQL driver
+    step14 # Run database migrations
+    step8  # Set up systemd service (restart application)
+    step10 # Check deployment status
+}
+
 # Run all steps
 run_all() {
     step1
@@ -295,7 +327,7 @@ run_all() {
 # Main loop
 while true; do
     show_menu
-    read -p "Enter your choice (0-12): " choice
+    read -p "Enter your choice (0-15): " choice
     
     case $choice in
         1) step1 ;;
@@ -310,6 +342,9 @@ while true; do
         10) step10 ;;
         11) step11 ;;
         12) run_all ;;
+        13) step13 ;;
+        14) step14 ;;
+        15) step15 ;;
         0) exit 0 ;;
         *) print_error "Invalid choice. Please try again." ;;
     esac
