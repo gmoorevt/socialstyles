@@ -243,34 +243,57 @@ def statistics():
     total_assessments = Assessment.query.count()
     total_results = AssessmentResult.query.count()
     
-    # Results by month (last 6 months)
-    six_months_ago = datetime.utcnow() - timedelta(days=180)
-    results_by_month = db.session.query(
-        func.strftime('%Y-%m', AssessmentResult.created_at).label('month'),
-        func.count(AssessmentResult.id)
-    ).filter(AssessmentResult.created_at > six_months_ago).group_by('month').order_by('month').all()
+    # Generate a list of the last 6 months in YYYY-MM format
+    months = []
+    month_labels = []
+    now = datetime.utcnow()
+    for i in range(5, -1, -1):  # Last 6 months, from oldest to newest
+        date = now - timedelta(days=i*30)  # Approximate month
+        month_str = date.strftime('%Y-%m')
+        months.append(month_str)
+        month_labels.append(date.strftime('%b %Y'))  # Formatted as "Jan 2023"
+    
+    # User growth by month
+    user_counts = []
+    for month in months:
+        year, month_num = month.split('-')
+        # Count users created in this month
+        count = User.query.filter(
+            func.strftime('%Y-%m', User.created_at) == month
+        ).count()
+        user_counts.append(count)
+    
+    # Assessment results by month
+    result_counts = []
+    for month in months:
+        year, month_num = month.split('-')
+        # Count results created in this month
+        count = AssessmentResult.query.filter(
+            func.strftime('%Y-%m', AssessmentResult.created_at) == month
+        ).count()
+        result_counts.append(count)
     
     # Social style distribution
-    style_distribution = db.session.query(
-        AssessmentResult.social_style,
-        func.count(AssessmentResult.id)
-    ).group_by(AssessmentResult.social_style).all()
+    style_names = ['DRIVER', 'EXPRESSIVE', 'AMIABLE', 'ANALYTICAL']
+    style_counts = []
     
-    # User activity by day of week
-    # Extract day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
-    active_users_by_day = [0] * 7  # Initialize with zeros for all days
+    for style in style_names:
+        count = AssessmentResult.query.filter_by(social_style=style).count()
+        style_counts.append(count)
+    
+    # User activity by day of week (0=Monday, 6=Sunday)
+    day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    day_counts = [0] * 7
     
     # Query active users by day of week
-    day_counts = db.session.query(
-        func.strftime('%w', User.last_login).label('day_of_week'),
-        func.count(User.id).label('count')
-    ).filter(User.last_login.isnot(None)).group_by('day_of_week').all()
-    
-    # Fill in the counts
-    for day, count in day_counts:
-        if day is not None:
-            day_index = int(day)
-            active_users_by_day[day_index] = count
+    for i in range(7):
+        # SQLite day of week is 0-6 where 0 is Sunday, so we need to adjust
+        sqlite_day = (i + 1) % 7  # Convert Monday=0 to Sunday=0 format
+        count = db.session.query(func.count(User.id)).filter(
+            User.last_login.isnot(None),
+            func.strftime('%w', User.last_login) == str(sqlite_day)
+        ).scalar() or 0
+        day_counts[i] = count
     
     return render_template('admin/statistics.html',
                           total_users=total_users,
@@ -278,6 +301,10 @@ def statistics():
                           active_users_7d=active_users_7d,
                           total_assessments=total_assessments,
                           total_results=total_results,
-                          results_by_month=results_by_month,
-                          style_distribution=style_distribution,
-                          active_users_by_day=active_users_by_day) 
+                          month_labels=month_labels,
+                          user_counts=user_counts,
+                          result_counts=result_counts,
+                          style_names=style_names,
+                          style_counts=style_counts,
+                          day_names=day_names,
+                          day_counts=day_counts) 
