@@ -318,7 +318,7 @@ run_all() {
     step2
     step3
     step4
-    # step5 is skipped to prevent updating the .env file
+    step5
     step6
     step7
     step8
