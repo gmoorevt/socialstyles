@@ -6,11 +6,17 @@ import boto3
 from botocore.exceptions import ClientError
 import logging
 import os
+import sys
 
 # Set up logging
 logger = logging.getLogger(__name__)
 # Configure logging to print to console
-logging.basicConfig(level=logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 def send_async_email(app, msg):
     """Send email asynchronously."""
@@ -28,27 +34,52 @@ def send_email(to, subject, template, **kwargs):
     # Debug logging
     logger.info(f"Email configuration: USE_SES={app.config.get('USE_SES')}")
     logger.info(f"AWS_REGION={app.config.get('AWS_REGION')}")
-    logger.info(f"AWS_ACCESS_KEY_ID={app.config.get('AWS_ACCESS_KEY_ID', 'Not set')[:4]}...")
+    logger.info(f"AWS_ACCESS_KEY_ID={app.config.get('AWS_ACCESS_KEY_ID', 'Not set')[:4] if app.config.get('AWS_ACCESS_KEY_ID') else 'Not set'}...")
     logger.info(f"MAIL_DEFAULT_SENDER={app.config.get('MAIL_DEFAULT_SENDER')}")
     
-    # Check if AWS SES should be used
-    if app.config.get('USE_SES', False):
+    # Force using AWS SES if configured
+    use_ses = app.config.get('USE_SES', False)
+    if use_ses:
         logger.info("Attempting to send email using AWS SES")
         # Send email using AWS SES
-        send_email_ses(to, subject, text_body, html_body, app)
+        success = send_email_ses(to, subject, text_body, html_body, app)
+        if not success:
+            logger.warning("SES failed, but USE_SES is True. Not falling back to Flask-Mail.")
+            return False
+        return True
     else:
-        logger.info("Falling back to Flask-Mail for email delivery")
+        logger.info("Using Flask-Mail for email delivery")
         # Send email using Flask-Mail
-        msg = Message(subject, recipients=[to])
-        msg.body = text_body
-        msg.html = html_body
-        Thread(target=send_async_email, args=(app, msg)).start()
+        try:
+            msg = Message(subject, recipients=[to])
+            msg.body = text_body
+            msg.html = html_body
+            Thread(target=send_async_email, args=(app, msg)).start()
+            return True
+        except Exception as e:
+            logger.error(f"Error sending email via Flask-Mail: {str(e)}")
+            return False
 
 def send_email_ses(to, subject, text_body, html_body, app):
     """Send email using AWS SES."""
     try:
         # Create a new SES resource
         logger.info(f"Creating SES client with region={app.config['AWS_REGION']}")
+        
+        # Check if all required AWS SES configuration is present
+        if not app.config.get('AWS_REGION'):
+            logger.error("AWS_REGION is not set")
+            return False
+        if not app.config.get('AWS_ACCESS_KEY_ID'):
+            logger.error("AWS_ACCESS_KEY_ID is not set")
+            return False
+        if not app.config.get('AWS_SECRET_ACCESS_KEY'):
+            logger.error("AWS_SECRET_ACCESS_KEY is not set")
+            return False
+        if not app.config.get('MAIL_DEFAULT_SENDER'):
+            logger.error("MAIL_DEFAULT_SENDER is not set")
+            return False
+            
         client = boto3.client(
             'ses',
             region_name=app.config['AWS_REGION'],
@@ -81,19 +112,10 @@ def send_email_ses(to, subject, text_body, html_body, app):
             Source=app.config['MAIL_DEFAULT_SENDER'],
         )
         logger.info(f"Email sent via SES! Message ID: {response['MessageId']}")
+        return True
     except ClientError as e:
         logger.error(f"Error sending email via SES: {e.response['Error']['Message']}")
-        # Fall back to Flask-Mail if SES fails
-        logger.info("Falling back to Flask-Mail for email delivery")
-        msg = Message(subject, recipients=[to])
-        msg.body = text_body
-        msg.html = html_body
-        Thread(target=send_async_email, args=(app, msg)).start()
+        return False
     except Exception as e:
         logger.error(f"Unexpected error sending email via SES: {str(e)}")
-        # Fall back to Flask-Mail for any other errors
-        logger.info("Falling back to Flask-Mail for email delivery")
-        msg = Message(subject, recipients=[to])
-        msg.body = text_body
-        msg.html = html_body
-        Thread(target=send_async_email, args=(app, msg)).start() 
+        return False 
