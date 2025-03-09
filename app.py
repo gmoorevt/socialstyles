@@ -7,13 +7,26 @@ from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 import logging
+import sys
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
 logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 # Load environment variables
 load_dotenv()
+
+# Print environment variables for debugging
+logger.info("Environment variables loaded:")
+logger.info(f"USE_SES: {os.environ.get('USE_SES')}")
+logger.info(f"AWS_REGION: {os.environ.get('AWS_REGION')}")
+logger.info(f"AWS_ACCESS_KEY_ID: {os.environ.get('AWS_ACCESS_KEY_ID', 'Not set')[:4] if os.environ.get('AWS_ACCESS_KEY_ID') else 'Not set'}...")
+logger.info(f"MAIL_DEFAULT_SENDER: {os.environ.get('MAIL_DEFAULT_SENDER')}")
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -50,10 +63,11 @@ def create_app():
     app.config['AWS_SECRET_ACCESS_KEY'] = os.environ.get('AWS_SECRET_ACCESS_KEY')
     
     # Log configuration
+    logger.info(f"App configuration:")
     logger.info(f"USE_SES: {use_ses}")
-    logger.info(f"AWS_REGION: {os.environ.get('AWS_REGION')}")
-    logger.info(f"AWS_ACCESS_KEY_ID: {os.environ.get('AWS_ACCESS_KEY_ID', 'Not set')[:4]}...")
-    logger.info(f"MAIL_DEFAULT_SENDER: {os.environ.get('MAIL_DEFAULT_SENDER')}")
+    logger.info(f"AWS_REGION: {app.config.get('AWS_REGION')}")
+    logger.info(f"AWS_ACCESS_KEY_ID: {app.config.get('AWS_ACCESS_KEY_ID', 'Not set')[:4] if app.config.get('AWS_ACCESS_KEY_ID') else 'Not set'}...")
+    logger.info(f"MAIL_DEFAULT_SENDER: {app.config.get('MAIL_DEFAULT_SENDER')}")
     
     # Initialize extensions with app
     db.init_app(app)
