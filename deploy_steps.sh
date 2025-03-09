@@ -4,7 +4,7 @@
 # This script contains individual steps to deploy the application to DigitalOcean
 
 # Configuration - MODIFY THESE VALUES
-DROPLET_IP="134.209.128.212"
+DROPLET_IP="159.89.95.194"
 DOMAIN_NAME="teamsocialstyles.com"
 SSH_KEY_PATH="~/.ssh/id_ed25519"
 APP_NAME="socialstyles"
