@@ -6,6 +6,11 @@ from flask_mail import Mail
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -38,10 +43,17 @@ def create_app():
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
     
     # AWS SES Configuration
-    app.config['USE_SES'] = os.environ.get('USE_SES', 'False').lower() in ['true', 'yes', '1']
+    use_ses = os.environ.get('USE_SES', 'False').lower() in ['true', 'yes', '1']
+    app.config['USE_SES'] = use_ses
     app.config['AWS_REGION'] = os.environ.get('AWS_REGION')
     app.config['AWS_ACCESS_KEY_ID'] = os.environ.get('AWS_ACCESS_KEY_ID')
     app.config['AWS_SECRET_ACCESS_KEY'] = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    
+    # Log configuration
+    logger.info(f"USE_SES: {use_ses}")
+    logger.info(f"AWS_REGION: {os.environ.get('AWS_REGION')}")
+    logger.info(f"AWS_ACCESS_KEY_ID: {os.environ.get('AWS_ACCESS_KEY_ID', 'Not set')[:4]}...")
+    logger.info(f"MAIL_DEFAULT_SENDER: {os.environ.get('MAIL_DEFAULT_SENDER')}")
     
     # Initialize extensions with app
     db.init_app(app)
