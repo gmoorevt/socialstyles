@@ -2,6 +2,14 @@ import click
 from flask.cli import with_appcontext
 from app.models.user import User
 from app import db
+from initialize_assessment import initialize_assessment
+
+@click.command('init-assessment')
+@with_appcontext
+def init_assessment():
+    """Initialize the assessment with the correct questions."""
+    initialize_assessment()
+
 
 @click.command('make-admin')
 @click.argument('email')
@@ -24,3 +32,4 @@ def make_admin(email):
 def register_commands(app):
     """Register custom commands with the Flask application."""
     app.cli.add_command(make_admin) 
+    app.cli.add_command(init_assessment)
