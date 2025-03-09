@@ -2,6 +2,10 @@ from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login_manager
+from itsdangerous import URLSafeTimedSerializer as Serializer
+from flask import current_app
+from time import time
+import jwt
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -32,6 +36,27 @@ class User(UserMixin, db.Model):
         """Update the last login time."""
         self.last_login = datetime.utcnow()
         db.session.commit()
+    
+    def generate_reset_token(self, expires_in=3600):
+        """Generate a token for password reset that expires in 1 hour."""
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            current_app.config['SECRET_KEY'],
+            algorithm='HS256'
+        )
+    
+    @staticmethod
+    def verify_reset_token(token):
+        """Verify the reset token."""
+        try:
+            id = jwt.decode(
+                token,
+                current_app.config['SECRET_KEY'],
+                algorithms=['HS256']
+            )['reset_password']
+        except:
+            return None
+        return User.query.get(id)
     
     def __repr__(self):
         return f'<User {self.email}>'
