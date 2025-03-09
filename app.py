@@ -37,6 +37,12 @@ def create_app():
     app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
     
+    # AWS SES Configuration
+    app.config['USE_SES'] = os.environ.get('USE_SES', 'False').lower() in ['true', 'yes', '1']
+    app.config['AWS_REGION'] = os.environ.get('AWS_REGION')
+    app.config['AWS_ACCESS_KEY_ID'] = os.environ.get('AWS_ACCESS_KEY_ID')
+    app.config['AWS_SECRET_ACCESS_KEY'] = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    
     # Initialize extensions with app
     db.init_app(app)
     login_manager.init_app(app)
