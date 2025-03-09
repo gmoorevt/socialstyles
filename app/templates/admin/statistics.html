@@ -13,71 +13,71 @@
         </div>
     </div>
     
-    <!-- Summary Cards -->
+    <!-- Summary Cards - Make them smaller and in one row -->
     <div class="row mb-4">
-        <div class="col-md-3">
+        <div class="col-md-3 col-6 mb-3 mb-md-0">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
+                <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0 me-3">
-                            <div class="bg-primary bg-opacity-10 p-3 rounded">
-                                <i class="bi bi-people text-primary fs-4"></i>
+                        <div class="flex-shrink-0 me-2">
+                            <div class="bg-primary bg-opacity-10 p-2 rounded">
+                                <i class="bi bi-people text-primary"></i>
                             </div>
                         </div>
                         <div>
-                            <h6 class="text-muted mb-1">Total Users</h6>
-                            <h3 class="mb-0">{{ total_users }}</h3>
+                            <h6 class="text-muted mb-0 small">Total Users</h6>
+                            <h5 class="mb-0">{{ total_users }}</h5>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 col-6 mb-3 mb-md-0">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
+                <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0 me-3">
-                            <div class="bg-success bg-opacity-10 p-3 rounded">
-                                <i class="bi bi-person-check text-success fs-4"></i>
+                        <div class="flex-shrink-0 me-2">
+                            <div class="bg-success bg-opacity-10 p-2 rounded">
+                                <i class="bi bi-person-check text-success"></i>
                             </div>
                         </div>
                         <div>
-                            <h6 class="text-muted mb-1">Active Users (30d)</h6>
-                            <h3 class="mb-0">{{ active_users_30d }}</h3>
+                            <h6 class="text-muted mb-0 small">Active (30d)</h6>
+                            <h5 class="mb-0">{{ active_users_30d }}</h5>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 col-6">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
+                <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0 me-3">
-                            <div class="bg-info bg-opacity-10 p-3 rounded">
-                                <i class="bi bi-clipboard-check text-info fs-4"></i>
+                        <div class="flex-shrink-0 me-2">
+                            <div class="bg-info bg-opacity-10 p-2 rounded">
+                                <i class="bi bi-clipboard-check text-info"></i>
                             </div>
                         </div>
                         <div>
-                            <h6 class="text-muted mb-1">Total Assessments</h6>
-                            <h3 class="mb-0">{{ total_assessments }}</h3>
+                            <h6 class="text-muted mb-0 small">Assessments</h6>
+                            <h5 class="mb-0">{{ total_assessments }}</h5>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 col-6">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
+                <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0 me-3">
-                            <div class="bg-warning bg-opacity-10 p-3 rounded">
-                                <i class="bi bi-clipboard-data text-warning fs-4"></i>
+                        <div class="flex-shrink-0 me-2">
+                            <div class="bg-warning bg-opacity-10 p-2 rounded">
+                                <i class="bi bi-clipboard-data text-warning"></i>
                             </div>
                         </div>
                         <div>
-                            <h6 class="text-muted mb-1">Total Results</h6>
-                            <h3 class="mb-0">{{ total_results }}</h3>
+                            <h6 class="text-muted mb-0 small">Results</h6>
+                            <h5 class="mb-0">{{ total_results }}</h5>
                         </div>
                     </div>
                 </div>
@@ -86,50 +86,56 @@
     </div>
     
     <div class="row">
-        <!-- User Growth Chart -->
+        <!-- First row of charts - 2 charts side by side -->
         <div class="col-md-6 mb-4">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">User Growth</h5>
+                <div class="card-header bg-light py-2">
+                    <h6 class="mb-0">User Growth</h6>
                 </div>
                 <div class="card-body">
-                    <canvas id="userGrowthChart" height="250"></canvas>
+                    <div style="height: 200px;">
+                        <canvas id="userGrowthChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- Assessment Results by Month -->
         <div class="col-md-6 mb-4">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Assessment Results by Month</h5>
+                <div class="card-header bg-light py-2">
+                    <h6 class="mb-0">Assessment Results</h6>
                 </div>
                 <div class="card-body">
-                    <canvas id="assessmentResultsChart" height="250"></canvas>
+                    <div style="height: 200px;">
+                        <canvas id="assessmentResultsChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- Social Style Distribution -->
+        <!-- Second row of charts - 2 charts side by side -->
         <div class="col-md-6 mb-4">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Social Style Distribution</h5>
+                <div class="card-header bg-light py-2">
+                    <h6 class="mb-0">Social Style Distribution</h6>
                 </div>
                 <div class="card-body">
-                    <canvas id="socialStyleChart" height="250"></canvas>
+                    <div style="height: 200px;">
+                        <canvas id="socialStyleChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- Active Users by Day -->
         <div class="col-md-6 mb-4">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Active Users by Day</h5>
+                <div class="card-header bg-light py-2">
+                    <h6 class="mb-0">Active Users by Day</h6>
                 </div>
                 <div class="card-body">
-                    <canvas id="activeUsersChart" height="250"></canvas>
+                    <div style="height: 200px;">
+                        <canvas id="activeUsersChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -141,103 +147,88 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // User Growth Chart - Use actual data from the server
+        // Get the data from the server
+        const monthLabels = {{ month_labels|tojson }};
+        const userCounts = {{ user_counts|tojson }};
+        const resultCounts = {{ result_counts|tojson }};
+        const styleNames = {{ style_names|tojson }};
+        const styleCounts = {{ style_counts|tojson }};
+        const dayNames = {{ day_names|tojson }};
+        const dayCounts = {{ day_counts|tojson }};
+        
+        // Common chart options for better fit
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0,
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        };
+        
+        // User Growth Chart
         const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
-        const userGrowthChart = new Chart(userGrowthCtx, {
+        new Chart(userGrowthCtx, {
             type: 'line',
             data: {
-                labels: [
-                    {% for month, count in results_by_month %}
-                        '{{ month }}'{% if not loop.last %},{% endif %}
-                    {% endfor %}
-                ],
+                labels: monthLabels,
                 datasets: [{
                     label: 'New Users',
-                    data: [
-                        {% for month, count in results_by_month %}
-                            {{ count }}{% if not loop.last %},{% endif %}
-                        {% endfor %}
-                    ],
+                    data: userCounts,
                     borderColor: '#0d6efd',
                     backgroundColor: 'rgba(13, 110, 253, 0.1)',
                     tension: 0.3,
                     fill: true
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
-                    }
-                }
-            }
+            options: commonOptions
         });
         
         // Assessment Results Chart
         const assessmentResultsCtx = document.getElementById('assessmentResultsChart').getContext('2d');
-        const assessmentResultsChart = new Chart(assessmentResultsCtx, {
+        new Chart(assessmentResultsCtx, {
             type: 'bar',
             data: {
-                labels: [
-                    {% for month, count in results_by_month %}
-                        '{{ month }}'{% if not loop.last %},{% endif %}
-                    {% endfor %}
-                ],
+                labels: monthLabels,
                 datasets: [{
                     label: 'Assessment Results',
-                    data: [
-                        {% for month, count in results_by_month %}
-                            {{ count }}{% if not loop.last %},{% endif %}
-                        {% endfor %}
-                    ],
+                    data: resultCounts,
                     backgroundColor: 'rgba(13, 202, 240, 0.7)'
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
-                    }
-                }
-            }
+            options: commonOptions
         });
         
         // Social Style Distribution Chart
         const socialStyleCtx = document.getElementById('socialStyleChart').getContext('2d');
-        const socialStyleChart = new Chart(socialStyleCtx, {
+        new Chart(socialStyleCtx, {
             type: 'pie',
             data: {
-                labels: [
-                    {% for style, count in style_distribution %}
-                        '{{ style }}'{% if not loop.last %},{% endif %}
-                    {% endfor %}
-                ],
+                labels: styleNames,
                 datasets: [{
-                    data: [
-                        {% for style, count in style_distribution %}
-                            {{ count }}{% if not loop.last %},{% endif %}
-                        {% endfor %}
-                    ],
+                    data: styleCounts,
                     backgroundColor: [
                         'rgba(220, 53, 69, 0.7)',  // Driver
                         'rgba(255, 193, 7, 0.7)',  // Expressive
@@ -248,43 +239,33 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
             }
         });
         
         // Active Users by Day Chart
         const activeUsersCtx = document.getElementById('activeUsersChart').getContext('2d');
-        const activeUsersChart = new Chart(activeUsersCtx, {
+        new Chart(activeUsersCtx, {
             type: 'bar',
             data: {
-                labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                labels: dayNames,
                 datasets: [{
                     label: 'Active Users',
-                    data: [
-                        {% for day in range(7) %}
-                            {{ active_users_by_day[day] if active_users_by_day and day < active_users_by_day|length else 0 }}{% if not loop.last %},{% endif %}
-                        {% endfor %}
-                    ],
+                    data: dayCounts,
                     backgroundColor: 'rgba(13, 110, 253, 0.7)'
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
-                    }
-                }
-            }
+            options: commonOptions
         });
     });
 </script>
