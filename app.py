@@ -6,6 +6,7 @@ from flask_mail import Mail
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
+from initialize_assessment import initialize_assessment
 import logging
 import sys
 
@@ -110,50 +111,12 @@ def test():
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
 
-@app.cli.command()
-def init_db():
-    """Initialize the database with default assessment."""
-    with app.app_context():
-        db.create_all()
-        
-        # Check if assessment already exists
-        if Assessment.query.first() is None:
-            # Create the Social Styles assessment
-            import json
-            
-            questions = [
-                {"id": 1, "text": "I tend to be direct and straightforward when dealing with others.", "category": "assertiveness"},
-                {"id": 2, "text": "I tend to speak quickly and state my views forcefully.", "category": "assertiveness"},
-                {"id": 3, "text": "I tend to be competitive and results-oriented.", "category": "assertiveness"},
-                {"id": 4, "text": "I tend to be decisive and quick to make decisions.", "category": "assertiveness"},
-                {"id": 5, "text": "I tend to be strong-willed and determined.", "category": "assertiveness"},
-                {"id": 6, "text": "I tend to be assertive and take charge in group situations.", "category": "assertiveness"},
-                {"id": 7, "text": "I tend to be focused on tasks rather than people.", "category": "assertiveness"},
-                {"id": 8, "text": "I tend to be confrontational when I disagree with others.", "category": "assertiveness"},
-                {"id": 9, "text": "I tend to be impatient when things move too slowly.", "category": "assertiveness"},
-                {"id": 10, "text": "I tend to be blunt and tell it like it is.", "category": "assertiveness"},
-                {"id": 11, "text": "I tend to show my emotions openly.", "category": "responsiveness"},
-                {"id": 12, "text": "I tend to be warm and friendly in my interactions.", "category": "responsiveness"},
-                {"id": 13, "text": "I tend to be enthusiastic and expressive.", "category": "responsiveness"},
-                {"id": 14, "text": "I tend to be people-oriented rather than task-oriented.", "category": "responsiveness"},
-                {"id": 15, "text": "I tend to be collaborative and seek consensus.", "category": "responsiveness"},
-                {"id": 16, "text": "I tend to be supportive and encouraging of others.", "category": "responsiveness"},
-                {"id": 17, "text": "I tend to be relationship-focused in my work.", "category": "responsiveness"},
-                {"id": 18, "text": "I tend to be empathetic and sensitive to others' feelings.", "category": "responsiveness"},
-                {"id": 19, "text": "I tend to be talkative and sociable.", "category": "responsiveness"},
-                {"id": 20, "text": "I tend to be open and share personal information.", "category": "responsiveness"}
-            ]
-            
-            assessment = Assessment(
-                name="Social Styles Assessment",
-                description="This assessment helps identify your social style based on assertiveness and responsiveness dimensions.",
-                questions=json.dumps(questions)
-            )
-            
-            db.session.add(assessment)
-            db.session.commit()
-            
-            print("Database initialized with Social Styles Assessment.")
+@app.cli.command()  
+def init_assessment():
+    """Initialize the assessment with the correct questions."""
+    initialize_assessment()
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
