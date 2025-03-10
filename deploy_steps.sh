@@ -81,7 +81,7 @@ step2() {
 step3() {
     print_message "Cloning the repository..."
     run_remote "rm -rf $APP_DIR && \
-                git clone $GITHUB_REPO $APP_DIR && \
+                git clone -b feature/team-dimension $GITHUB_REPO $APP_DIR && \
                 chown -R $APP_NAME:www-data $APP_DIR"
     
     # Copy version.txt file to ensure it's available
