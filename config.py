@@ -65,8 +65,7 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     """Production environment configuration"""
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        f'sqlite:///{os.path.join(basedir, "social_styles.db")}'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') 
     
     @classmethod
     def init_app(cls, app):
