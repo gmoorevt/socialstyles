@@ -19,6 +19,7 @@
         .presentation-container {
             display: flex;
             height: 100vh;
+            overflow-y: auto;
         }
         
         .qr-sidebar {
@@ -48,9 +49,12 @@
         
         .grid-container {
             flex-grow: 1;
-            padding: 2rem;
+            padding: 2rem 2rem 3rem 2rem;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            max-height: 100vh;
+            overflow-y: auto;
         }
         
         .header {
@@ -58,14 +62,31 @@
             margin-bottom: 2rem;
         }
         
-        .social-styles-grid {
-            flex-grow: 1;
+        .social-styles-grid-wrapper {
             position: relative;
+            width: 100%;
+            max-width: 650px;
+            max-height: 70vh;
+            margin: 0 auto 3rem;
+        }
+        
+        .social-styles-grid-wrapper::before {
+            content: "";
+            display: block;
+            padding-bottom: 100%;
+        }
+        
+        .social-styles-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             border: 2px solid #ddd;
-            margin-bottom: 2rem;
             background-color: #fff;
             border-radius: 5px;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
         
         .grid-lines {
@@ -210,7 +231,8 @@
         .legend {
             display: flex;
             justify-content: center;
-            margin-top: 1rem;
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
             background-color: white;
             padding: 1rem;
             border-radius: 5px;
@@ -270,6 +292,17 @@
                 max-width: 200px;
             }
         }
+        
+        @media (max-height: 800px) {
+            .social-styles-grid-wrapper {
+                max-height: 60vh;
+                margin-bottom: 2rem;
+            }
+            
+            .grid-container {
+                padding-bottom: 4rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -293,50 +326,52 @@
                 <p class="text-muted">{{ members|length }} team members with assessment results</p>
             </div>
             
-            <div class="social-styles-grid">
-                <!-- Grid lines -->
-                <div class="grid-lines">
-                    {% for i in range(0, 10) %}
-                        {% for j in range(0, 10) %}
-                            <div class="grid-line"></div>
+            <div class="social-styles-grid-wrapper">
+                <div class="social-styles-grid">
+                    <!-- Grid lines -->
+                    <div class="grid-lines">
+                        {% for i in range(0, 10) %}
+                            {% for j in range(0, 10) %}
+                                <div class="grid-line"></div>
+                            {% endfor %}
                         {% endfor %}
-                    {% endfor %}
-                </div>
-                
-                <!-- Axes -->
-                <div class="axes">
-                    <div class="vertical-axis"></div>
-                    <div class="horizontal-axis"></div>
+                    </div>
                     
-                    <div class="axis-label assertiveness-high">HIGH ASSERTIVENESS</div>
-                    <div class="axis-label assertiveness-low">LOW ASSERTIVENESS</div>
-                    <div class="axis-label responsiveness-high">HIGH RESPONSIVENESS</div>
-                    <div class="axis-label responsiveness-low">LOW RESPONSIVENESS</div>
-                    
-                    <div class="quadrant-label driver-label">DRIVER</div>
-                    <div class="quadrant-label expressive-label">EXPRESSIVE</div>
-                    <div class="quadrant-label analytical-label">ANALYTICAL</div>
-                    <div class="quadrant-label amiable-label">AMIABLE</div>
-                </div>
-                
-                <!-- Member Dots -->
-                {% for member in members %}
-                    {% if member.result %}
-                        {% set x = (member.result.responsiveness_score - 1) / 3 * 100 %}
-                        {% set y = 100 - ((member.result.assertiveness_score - 1) / 3 * 100) %}
-                        {% set style_class = member.result.social_style.lower() ~ "-dot" %}
+                    <!-- Axes -->
+                    <div class="axes">
+                        <div class="vertical-axis"></div>
+                        <div class="horizontal-axis"></div>
                         
-                        <div class="member-dot {{ style_class }}" style="left: {{ x }}%; top: {{ y }}%;"></div>
-                        <div class="member-name" style="left: {{ x }}%; top: {{ y }}%;">
-                            {{ member.user.name or member.user.email }}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-                
-                <!-- Refresh Button -->
-                <a href="javascript:location.reload()" class="btn btn-primary refresh-button">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </a>
+                        <div class="axis-label assertiveness-high">HIGH ASSERTIVENESS</div>
+                        <div class="axis-label assertiveness-low">LOW ASSERTIVENESS</div>
+                        <div class="axis-label responsiveness-high">HIGH RESPONSIVENESS</div>
+                        <div class="axis-label responsiveness-low">LOW RESPONSIVENESS</div>
+                        
+                        <div class="quadrant-label driver-label">DRIVER</div>
+                        <div class="quadrant-label expressive-label">EXPRESSIVE</div>
+                        <div class="quadrant-label analytical-label">ANALYTICAL</div>
+                        <div class="quadrant-label amiable-label">AMIABLE</div>
+                    </div>
+                    
+                    <!-- Member Dots -->
+                    {% for member in members %}
+                        {% if member.result %}
+                            {% set x = (member.result.responsiveness_score - 1) / 3 * 100 %}
+                            {% set y = 100 - ((member.result.assertiveness_score - 1) / 3 * 100) %}
+                            {% set style_class = member.result.social_style.lower() ~ "-dot" %}
+                            
+                            <div class="member-dot {{ style_class }}" style="left: {{ x }}%; top: {{ y }}%;"></div>
+                            <div class="member-name" style="left: {{ x }}%; top: {{ y }}%;">
+                                {{ member.user.name or member.user.email }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Refresh Button -->
+                    <a href="javascript:location.reload()" class="btn btn-primary refresh-button">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </a>
+                </div>
             </div>
             
             <!-- Legend -->
