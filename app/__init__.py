@@ -4,6 +4,10 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
+import os
+from app.utils import get_version_info
+import logging
+import sys
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -12,8 +16,26 @@ login_manager = LoginManager()
 mail = Mail()
 csrf = CSRFProtect()
 
-def create_app(config_name='default'):
+# Set up logging
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+def create_app(config_name=None):
+    """Application factory pattern for creating Flask app"""
     app = Flask(__name__)
+    
+    # Determine config based on environment if not explicitly provided
+    if config_name is None:
+        config_name = os.environ.get('FLASK_ENV', 'development')
+        if config_name == 'production':
+            config_name = 'production'
+        else:
+            config_name = 'development'
     
     # Import configuration
     from config import config
@@ -41,15 +63,32 @@ def create_app(config_name='default'):
     from app.admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint, url_prefix='/admin')
     
+    from app.team import team as team_blueprint
+    app.register_blueprint(team_blueprint, url_prefix='/team')
+    
     # Register custom commands
     from app.commands import register_commands
     register_commands(app)
     
     # Add version info to template context
-    from app.utils import get_version_info
-    
     @app.context_processor
     def inject_version():
         return get_version_info()
     
+    # Shell context processor for Flask CLI
+    @app.shell_context_processor
+    def make_shell_context():
+        # Import all models here to make them available in shell context
+        from app.models.user import User
+        from app.models.assessment import Assessment, AssessmentResult
+        from app.models.team import Team
+        
+        return {
+            'db': db, 
+            'User': User, 
+            'Assessment': Assessment, 
+            'AssessmentResult': AssessmentResult,
+            'Team': Team
+        }
+        
     return app

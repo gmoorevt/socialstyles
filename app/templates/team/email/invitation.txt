@@ -1,0 +1,22 @@
+You're Invited!
+
+Hello,
+
+You have been invited to join the {{ team.name }} team on the Social Styles Assessment platform.
+
+{% if team.description %}
+Team Description: {{ team.description }}
+{% endif %}
+
+As a team member, you'll be able to:
+- Complete your own social styles assessment
+- View your team's collective social styles on an interactive dashboard
+- Gain insights into how your team collaborates and communicates
+
+Ready to get started? Click the link below to accept this invitation:
+{{ token_url }}
+
+This invitation will expire in 7 days.
+
+---
+This is an automated message. Please do not reply to this email. 

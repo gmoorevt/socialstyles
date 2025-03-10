@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+    }
+    
+    .dashboard-full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .social-styles-grid {
+        width: 100%;
+        max-width: 600px;
+        aspect-ratio: 1 / 1;
+        position: relative;
+        border: 1px solid #ddd;
+        margin: 0 auto 1rem auto;
+        background-color: #f8f9fa;
+    }
+    
+    .grid-lines {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        grid-template-rows: repeat(10, 1fr);
+    }
+    
+    .grid-line {
+        border-right: 1px dashed #ccc;
+        border-bottom: 1px dashed #ccc;
+    }
+    
+    .axes {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .vertical-axis {
+        position: absolute;
+        width: 2px;
+        height: 100%;
+        background-color: #000;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .horizontal-axis {
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background-color: #000;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .axis-label {
+        position: absolute;
+        font-weight: bold;
+        font-size: 0.8rem;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 4px 8px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .assertiveness-high {
+        top: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .assertiveness-low {
+        bottom: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .responsiveness-high {
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .responsiveness-low {
+        left: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .quadrant-label {
+        position: absolute;
+        font-weight: bold;
+        font-size: 1rem;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 5px 10px;
+        border-radius: 4px;
+        z-index: 5;
+    }
+    
+    .driver-label {
+        top: 25%;
+        left: 25%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .expressive-label {
+        top: 25%;
+        right: 25%;
+        transform: translate(50%, -50%);
+    }
+    
+    .analytical-label {
+        bottom: 25%;
+        left: 25%;
+        transform: translate(-50%, 50%);
+    }
+    
+    .amiable-label {
+        bottom: 25%;
+        right: 25%;
+        transform: translate(50%, 50%);
+    }
+    
+    .member-dot {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        transform: translate(-50%, -50%);
+        transition: all 0.3s ease;
+        z-index: 5;
+    }
+    
+    .member-dot:hover {
+        width: 18px;
+        height: 18px;
+        z-index: 100;
+    }
+    
+    .member-name {
+        position: absolute;
+        background-color: rgba(255,255,255,0.9);
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-size: 12px;
+        white-space: nowrap;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transform: translate(-50%, 20px);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    
+    .member-dot:hover + .member-name {
+        opacity: 1;
+    }
+    
+    .member-dot-label {
+        position: absolute;
+        font-size: 10px;
+        font-weight: bold;
+        color: #333;
+        z-index: 6;
+        transform: translate(-50%, -50%);
+        white-space: nowrap;
+        text-shadow: 1px 1px 1px rgba(255,255,255,0.8);
+    }
+    
+    .driver-dot {
+        background-color: #dc3545; /* red */
+    }
+    
+    .expressive-dot {
+        background-color: #fd7e14; /* orange */
+    }
+    
+    .analytical-dot {
+        background-color: #0d6efd; /* blue */
+    }
+    
+    .amiable-dot {
+        background-color: #198754; /* green */
+    }
+    
+    .qr-section {
+        text-align: center;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        height: 100%;
+    }
+    
+    .qr-code {
+        max-width: 150px;
+        margin: 0 auto;
+    }
+    
+    .stats-card {
+        height: 100%;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>{{ team.name }} Dashboard</h1>
+        <div>
+            <a href="{{ url_for('team.view_team', team_id=team.id) }}" class="btn btn-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Back to Team
+            </a>
+            <a href="{{ url_for('team.team_presentation', team_id=team.id) }}" class="btn btn-success">
+                <i class="fas fa-desktop"></i> Presentation Mode
+            </a>
+        </div>
+    </div>
+    
+    {% if not members %}
+    <div class="alert alert-info">
+        <p>No team members have completed assessments yet. Complete your assessment to be the first to appear on the team grid!</p>
+    </div>
+    {% else %}
+    
+    <div class="dashboard-container">
+        <!-- Social Styles Grid Visualization -->
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Team Social Styles</h3>
+            </div>
+            <div class="card-body">
+                <div class="social-styles-grid">
+                    <!-- Grid lines -->
+                    <div class="grid-lines">
+                        {% for i in range(0, 10) %}
+                            {% for j in range(0, 10) %}
+                                <div class="grid-line"></div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Axes -->
+                    <div class="axes">
+                        <div class="vertical-axis"></div>
+                        <div class="horizontal-axis"></div>
+                        
+                        <div class="axis-label assertiveness-high">HIGH ASSERTIVENESS</div>
+                        <div class="axis-label assertiveness-low">LOW ASSERTIVENESS</div>
+                        <div class="axis-label responsiveness-high">HIGH RESPONSIVENESS</div>
+                        <div class="axis-label responsiveness-low">LOW RESPONSIVENESS</div>
+                        
+                        <div class="quadrant-label driver-label">DRIVER</div>
+                        <div class="quadrant-label expressive-label">EXPRESSIVE</div>
+                        <div class="quadrant-label analytical-label">ANALYTICAL</div>
+                        <div class="quadrant-label amiable-label">AMIABLE</div>
+                    </div>
+                    
+                    <!-- Member Dots with Names -->
+                    {% for member in members %}
+                        {% if member.result %}
+                            {% set x = (member.result.responsiveness_score - 1) / 3 * 100 %}
+                            {% set y = 100 - ((member.result.assertiveness_score - 1) / 3 * 100) %}
+                            {% set style_class = member.result.social_style.lower() ~ "-dot" %}
+                            {% set name = member.user.name or member.user.email %}
+                            {% set short_name = name.split(' ')[0] if ' ' in name else name %}
+                            
+                            <div class="member-dot {{ style_class }}" style="left: {{ x }}%; top: {{ y }}%;" 
+                                 title="{{ name }}"></div>
+                            <div class="member-dot-label" style="left: {{ x }}%; top: {{ y + 6 }}%;">
+                                {{ short_name }}
+                            </div>
+                            <div class="member-name" style="left: {{ x }}%; top: {{ y }}%;">
+                                {{ name }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                <!-- Legend -->
+                <div class="d-flex justify-content-center mt-2">
+                    <div class="px-3">
+                        <span class="badge bg-danger">&nbsp;</span> Driver
+                    </div>
+                    <div class="px-3">
+                        <span class="badge bg-warning">&nbsp;</span> Expressive
+                    </div>
+                    <div class="px-3">
+                        <span class="badge bg-primary">&nbsp;</span> Analytical
+                    </div>
+                    <div class="px-3">
+                        <span class="badge bg-success">&nbsp;</span> Amiable
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right side content -->
+        <div class="d-flex flex-column">
+            <!-- QR Code Section -->
+            <div class="card mb-3">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">Join Our Team</h4>
+                </div>
+                <div class="card-body qr-section">
+                    <p>Scan this QR code to join the team and add your assessment results.</p>
+                    <div class="qr-code mb-3">
+                        <img src="data:image/png;base64,{{ qr_image }}" alt="Team Join QR Code" class="img-fluid">
+                    </div>
+                    <p class="text-muted small">Or use this link: <a href="{{ join_url }}">{{ join_url }}</a></p>
+                </div>
+            </div>
+            
+            <!-- Team Stats Card -->
+            <div class="card stats-card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Team Stats</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Members:</strong> {{ members|length }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Style Breakdown:</strong>
+                        <div class="progress mt-2" style="height: 25px;">
+                            {% set driver_count = members|selectattr('result.social_style', 'equalto', 'DRIVER')|list|length %}
+                            {% set expressive_count = members|selectattr('result.social_style', 'equalto', 'EXPRESSIVE')|list|length %}
+                            {% set analytical_count = members|selectattr('result.social_style', 'equalto', 'ANALYTICAL')|list|length %}
+                            {% set amiable_count = members|selectattr('result.social_style', 'equalto', 'AMIABLE')|list|length %}
+                            
+                            {% set driver_percent = (driver_count / members|length * 100)|round %}
+                            {% set expressive_percent = (expressive_count / members|length * 100)|round %}
+                            {% set analytical_percent = (analytical_count / members|length * 100)|round %}
+                            {% set amiable_percent = (amiable_count / members|length * 100)|round %}
+                            
+                            <div class="progress-bar bg-danger" style="width: {{ driver_percent }}%" 
+                                 title="Driver: {{ driver_count }}">
+                                {{ driver_percent }}%
+                            </div>
+                            <div class="progress-bar bg-warning" style="width: {{ expressive_percent }}%" 
+                                 title="Expressive: {{ expressive_count }}">
+                                {{ expressive_percent }}%
+                            </div>
+                            <div class="progress-bar bg-primary" style="width: {{ analytical_percent }}%" 
+                                 title="Analytical: {{ analytical_count }}">
+                                {{ analytical_percent }}%
+                            </div>
+                            <div class="progress-bar bg-success" style="width: {{ amiable_percent }}%" 
+                                 title="Amiable: {{ amiable_count }}">
+                                {{ amiable_percent }}%
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small>Driver: {{ driver_count }}</small>
+                            <small>Expressive: {{ expressive_count }}</small>
+                            <small>Analytical: {{ analytical_count }}</small>
+                            <small>Amiable: {{ amiable_count }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Team Member List -->
+    <div class="card mt-4 dashboard-full-width">
+        <div class="card-header bg-info text-white">
+            <h3 class="mb-0">Team Member Results</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Social Style</th>
+                            <th>Assertiveness</th>
+                            <th>Responsiveness</th>
+                            <th>Completed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members %}
+                        <tr>
+                            <td>{{ member.user.name or member.user.email }}</td>
+                            <td>
+                                <span class="badge bg-{% if member.result.social_style == 'DRIVER' %}danger{% elif member.result.social_style == 'EXPRESSIVE' %}warning{% elif member.result.social_style == 'ANALYTICAL' %}primary{% else %}success{% endif %}">
+                                    {{ member.result.social_style }}
+                                </span>
+                            </td>
+                            <td>{{ "%.2f"|format(member.result.assertiveness_score) }}</td>
+                            <td>{{ "%.2f"|format(member.result.responsiveness_score) }}</td>
+                            <td>{{ member.result.created_at.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

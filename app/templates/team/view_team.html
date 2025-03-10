@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Team header with actions -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">{{ team.name }}</h2>
+                <div>
+                    {% if is_owner %}
+                    <a href="{{ url_for('team.invite_members', team_id=team.id) }}" class="btn btn-light btn-sm me-2">
+                        <i class="fas fa-user-plus"></i> Invite Members
+                    </a>
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTeamModal">
+                        <i class="fas fa-trash"></i> Delete Team
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#leaveTeamModal">
+                        <i class="fas fa-sign-out-alt"></i> Leave Team
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if team.description %}
+            <p class="lead">{{ team.description }}</p>
+            {% endif %}
+            <p><strong>Created by:</strong> {{ team.owner.name or team.owner.email }}</p>
+            <p><strong>Created on:</strong> {{ team.created_at.strftime('%B %d, %Y') }}</p>
+            <p><strong>Members:</strong> {{ members|length }}</p>
+            
+            <div class="d-flex mt-3">
+                <a href="{{ url_for('team.team_dashboard', team_id=team.id) }}" class="btn btn-primary me-2">
+                    <i class="fas fa-chart-line"></i> Team Dashboard
+                </a>
+                <a href="{{ url_for('team.team_presentation', team_id=team.id) }}" class="btn btn-success">
+                    <i class="fas fa-desktop"></i> Presentation Mode
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Team members -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h3 class="mb-0">Team Members</h3>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                {% for member in members %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">{{ member.user.name or member.user.email }}</h5>
+                            <small class="text-muted">Joined {{ member.joined_at.strftime('%B %d, %Y') }}</small>
+                            <p class="mb-1">
+                                <span class="badge bg-{{ 'primary' if member.role == 'owner' else 'success' }}">
+                                    {{ member.role|capitalize }}
+                                </span>
+                                {% if member.latest_result %}
+                                <span class="badge bg-info ms-2">
+                                    {{ member.latest_result.social_style }}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary ms-2">
+                                    No assessment
+                                </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% if is_owner and not team.is_owner(member.user) %}
+                        <form action="{{ url_for('team.remove_member', team_id=team.id, user_id=member.user.id) }}" method="POST" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to remove this member?')">
+                                <i class="fas fa-user-minus"></i> Remove
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pending invitations (owner only) -->
+    {% if is_owner and pending_invites %}
+    <div class="card">
+        <div class="card-header bg-warning text-dark">
+            <h3 class="mb-0">Pending Invitations</h3>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                {% for invite in pending_invites %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ invite.email }}
+                    <small class="text-muted">Invited {{ invite.created_at.strftime('%B %d, %Y') }}</small>
+                    <span class="badge bg-warning text-dark">Pending</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Delete Team Modal -->
+    {% if is_owner %}
+    <div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteTeamModalLabel">Delete Team</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the team "<strong>{{ team.name }}</strong>"?</p>
+                    <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="{{ url_for('team.delete_team', team_id=team.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger">Delete Team</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Leave Team Modal -->
+    <div class="modal fade" id="leaveTeamModal" tabindex="-1" aria-labelledby="leaveTeamModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="leaveTeamModalLabel">Leave Team</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to leave the team "<strong>{{ team.name }}</strong>"?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="{{ url_for('team.leave_team', team_id=team.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-warning">Leave Team</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

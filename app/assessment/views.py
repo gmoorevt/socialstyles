@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, send_file
+from flask import render_template, redirect, url_for, flash, request, jsonify, send_file, session
 from flask_login import login_required, current_user
 from . import assessment
 from .. import db
@@ -91,6 +91,11 @@ def results(result_id):
     
     # Generate chart
     chart_img = generate_social_style_chart(result.assertiveness_score, result.responsiveness_score)
+    
+    # Check if user needs to set password (from QR code quick registration)
+    if session.get('needs_password_setup'):
+        flash('Please set a password to secure your account.', 'info')
+        return redirect(url_for('team.set_password'))
     
     return render_template('assessment/results.html', 
                           result=result,

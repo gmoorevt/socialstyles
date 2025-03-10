@@ -32,12 +32,74 @@ print_error() {
 
 # Function to run commands on the remote server
 run_remote() {
-    ssh -i "$SSH_KEY_PATH" root@"$DROPLET_IP" "$1"
+    local command="$1"
+    local result
+    
+    print_message "Running remote command: $command"
+    result=$(ssh -i "$SSH_KEY_PATH" root@"$DROPLET_IP" "$command" 2>&1)
+    local status=$?
+    
+    if [ $status -ne 0 ]; then
+        print_error "Remote command failed with exit code $status"
+        print_error "Output: $result"
+        return $status
+    else
+        echo "$result"
+        return 0
+    fi
 }
 
 # Function to copy files to the remote server
 copy_to_remote() {
-    scp -i "$SSH_KEY_PATH" "$1" root@"$DROPLET_IP":"$2"
+    local source="$1"
+    local destination="$2"
+    
+    print_message "Copying $source to $destination on remote server"
+    scp -i "$SSH_KEY_PATH" "$source" root@"$DROPLET_IP":"$destination"
+    local status=$?
+    
+    if [ $status -ne 0 ]; then
+        print_error "Failed to copy file to remote server"
+        return $status
+    else
+        print_message "File copied successfully"
+        return 0
+    fi
+}
+
+# Function to check git repository details
+check_git_repo() {
+    print_message "Checking git repository details..."
+    
+    # Check if we can access the repository
+    print_message "Testing repository access locally..."
+    if ! git ls-remote --heads "$GITHUB_REPO" > /dev/null 2>&1; then
+        print_error "Cannot access repository: $GITHUB_REPO"
+        print_message "Make sure:"
+        print_message "1. The repository URL is correct"
+        print_message "2. The repository is public or you have proper SSH keys configured"
+        print_message "3. Your network allows the connection"
+        return 1
+    fi
+    
+    # Check if the specified branch exists
+    print_message "Checking if branch 'feature/team-dimension' exists..."
+    if ! git ls-remote --heads "$GITHUB_REPO" "feature/team-dimension" | grep -q "feature/team-dimension"; then
+        print_error "Branch 'feature/team-dimension' does not exist in repository"
+        print_message "Available branches:"
+        git ls-remote --heads "$GITHUB_REPO" | awk '{print $2}' | sed 's/refs\/heads\///'
+        return 1
+    fi
+    
+    print_message "Repository and branch confirmed accessible"
+    return 0
+}
+
+# Function to get available branches
+get_available_branches() {
+    print_message "Checking available branches in repository..."
+    local branches=$(git ls-remote --heads "$GITHUB_REPO" | awk '{print $2}' | sed 's/refs\/heads\///')
+    echo "$branches"
 }
 
 # Display menu
@@ -58,6 +120,12 @@ show_menu() {
     echo "13. Install PostgreSQL driver"
     echo "14. Run database migrations"
     echo "15. Full deploy with database setup"
+    echo "16. Update database only"
+    echo "17. Initialize migrations directory"
+    echo "18. Run migration diagnostics"
+    echo "19. Direct fix for migrations"
+    echo "20. Check repository and branch"
+    echo "21. Debug repository cloning"
     echo "0. Exit"
     echo "=================================="
 }
@@ -80,13 +148,77 @@ step2() {
 # Step 3: Clone repository
 step3() {
     print_message "Cloning the repository..."
-    run_remote "rm -rf $APP_DIR && \
-                git clone $GITHUB_REPO $APP_DIR && \
-                chown -R $APP_NAME:www-data $APP_DIR"
     
-    # Copy version.txt file to ensure it's available
-    copy_to_remote "version.txt" "$APP_DIR/version.txt"
-    run_remote "chown $APP_NAME:www-data $APP_DIR/version.txt"
+    # Add verbose diagnostic output before cloning
+    print_message "Current APP_DIR value: $APP_DIR"
+    print_message "Current GITHUB_REPO value: $GITHUB_REPO"
+    print_message "Target branch: feature/team-dimension"
+    
+    # Check if git is installed
+    run_remote "which git || echo 'ERROR: Git is not installed!'"
+    
+    # Show repository access check
+    run_remote "echo 'Testing repository access...' && \
+                git ls-remote --heads $GITHUB_REPO || echo 'ERROR: Cannot access repository!'"
+    
+    # Check for specific branch existence
+    run_remote "echo 'Checking branch existence...' && \
+                if ! git ls-remote --heads $GITHUB_REPO feature/team-dimension | grep -q 'feature/team-dimension'; then \
+                    echo 'WARNING: Branch feature/team-dimension does not exist!'; \
+                    echo 'Available branches:'; \
+                    git ls-remote --heads $GITHUB_REPO | awk '{print \$2}' | sed 's/refs\/heads\///'; \
+                    echo 'Will try to use master or main branch instead.'; \
+                    if git ls-remote --heads $GITHUB_REPO master | grep -q master; then \
+                        echo 'Using master branch instead'; \
+                        BRANCH='master'; \
+                    elif git ls-remote --heads $GITHUB_REPO main | grep -q main; then \
+                        echo 'Using main branch instead'; \
+                        BRANCH='main'; \
+                    else \
+                        echo 'ERROR: Cannot find a default branch!'; \
+                        exit 1; \
+                    fi; \
+                else \
+                    echo 'Branch feature/team-dimension exists, proceeding.'; \
+                    BRANCH='feature/team-dimension'; \
+                fi && \
+                echo 'Selected branch: '\$BRANCH"
+    
+    # More verbose clone with explicit error handling and flexible branch selection
+    run_remote "set -x && \
+                echo 'Removing existing directory...' && \
+                rm -rf $APP_DIR && \
+                echo 'Directory removed, proceeding with clone...' && \
+                if git ls-remote --heads $GITHUB_REPO feature/team-dimension | grep -q 'feature/team-dimension'; then \
+                    BRANCH='feature/team-dimension'; \
+                elif git ls-remote --heads $GITHUB_REPO master | grep -q master; then \
+                    BRANCH='master'; \
+                elif git ls-remote --heads $GITHUB_REPO main | grep -q main; then \
+                    BRANCH='main'; \
+                else \
+                    echo 'ERROR: No suitable branch found!'; \
+                    exit 1; \
+                fi && \
+                echo 'Using branch: '\$BRANCH && \
+                git clone -v -b \$BRANCH $GITHUB_REPO $APP_DIR && \
+                echo 'Clone completed, checking results...' && \
+                ls -la $APP_DIR && \
+                echo 'Setting permissions...' && \
+                chown -R $APP_NAME:www-data $APP_DIR && \
+                echo 'Clone process completed.' || echo 'ERROR: Clone process failed!'"
+    
+    # Check if version.txt exists locally before trying to copy it
+    if [ -f "version.txt" ]; then
+        print_message "Copying version.txt file..."
+        copy_to_remote "version.txt" "$APP_DIR/version.txt"
+        run_remote "chown $APP_NAME:www-data $APP_DIR/version.txt"
+    else
+        print_warning "version.txt not found locally, skipping copy."
+    fi
+    
+    # Final verification
+    print_message "Verifying repository contents..."
+    run_remote "ls -la $APP_DIR || echo 'ERROR: Cannot list directory contents!'"
 }
 
 # Step 4: Set up Python virtual environment
@@ -102,10 +234,9 @@ step4() {
 # Step 5: Set up production environment
 step5() {
     print_message "Setting up production environment..."
-    print_message "Skipping .env file update as requested."
-    # The following lines are commented out to prevent updating the .env file
-    # copy_to_remote ".env.production" "$APP_DIR/.env"
-    # run_remote "chown $APP_NAME:www-data $APP_DIR/.env"
+    print_message "Uploading .env file..."
+    copy_to_remote ".env" "$APP_DIR/.env"
+    run_remote "chown $APP_NAME:www-data $APP_DIR/.env"
 }
 
 # Step 6: Initialize database
@@ -290,8 +421,22 @@ step13() {
                 sudo -u $APP_NAME venv/bin/pip install psycopg2-binary"
 }
 
+# Step 13b: Initialize migrations directory
+step13b() {
+    print_message "Checking and initializing migrations directory if needed..."
+    run_remote "cd $APP_DIR && \
+                if [ ! -f migrations/env.py ]; then \
+                  print_message 'Migrations directory not found or incomplete. Initializing...' && \
+                  sudo -u $APP_NAME venv/bin/flask db init && \
+                  chown -R $APP_NAME:www-data migrations; \
+                fi"
+}
+
 # Step 14: Run database migrations
 step14() {
+    print_message "Checking migrations directory first..."
+    step13b
+    
     print_message "Running database migrations..."
     run_remote "cd $APP_DIR && \
                 sudo -u $APP_NAME venv/bin/flask db upgrade"
@@ -312,6 +457,111 @@ step15() {
     step10 # Check deployment status
 }
 
+# Step 16: Update database only
+step16() {
+    print_message "Updating database only..."
+    step5  # Upload correct .env file
+    step13 # Install PostgreSQL driver
+    step14 # Run database migrations
+    print_message "Restarting application service..."
+    run_remote "systemctl restart socialstyles.service"
+    step10 # Check deployment status
+}
+
+# Step 17: Initialize migrations directory
+step17() {
+    print_message "Initializing migrations directory..."
+    step5  # Upload correct .env file
+    step13 # Install PostgreSQL driver
+    step13b # Initialize migrations
+    print_message "Migrations directory initialized successfully."
+}
+
+# Step 18: Run detailed migration diagnostics
+step18() {
+    print_message "Running detailed migration diagnostics..."
+    run_remote "cd $APP_DIR && \
+                echo '=== ENV FILE CONTENTS ===' && \
+                cat .env | grep -v SECRET && \
+                echo '=== PYTHON VERSION ===' && \
+                python3 --version && \
+                echo '=== APP STRUCTURE ===' && \
+                ls -la && \
+                echo '=== MIGRATIONS DIRECTORY ===' && \
+                ls -la migrations 2>/dev/null || echo 'Migrations directory does not exist' && \
+                echo '=== FLASK CONFIG ===' && \
+                sudo -u $APP_NAME venv/bin/python -c 'import os; print(\"FLASK_APP = \" + os.environ.get(\"FLASK_APP\", \"Not set\"))' && \
+                echo '=== MANUALLY INITIALIZING MIGRATIONS ===' && \
+                export FLASK_APP=wsgi.py && \
+                cd $APP_DIR && \
+                sudo -u $APP_NAME venv/bin/flask db init && \
+                echo '=== MIGRATIONS AFTER INIT ===' && \
+                ls -la migrations 2>/dev/null || echo 'Migrations directory still does not exist'"
+    
+    print_message "Diagnostics complete. Check the output for details."
+}
+
+# Step 19: Direct fix for migrations
+step19() {
+    print_message "Applying direct fix for migrations..."
+    run_remote "cd $APP_DIR && \
+                # Ensure correct environment variables are set
+                export FLASK_APP=wsgi.py && \
+                # Create migrations directory if it doesn't exist
+                mkdir -p migrations && \
+                chown -R $APP_NAME:www-data migrations && \
+                # Force initialize migrations
+                sudo -u $APP_NAME venv/bin/flask db init --force && \
+                # Create a blank migration
+                sudo -u $APP_NAME venv/bin/flask db migrate -m 'initial migration' && \
+                # Apply the migration
+                sudo -u $APP_NAME venv/bin/flask db upgrade && \
+                # Run application initialization
+                sudo -u $APP_NAME venv/bin/python initialize_assessment.py && \
+                # Restart the service
+                systemctl restart socialstyles.service"
+    
+    print_message "Direct migration fix applied."
+}
+
+# Step 20: Check repository details
+step20() {
+    print_message "Checking repository details..."
+    check_git_repo
+    if [ $? -eq 0 ]; then
+        print_message "Repository check succeeded."
+    else
+        print_error "Repository check failed. Please fix the issues before attempting to clone."
+    fi
+}
+
+# Step 21: Debug repository cloning
+step21() {
+    print_message "Running clone debug process..."
+    
+    # Check git on server
+    run_remote "echo 'Git version:' && git --version"
+    
+    # Test a simple public repo clone
+    run_remote "echo 'Testing clone with public repo...' && \
+                mkdir -p /tmp/test-clone && \
+                cd /tmp/test-clone && \
+                rm -rf test-repo && \
+                git clone https://github.com/octocat/Hello-World.git test-repo && \
+                ls -la test-repo"
+    
+    # Test target repository without specified branch
+    run_remote "echo 'Testing main repository without branch specification...' && \
+                mkdir -p /tmp/test-clone && \
+                cd /tmp/test-clone && \
+                rm -rf test-repo-main && \
+                git clone $GITHUB_REPO test-repo-main && \
+                echo 'Available branches:' && \
+                cd test-repo-main && git branch -a 2>/dev/null || echo 'Failed to clone main repository'"
+    
+    print_message "Clone debugging complete."
+}
+
 # Run all steps
 run_all() {
     step1
@@ -329,7 +579,7 @@ run_all() {
 # Main loop
 while true; do
     show_menu
-    read -p "Enter your choice (0-15): " choice
+    read -p "Enter your choice (0-21): " choice
     
     case $choice in
         1) step1 ;;
@@ -347,6 +597,12 @@ while true; do
         13) step13 ;;
         14) step14 ;;
         15) step15 ;;
+        16) step16 ;;
+        17) step17 ;;
+        18) step18 ;;
+        19) step19 ;;
+        20) step20 ;;
+        21) step21 ;;
         0) exit 0 ;;
         *) print_error "Invalid choice. Please try again." ;;
     esac

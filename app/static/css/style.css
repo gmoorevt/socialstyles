@@ -154,6 +154,137 @@ footer {
     .card-body {
         padding: 1rem;
     }
+    
+    .paired-opposites-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .rating-scale-modern {
+        width: 100%;
+        margin: 20px 0;
+        min-height: 60px; /* Ensure consistent height */
+        position: relative;
+    }
+    
+    .rating-line {
+        top: 50%; /* Ensure line is centered vertically */
+    }
+    
+    .rating-options {
+        justify-content: space-between; /* Even spacing on mobile */
+        width: 100%;
+    }
+    
+    .characteristic-box {
+        width: 100%;
+        margin: 0;
+        text-align: center; /* Center text on mobile */
+        position: relative;
+    }
+    
+    /* Add indicators to connect characteristics to scale ends */
+    .characteristic-box:first-child::after {
+        content: "1";
+        position: absolute;
+        bottom: -18px;
+        left: 20px;
+        width: 18px;
+        height: 18px;
+        background-color: #dee2e6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .characteristic-box:last-child::after {
+        content: "4";
+        position: absolute;
+        bottom: -18px;
+        right: 20px;
+        width: 18px;
+        height: 18px;
+        background-color: #dee2e6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    /* Add arrows connecting characteristics to scale ends */
+    .paired-opposites-container::before {
+        content: "←";
+        position: absolute;
+        font-size: 1.2rem;
+        color: #6c757d;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+    }
+    
+    .paired-opposites-container::after {
+        content: "→";
+        position: absolute;
+        font-size: 1.2rem;
+        color: #6c757d;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+    }
+    
+    .question-card {
+        padding: 1rem;
+        position: relative;
+    }
+    
+    .question-card::after {
+        content: "";
+        display: block;
+        width: 60%;
+        height: 1px;
+        background-color: #e9ecef;
+        margin: 15px auto 5px;
+    }
+    
+    .question-title {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Add a helpful label for mobile users */
+    .mobile-scale-label {
+        text-align: center;
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin: 5px 0 15px;
+        font-style: italic;
+    }
+    
+    .scale-circle, .rating-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+        margin: 0 auto; /* Center the circle */
+    }
+    
+    .scale-label {
+        font-size: 0.75rem;
+    }
+    
+    .question-number-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
 }
 
 /* Modern Assessment Styles */
@@ -330,11 +461,13 @@ footer {
 
 .rating-line {
     position: absolute;
-    top: 18px; /* Align with the center of the circles */
+    height: 2px;
+    background-color: #0d6efd;
+    top: 50%;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(to right, #dee2e6, #0d6efd, #dee2e6);
+    transform: translateY(-50%);
+    z-index: 0;
 }
 
 .rating-options {
@@ -392,48 +525,6 @@ footer {
 .rating-option:hover .rating-circle {
     border-color: #0d6efd;
     transform: scale(1.05);
-}
-
-/* Mobile optimizations */
-@media (max-width: 768px) {
-    .paired-opposites-container {
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    .rating-scale-modern {
-        width: 100%;
-        margin: 20px 0;
-    }
-    
-    .characteristic-box {
-        width: 100%;
-        margin: 0;
-    }
-    
-    .question-card {
-        padding: 1rem;
-    }
-    
-    .scale-circle, .rating-circle {
-        width: 32px;
-        height: 32px;
-        font-size: 0.9rem;
-    }
-    
-    .scale-label {
-        font-size: 0.75rem;
-    }
-    
-    .question-number-circle {
-        width: 36px;
-        height: 36px;
-        font-size: 1.1rem;
-    }
-    
-    .question-title {
-        font-size: 1rem;
-    }
 }
 
 /* Animation */
