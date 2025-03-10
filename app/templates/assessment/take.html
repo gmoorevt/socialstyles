@@ -83,7 +83,15 @@
                             
                             <div class="question-content">
                                 <div class="paired-opposites-container">
-                                    <div class="characteristic-box">{{ question.left_characteristic }}</div>
+                                    <div class="characteristic-box">
+                                        <span class="d-none d-md-inline">{{ question.left_characteristic }}</span>
+                                        <span class="d-md-none">
+                                            <small class="text-muted d-block mb-1">(1)</small>
+                                            {{ question.left_characteristic }}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="d-md-none mobile-scale-label">Select a number from 1-4 indicating which characteristic best describes you</div>
                                     
                                     <div class="rating-scale-modern">
                                         <div class="rating-line"></div>
@@ -103,7 +111,13 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="characteristic-box">{{ question.right_characteristic }}</div>
+                                    <div class="characteristic-box">
+                                        <span class="d-none d-md-inline">{{ question.right_characteristic }}</span>
+                                        <span class="d-md-none">
+                                            <small class="text-muted d-block mb-1">(4)</small>
+                                            {{ question.right_characteristic }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -132,7 +146,15 @@
                             
                             <div class="question-content">
                                 <div class="paired-opposites-container">
-                                    <div class="characteristic-box">{{ question.left_characteristic }}</div>
+                                    <div class="characteristic-box">
+                                        <span class="d-none d-md-inline">{{ question.left_characteristic }}</span>
+                                        <span class="d-md-none">
+                                            <small class="text-muted d-block mb-1">(1)</small>
+                                            {{ question.left_characteristic }}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="d-md-none mobile-scale-label">Select a number from 1-4 indicating which characteristic best describes you</div>
                                     
                                     <div class="rating-scale-modern">
                                         <div class="rating-line"></div>
@@ -152,7 +174,13 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="characteristic-box">{{ question.right_characteristic }}</div>
+                                    <div class="characteristic-box">
+                                        <span class="d-none d-md-inline">{{ question.right_characteristic }}</span>
+                                        <span class="d-md-none">
+                                            <small class="text-muted d-block mb-1">(4)</small>
+                                            {{ question.right_characteristic }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

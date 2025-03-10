@@ -38,7 +38,11 @@ def create_app():
     
     # Configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-for-development')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///social_styles.db')
+    
+    # Use the explicit path to social_styles_dev.db
+    db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'social_styles_dev.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # CSRF Configuration
@@ -62,6 +66,7 @@ def create_app():
     logger.info(f"AWS_REGION: {app.config.get('AWS_REGION')}")
     logger.info(f"AWS_ACCESS_KEY_ID: {app.config.get('AWS_ACCESS_KEY_ID', 'Not set')[:4] if app.config.get('AWS_ACCESS_KEY_ID') else 'Not set'}...")
     logger.info(f"MAIL_DEFAULT_SENDER: {app.config.get('MAIL_DEFAULT_SENDER')}")
+    logger.info(f"Database URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
     
     # Initialize extensions with app
     db.init_app(app)
@@ -79,6 +84,9 @@ def create_app():
     from app.assessment import assessment as assessment_blueprint
     app.register_blueprint(assessment_blueprint, url_prefix='/assessment')
     
+    from app.team import team as team_blueprint
+    app.register_blueprint(team_blueprint, url_prefix='/team')
+    
     # Create database tables
     with app.app_context():
         db.create_all()
@@ -90,11 +98,12 @@ app = create_app()
 migrate = Migrate(app, db)
 
 # Import models after app is created to avoid circular imports
-from app.models import User, Assessment, AssessmentResult
+from app.models import User, Assessment, AssessmentResult, Team, TeamMember, TeamInvite
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(db=db, User=User, Assessment=Assessment, AssessmentResult=AssessmentResult)
+    return dict(db=db, User=User, Assessment=Assessment, AssessmentResult=AssessmentResult,
+               Team=Team, TeamMember=TeamMember, TeamInvite=TeamInvite)
 
 @app.cli.command()
 def test():

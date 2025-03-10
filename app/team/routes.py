@@ -1,13 +1,14 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, abort
-from flask_login import login_required, current_user
+from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, abort, session
+from flask_login import login_required, current_user, login_user
 from app import db
 from app.team import team
-from app.models import Team, TeamMember, TeamInvite, User
-from app.team.forms import TeamForm, InviteMembersForm
+from app.models import Team, TeamMember, TeamInvite, User, Assessment
+from app.team.forms import TeamForm, InviteMembersForm, QuickRegisterForm
 from app.email import send_email
 import qrcode
 from io import BytesIO
 import base64
+from werkzeug.security import generate_password_hash
 
 @team.route('/teams')
 @login_required
@@ -213,8 +214,8 @@ def team_dashboard(team_id):
                 'result': latest_result
             })
     
-    # Generate the team join QR code
-    join_url = team.get_join_url()
+    # Generate the team join QR code - now points to quick-join route
+    join_url = url_for('team.quick_join', team_id=team.id, _external=True)
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -257,8 +258,8 @@ def team_presentation(team_id):
                 'result': latest_result
             })
     
-    # Generate the team join QR code
-    join_url = team.get_join_url()
+    # Generate the team join QR code - now points to quick-join route
+    join_url = url_for('team.quick_join', team_id=team.id, _external=True)
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -365,14 +366,108 @@ def send_team_invitation(invite):
     team = Team.query.get(invite.team_id)
     token_url = url_for('team.accept_invite', token=invite.token, _external=True)
     
-    html = render_template('team/email/invitation.html',
-                         team=team,
-                         token_url=token_url)
+    send_email(
+        to=invite.email,
+        subject=f"Invitation to join {team.name} team",
+        template='team/email/invitation',
+        team=team,
+        token_url=token_url
+    )
     
-    subject = f"Invitation to join {team.name} team"
+    return True
+
+@team.route('/quick-join/<int:team_id>', methods=['GET', 'POST'])
+def quick_join(team_id):
+    """Streamlined join process initiated from QR code"""
+    team = Team.query.get_or_404(team_id)
     
-    send_email(subject, 
-              recipients=[invite.email],
-              html_body=html)
+    # If user is already logged in
+    if current_user.is_authenticated:
+        # If already a member of this team, go to assessment
+        if team.is_member(current_user):
+            return redirect(url_for('assessment.take_assessment', assessment_id=1))
+        # If not a member, add them to the team
+        else:
+            team.add_member(current_user)
+            db.session.commit()
+            flash(f'You have been added to the team "{team.name}"!', 'success')
+            return redirect(url_for('assessment.take_assessment', assessment_id=1))
     
-    return True 
+    # For new or not logged in users
+    form = QuickRegisterForm()
+    if form.validate_on_submit():
+        # Check if user exists
+        user = User.query.filter_by(email=form.email.data).first()
+        
+        if user:
+            # Existing user, log them in
+            login_user(user)
+            
+            # If not already a member, add to team
+            if not team.is_member(user):
+                team.add_member(user)
+                db.session.commit()
+                flash(f'Welcome back! You have been added to the team "{team.name}"', 'success')
+            
+            # Send to assessment
+            return redirect(url_for('assessment.take_assessment', assessment_id=1))
+        else:
+            # Create a new user with temporary password
+            temp_password = generate_password_hash('changeme')
+            new_user = User(
+                email=form.email.data,
+                name=form.name.data,
+                password_hash=temp_password
+            )
+            db.session.add(new_user)
+            db.session.flush()  # Get user ID
+            
+            # Add user to team
+            team.add_member(new_user)
+            db.session.commit()
+            
+            # Log in the new user
+            login_user(new_user)
+            
+            # Store in session that user needs to set password after assessment
+            session['needs_password_setup'] = True
+            session['from_team_join'] = team.id
+            
+            flash('Welcome! Please complete the assessment.', 'success')
+            return redirect(url_for('assessment.take_assessment', assessment_id=1))
+    
+    return render_template(
+        'team/quick_register.html',
+        form=form,
+        team=team,
+        title=f'Join {team.name}'
+    )
+
+@team.route('/set-password', methods=['GET', 'POST'])
+@login_required
+def set_password():
+    """Allow users to set their password after completing assessment via QR code"""
+    # If user doesn't need to set password, redirect to dashboard
+    if not session.get('needs_password_setup'):
+        return redirect(url_for('assessment.dashboard'))
+    
+    from app.auth.forms import PasswordForm
+    form = PasswordForm()
+    
+    if form.validate_on_submit():
+        current_user.password = form.password.data
+        db.session.commit()
+        
+        # Clear the session flags
+        session.pop('needs_password_setup', None)
+        team_id = session.pop('from_team_join', None)
+        
+        flash('Your password has been set successfully!', 'success')
+        
+        # If they came from a team join, show them the team dashboard
+        if team_id:
+            return redirect(url_for('team.team_dashboard', team_id=team_id))
+        else:
+            return redirect(url_for('assessment.dashboard'))
+    
+    return render_template('team/set_password.html', form=form, title='Set Your Password') 
