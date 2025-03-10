@@ -6,7 +6,8 @@
 # Configuration - MODIFY THESE VALUES
 DROPLET_IP="159.89.95.194"
 DOMAIN_NAME="teamsocialstyles.com"
-SSH_KEY_PATH="~/.ssh/id_ed25519"
+# Use $HOME instead of tilde for better compatibility
+SSH_KEY_PATH="$HOME/.ssh/id_ed25519"
 APP_NAME="socialstyles"
 APP_DIR="/var/www/$APP_NAME"
 GITHUB_REPO="https://github.com/gmoorevt/socialstyles.git"
@@ -114,16 +115,16 @@ validate_env_file() {
     local missing_vars=()
     
     # PostgreSQL database connection should be configured
-    if ! grep -q "DATABASE_URL=" .env; then
+    if ! grep -q "^DATABASE_URL=" .env; then
         missing_vars+=("DATABASE_URL")
     fi
     
     # Check for other essential variables
-    if ! grep -q "SECRET_KEY=" .env; then
+    if ! grep -q "^SECRET_KEY=" .env; then
         missing_vars+=("SECRET_KEY")
     fi
     
-    if ! grep -q "FLASK_APP=" .env; then
+    if ! grep -q "^FLASK_APP=" .env; then
         missing_vars+=("FLASK_APP")
     fi
     
@@ -138,26 +139,57 @@ validate_env_file() {
     fi
     
     # Ensure DATABASE_URL is using PostgreSQL
-    if ! grep -q "DATABASE_URL=postgresql://" .env; then
-        print_warning "DATABASE_URL does not appear to be a PostgreSQL connection string."
+    if ! grep -q "^DATABASE_URL=postgresql://" .env; then
+        print_warning "Active DATABASE_URL does not appear to be a PostgreSQL connection string."
         print_warning "Make sure it's in the format: postgresql://username:password@hostname:port/database"
+        
+        # Show the current DATABASE_URL for review
+        local current_db_url=$(grep "^DATABASE_URL=" .env | head -n 1)
+        print_warning "Current setting: $current_db_url"
+        
         read -p "Continue anyway? (y/n) " continue_anyway
         if [[ $continue_anyway != "y" ]]; then
             return 1
         fi
     fi
     
+    # Create a temp file for any .env modifications
+    local temp_env=$(mktemp)
+    cat .env > "$temp_env"
+    
     # Ensure FLASK_APP is set to wsgi.py
-    if ! grep -q "FLASK_APP=wsgi.py" .env; then
+    if ! grep -q "^FLASK_APP=wsgi.py" "$temp_env"; then
         print_warning "FLASK_APP should be set to wsgi.py for production."
-        sed -i '' "s/FLASK_APP=.*/FLASK_APP=wsgi.py/" .env || print_warning "Could not automatically fix FLASK_APP"
+        sed -i.bak "s/^FLASK_APP=.*/FLASK_APP=wsgi.py/" "$temp_env" && rm -f "$temp_env.bak" || print_warning "Could not automatically fix FLASK_APP"
     fi
     
     # Ensure FLASK_ENV is set to production
-    if grep -q "FLASK_ENV=development" .env; then
+    if grep -q "^FLASK_ENV=development" "$temp_env"; then
         print_warning "FLASK_ENV is set to development. Changing to production."
-        sed -i '' "s/FLASK_ENV=development/FLASK_ENV=production/" .env || print_warning "Could not automatically fix FLASK_ENV"
+        sed -i.bak "s/^FLASK_ENV=development/FLASK_ENV=production/" "$temp_env" && rm -f "$temp_env.bak" || print_warning "Could not automatically fix FLASK_ENV"
     fi
+    
+    # Ensure FLASK_DEBUG is set to 0
+    if grep -q "^FLASK_DEBUG=1" "$temp_env"; then
+        print_warning "FLASK_DEBUG is set to 1. Changing to 0 for production."
+        sed -i.bak "s/^FLASK_DEBUG=1/FLASK_DEBUG=0/" "$temp_env" && rm -f "$temp_env.bak" || print_warning "Could not automatically fix FLASK_DEBUG"
+    fi
+    
+    # Display modifications and ask for confirmation
+    if ! diff -q .env "$temp_env" > /dev/null; then
+        print_warning "The following changes are recommended for your .env file:"
+        diff -u .env "$temp_env" || echo "Could not display differences"
+        read -p "Apply these changes? (y/n) " apply_changes
+        if [[ $apply_changes == "y" ]]; then
+            cat "$temp_env" > .env
+            print_message "Changes applied to .env file."
+        else
+            print_warning "Changes not applied. Using original .env file."
+        fi
+    fi
+    
+    # Clean up
+    rm -f "$temp_env"
     
     print_message ".env file validation passed."
     return 0
@@ -177,6 +209,8 @@ show_menu() {
     echo "9. Test deployment"
     echo "10. Full deployment (runs all steps 1-9)"
     echo "11. Update application only (code and database)"
+    echo "12. Set custom SSH key path"
+    echo "13. Fix and clean up .env file"
     echo "0. Exit"
     echo "======================================"
 }
@@ -185,10 +219,28 @@ show_menu() {
 step1() {
     print_step "Checking prerequisites and setup..."
     
+    # Display the expanded SSH path for debugging
+    print_message "Using SSH key: $SSH_KEY_PATH"
+    
     # Check if SSH key exists
     if [ ! -f "$SSH_KEY_PATH" ]; then
         print_error "SSH key not found at $SSH_KEY_PATH"
-        print_message "Generate an SSH key with: ssh-keygen -t ed25519"
+        print_message "Checking for alternative SSH keys..."
+        
+        # Check for other common SSH key names
+        if [ -f "$HOME/.ssh/id_rsa" ]; then
+            print_message "Found alternative key at $HOME/.ssh/id_rsa"
+            print_message "Please update the SSH_KEY_PATH in the script to use this key instead."
+        elif [ -f "$HOME/.ssh/id_ecdsa" ]; then
+            print_message "Found alternative key at $HOME/.ssh/id_ecdsa"
+            print_message "Please update the SSH_KEY_PATH in the script to use this key instead."
+        elif [ -f "$HOME/.ssh/id_dsa" ]; then
+            print_message "Found alternative key at $HOME/.ssh/id_dsa"
+            print_message "Please update the SSH_KEY_PATH in the script to use this key instead."
+        else
+            print_message "No SSH keys found in $HOME/.ssh/"
+            print_message "Generate an SSH key with: ssh-keygen -t ed25519"
+        fi
         return 1
     fi
     
@@ -241,14 +293,36 @@ step2() {
 step3() {
     print_step "Setting up PostgreSQL database (checking connection)..."
     
-    # Check database connectivity using values from .env
-    local db_url=$(grep "DATABASE_URL=" .env | cut -d '=' -f2-)
+    # Check database connectivity using values from .env - only use active, uncommented PostgreSQL URL
+    local db_url=$(grep "^DATABASE_URL=postgresql://" .env | head -n 1 | cut -d '=' -f2-)
     
-    # Try to connect to the database
+    if [ -z "$db_url" ]; then
+        print_error "No active PostgreSQL DATABASE_URL found in .env file"
+        print_message "Please uncomment or add a valid DATABASE_URL in your .env file."
+        print_message "Format should be: DATABASE_URL=postgresql://username:password@hostname:port/database"
+        return 1
+    fi
+    
+    print_message "Found PostgreSQL URL: ${db_url:0:40}... (truncated for security)"
+    
+    # Extract connection details for PostgreSQL client
+    local db_user=$(echo "$db_url" | sed -E 's/postgresql:\/\/([^:]*):([^@]*)@.*/\1/')
+    local db_password=$(echo "$db_url" | sed -E 's/postgresql:\/\/([^:]*):([^@]*)@.*/\2/')
+    local db_host=$(echo "$db_url" | sed -E 's/postgresql:\/\/[^@]*@([^:]*).*/\1/')
+    local db_port=$(echo "$db_url" | sed -E 's/.*:([0-9]+)\/.*/\1/')
+    local db_name=$(echo "$db_url" | sed -E 's/.*\/([^?]*).*/\1/')
+    
+    print_message "Extracted database connection details:"
+    print_message "- User: $db_user"
+    print_message "- Host: $db_host"
+    print_message "- Port: $db_port"
+    print_message "- Database: $db_name"
+    
+    # Try to connect to the database with the extracted values
     run_remote "apt-get install -y postgresql-client && \
                 echo 'Testing database connection...' && \
-                export PGPASSWORD=\$(echo '$db_url' | sed -E 's/.*:([^@]*)@.*/\1/') && \
-                psql \$(echo '$db_url' | sed -E 's/postgresql:\/\/([^:]*):([^@]*)@([^:]*):([^\/]*)\/([^?]*).*/\5 -h \3 -p \4 -U \1/') -c 'SELECT 1;' && \
+                export PGPASSWORD='$db_password' && \
+                psql -h $db_host -p $db_port -U $db_user -d $db_name -c 'SELECT 1;' && \
                 echo 'Database connection successful!'"
     
     if [ $? -ne 0 ]; then
@@ -538,10 +612,108 @@ update_app() {
     return 0
 }
 
+# Function to set custom SSH key path
+set_ssh_key_path() {
+    print_step "Setting custom SSH key path..."
+    echo "Current SSH key path: $SSH_KEY_PATH"
+    read -p "Enter the full path to your SSH key: " new_path
+    
+    if [ -f "$new_path" ]; then
+        SSH_KEY_PATH="$new_path"
+        print_message "SSH key path updated to: $SSH_KEY_PATH"
+    else
+        print_error "File not found: $new_path"
+        print_message "SSH key path remains: $SSH_KEY_PATH"
+    fi
+    return 0
+}
+
+# Function to fix .env file issues
+fix_env_file() {
+    print_step "Fixing .env file issues..."
+    
+    if [ ! -f ".env" ]; then
+        print_error ".env file not found."
+        return 1
+    fi
+    
+    # Create a temp file
+    local temp_env=$(mktemp)
+    
+    # First, copy all lines to temp file except commented DATABASE_URL lines
+    print_message "Cleaning up DATABASE_URL entries..."
+    grep -v "^#.*DATABASE_URL" .env > "$temp_env"
+    
+    # If we have multiple uncommented DATABASE_URL entries, keep only the PostgreSQL one
+    local url_count=$(grep -c "^DATABASE_URL=" "$temp_env")
+    if [ "$url_count" -gt 1 ]; then
+        print_message "Found multiple DATABASE_URL entries ($url_count), cleaning up..."
+        # First, save the PostgreSQL URL if it exists
+        local pg_url=$(grep "^DATABASE_URL=postgresql://" "$temp_env" | head -n 1)
+        
+        # If we found a PostgreSQL URL, replace all DATABASE_URL lines with just that one
+        if [ -n "$pg_url" ]; then
+            print_message "Found PostgreSQL URL, keeping this one as the active DATABASE_URL."
+            grep -v "^DATABASE_URL=" "$temp_env" > "$temp_env.new"
+            echo "$pg_url" >> "$temp_env.new"
+            mv "$temp_env.new" "$temp_env"
+        else
+            print_warning "No PostgreSQL DATABASE_URL found, keeping the first one."
+            local first_url=$(grep "^DATABASE_URL=" "$temp_env" | head -n 1)
+            grep -v "^DATABASE_URL=" "$temp_env" > "$temp_env.new"
+            echo "$first_url" >> "$temp_env.new"
+            mv "$temp_env.new" "$temp_env"
+        fi
+    fi
+    
+    # Ensure FLASK_APP is set to wsgi.py
+    if grep -q "^FLASK_APP=" "$temp_env"; then
+        sed -i.bak "s/^FLASK_APP=.*/FLASK_APP=wsgi.py/" "$temp_env" && rm -f "$temp_env.bak"
+    else
+        echo "FLASK_APP=wsgi.py" >> "$temp_env"
+    fi
+    
+    # Ensure FLASK_ENV is set to production
+    if grep -q "^FLASK_ENV=" "$temp_env"; then
+        sed -i.bak "s/^FLASK_ENV=.*/FLASK_ENV=production/" "$temp_env" && rm -f "$temp_env.bak"
+    else
+        echo "FLASK_ENV=production" >> "$temp_env"
+    fi
+    
+    # Ensure FLASK_DEBUG is set to 0
+    if grep -q "^FLASK_DEBUG=" "$temp_env"; then
+        sed -i.bak "s/^FLASK_DEBUG=.*/FLASK_DEBUG=0/" "$temp_env" && rm -f "$temp_env.bak"
+    else
+        echo "FLASK_DEBUG=0" >> "$temp_env"
+    fi
+    
+    # Show changes
+    echo "Proposed changes to .env file:"
+    diff -u .env "$temp_env" || echo "No differences or couldn't display diff"
+    
+    read -p "Apply these changes? (y/n) " apply_changes
+    if [[ $apply_changes == "y" ]]; then
+        # Backup original .env file
+        cp .env ".env.backup.$(date +%Y%m%d%H%M%S)"
+        print_message "Original .env file backed up."
+        
+        # Apply changes
+        cat "$temp_env" > .env
+        print_message "Changes applied to .env file."
+    else
+        print_warning "Changes not applied."
+    fi
+    
+    # Clean up
+    rm -f "$temp_env"
+    
+    return 0
+}
+
 # Main loop
 while true; do
     show_menu
-    read -p "Enter your choice (0-11): " choice
+    read -p "Enter your choice (0-13): " choice
     
     case $choice in
         1) step1 ;;
@@ -555,6 +727,8 @@ while true; do
         9) step9 ;;
         10) run_all ;;
         11) update_app ;;
+        12) set_ssh_key_path ;;
+        13) fix_env_file ;;
         0) exit 0 ;;
         *) print_error "Invalid choice. Please try again." ;;
     esac
