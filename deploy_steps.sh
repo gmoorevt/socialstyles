@@ -58,6 +58,10 @@ show_menu() {
     echo "13. Install PostgreSQL driver"
     echo "14. Run database migrations"
     echo "15. Full deploy with database setup"
+    echo "16. Update database only"
+    echo "17. Initialize migrations directory"
+    echo "18. Run migration diagnostics"
+    echo "19. Direct fix for migrations"
     echo "0. Exit"
     echo "=================================="
 }
@@ -102,10 +106,9 @@ step4() {
 # Step 5: Set up production environment
 step5() {
     print_message "Setting up production environment..."
-    print_message "Skipping .env file update as requested."
-    # The following lines are commented out to prevent updating the .env file
-    # copy_to_remote ".env.production" "$APP_DIR/.env"
-    # run_remote "chown $APP_NAME:www-data $APP_DIR/.env"
+    print_message "Uploading .env file..."
+    copy_to_remote ".env" "$APP_DIR/.env"
+    run_remote "chown $APP_NAME:www-data $APP_DIR/.env"
 }
 
 # Step 6: Initialize database
@@ -290,8 +293,22 @@ step13() {
                 sudo -u $APP_NAME venv/bin/pip install psycopg2-binary"
 }
 
+# Step 13b: Initialize migrations directory
+step13b() {
+    print_message "Checking and initializing migrations directory if needed..."
+    run_remote "cd $APP_DIR && \
+                if [ ! -f migrations/env.py ]; then \
+                  print_message 'Migrations directory not found or incomplete. Initializing...' && \
+                  sudo -u $APP_NAME venv/bin/flask db init && \
+                  chown -R $APP_NAME:www-data migrations; \
+                fi"
+}
+
 # Step 14: Run database migrations
 step14() {
+    print_message "Checking migrations directory first..."
+    step13b
+    
     print_message "Running database migrations..."
     run_remote "cd $APP_DIR && \
                 sudo -u $APP_NAME venv/bin/flask db upgrade"
@@ -312,6 +329,73 @@ step15() {
     step10 # Check deployment status
 }
 
+# Step 16: Update database only
+step16() {
+    print_message "Updating database only..."
+    step5  # Upload correct .env file
+    step13 # Install PostgreSQL driver
+    step14 # Run database migrations
+    print_message "Restarting application service..."
+    run_remote "systemctl restart socialstyles.service"
+    step10 # Check deployment status
+}
+
+# Step 17: Initialize migrations directory
+step17() {
+    print_message "Initializing migrations directory..."
+    step5  # Upload correct .env file
+    step13 # Install PostgreSQL driver
+    step13b # Initialize migrations
+    print_message "Migrations directory initialized successfully."
+}
+
+# Step 18: Run detailed migration diagnostics
+step18() {
+    print_message "Running detailed migration diagnostics..."
+    run_remote "cd $APP_DIR && \
+                echo '=== ENV FILE CONTENTS ===' && \
+                cat .env | grep -v SECRET && \
+                echo '=== PYTHON VERSION ===' && \
+                python3 --version && \
+                echo '=== APP STRUCTURE ===' && \
+                ls -la && \
+                echo '=== MIGRATIONS DIRECTORY ===' && \
+                ls -la migrations 2>/dev/null || echo 'Migrations directory does not exist' && \
+                echo '=== FLASK CONFIG ===' && \
+                sudo -u $APP_NAME venv/bin/python -c 'import os; print(\"FLASK_APP = \" + os.environ.get(\"FLASK_APP\", \"Not set\"))' && \
+                echo '=== MANUALLY INITIALIZING MIGRATIONS ===' && \
+                export FLASK_APP=wsgi.py && \
+                cd $APP_DIR && \
+                sudo -u $APP_NAME venv/bin/flask db init && \
+                echo '=== MIGRATIONS AFTER INIT ===' && \
+                ls -la migrations 2>/dev/null || echo 'Migrations directory still does not exist'"
+    
+    print_message "Diagnostics complete. Check the output for details."
+}
+
+# Step 19: Direct fix for migrations
+step19() {
+    print_message "Applying direct fix for migrations..."
+    run_remote "cd $APP_DIR && \
+                # Ensure correct environment variables are set
+                export FLASK_APP=wsgi.py && \
+                # Create migrations directory if it doesn't exist
+                mkdir -p migrations && \
+                chown -R $APP_NAME:www-data migrations && \
+                # Force initialize migrations
+                sudo -u $APP_NAME venv/bin/flask db init --force && \
+                # Create a blank migration
+                sudo -u $APP_NAME venv/bin/flask db migrate -m 'initial migration' && \
+                # Apply the migration
+                sudo -u $APP_NAME venv/bin/flask db upgrade && \
+                # Run application initialization
+                sudo -u $APP_NAME venv/bin/python initialize_assessment.py && \
+                # Restart the service
+                systemctl restart socialstyles.service"
+    
+    print_message "Direct migration fix applied."
+}
+
 # Run all steps
 run_all() {
     step1
@@ -329,7 +413,7 @@ run_all() {
 # Main loop
 while true; do
     show_menu
-    read -p "Enter your choice (0-15): " choice
+    read -p "Enter your choice (0-19): " choice
     
     case $choice in
         1) step1 ;;
@@ -347,6 +431,10 @@ while true; do
         13) step13 ;;
         14) step14 ;;
         15) step15 ;;
+        16) step16 ;;
+        17) step17 ;;
+        18) step18 ;;
+        19) step19 ;;
         0) exit 0 ;;
         *) print_error "Invalid choice. Please try again." ;;
     esac

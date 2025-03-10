@@ -42,6 +42,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+.pytest_cache/
 
 # Translations
 *.mo
@@ -78,6 +79,8 @@ celerybeat-schedule
 
 # Environments
 .env
+.env.local
+.env.production
 .venv
 env/
 venv/
@@ -101,6 +104,7 @@ venv.bak/
 # SQLite databases
 *.sqlite
 *.db
+*.sql
 
 # VS Code
 .vscode/
@@ -109,4 +113,13 @@ venv.bak/
 .idea/
 
 # macOS
-.DS_Store 
+.DS_Store
+
+# Virtual environment
+venv/
+virtualenv/
+
+# Application specific
+logs/
+uploads/
+tmp/ 
