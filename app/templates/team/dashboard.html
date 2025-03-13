@@ -215,6 +215,65 @@
             grid-template-columns: 1fr;
         }
     }
+    
+    /* Social styles grid styling for SVG-based grid */
+    .social-styles-grid-container {
+        position: relative;
+        max-width: 600px;
+        margin: 0 auto 1rem auto;
+    }
+    
+    .social-styles-grid {
+        position: relative;
+        width: 100%;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .social-styles-svg {
+        display: block;
+        background-color: white;
+    }
+    
+    .quadrant-label {
+        font-size: 16px;
+        font-weight: 700;
+    }
+    
+    .quadrant-bg[data-quadrant="ANALYTICAL"] {
+        fill: rgba(21, 101, 192, 0.03);
+    }
+    
+    .quadrant-bg[data-quadrant="DRIVER"] {
+        fill: rgba(198, 40, 40, 0.03);
+    }
+    
+    .quadrant-bg[data-quadrant="AMIABLE"] {
+        fill: rgba(46, 125, 50, 0.03);
+    }
+    
+    .quadrant-bg[data-quadrant="EXPRESSIVE"] {
+        fill: rgba(245, 124, 0, 0.03);
+    }
+    
+    .analytical-color {
+        color: #1565c0;
+    }
+    
+    .driver-color {
+        color: #c62828;
+    }
+    
+    .amiable-color {
+        color: #2e7d32;
+    }
+    
+    .expressive-color {
+        color: #f57c00;
+    }
+    
+    }
 </style>
 {% endblock %}
 
@@ -245,51 +304,107 @@
                 <h3 class="mb-0">Team Social Styles</h3>
             </div>
             <div class="card-body">
-                <div class="social-styles-grid">
-                    <!-- Grid lines -->
-                    <div class="grid-lines">
-                        {% for i in range(0, 10) %}
-                            {% for j in range(0, 10) %}
-                                <div class="grid-line"></div>
-                            {% endfor %}
-                        {% endfor %}
-                    </div>
-                    
-                    <!-- Axes -->
-                    <div class="axes">
-                        <div class="vertical-axis"></div>
-                        <div class="horizontal-axis"></div>
-                        
-                        <div class="axis-label assertiveness-high">HIGH ASSERTIVENESS</div>
-                        <div class="axis-label assertiveness-low">LOW ASSERTIVENESS</div>
-                        <div class="axis-label responsiveness-high">HIGH RESPONSIVENESS</div>
-                        <div class="axis-label responsiveness-low">LOW RESPONSIVENESS</div>
-                        
-                        <div class="quadrant-label driver-label">DRIVER</div>
-                        <div class="quadrant-label expressive-label">EXPRESSIVE</div>
-                        <div class="quadrant-label analytical-label">ANALYTICAL</div>
-                        <div class="quadrant-label amiable-label">AMIABLE</div>
-                    </div>
-                    
-                    <!-- Member Dots with Names -->
-                    {% for member in members %}
-                        {% if member.result %}
-                            {% set x = (member.result.responsiveness_score - 1) / 3 * 100 %}
-                            {% set y = 100 - ((member.result.assertiveness_score - 1) / 3 * 100) %}
-                            {% set style_class = member.result.social_style.lower() ~ "-dot" %}
-                            {% set name = member.user.name or member.user.email %}
-                            {% set short_name = name.split(' ')[0] if ' ' in name else name %}
+                <div class="social-styles-grid-container">
+                    <div class="social-styles-grid">
+                        <svg width="100%" height="100%" viewBox="0 0 400 400" class="social-styles-svg">
+                            <defs>
+                                <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.07" />
+                                </filter>
+                            </defs>
                             
-                            <div class="member-dot {{ style_class }}" style="left: {{ x }}%; top: {{ y }}%;" 
-                                 title="{{ name }}"></div>
-                            <div class="member-dot-label" style="left: {{ x }}%; top: {{ y + 6 }}%;">
-                                {{ short_name }}
-                            </div>
-                            <div class="member-name" style="left: {{ x }}%; top: {{ y }}%;">
-                                {{ name }}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
+                            <!-- Main background -->
+                            <rect x="0" y="0" width="400" height="400" fill="#ffffff" rx="4" ry="4" filter="url(#dropShadow)" />
+                            
+                            <!-- Grid background with subtle grid lines -->
+                            <g class="grid-background">
+                                <!-- Horizontal grid lines -->
+                                <line x1="50" y1="125" x2="350" y2="125" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                                <line x1="50" y1="275" x2="350" y2="275" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                                
+                                <!-- Vertical grid lines -->
+                                <line x1="125" y1="50" x2="125" y2="350" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                                <line x1="275" y1="50" x2="275" y2="350" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2" />
+                                
+                                <!-- Main axes -->
+                                <line x1="200" y1="50" x2="200" y2="350" stroke="#9e9e9e" stroke-width="1.5" />
+                                <line x1="50" y1="200" x2="350" y2="200" stroke="#9e9e9e" stroke-width="1.5" />
+                            </g>
+                            
+                            <!-- Quadrant backgrounds with solid colors -->
+                            <rect x="50" y="50" width="150" height="150" fill="#ffffff" stroke="#1565c0" stroke-width="2" stroke-opacity="0.9" rx="0" class="quadrant-bg" data-quadrant="ANALYTICAL" />
+                            <rect x="200" y="50" width="150" height="150" fill="#ffffff" stroke="#c62828" stroke-width="2" stroke-opacity="0.9" rx="0" class="quadrant-bg" data-quadrant="DRIVER" />
+                            <rect x="50" y="200" width="150" height="150" fill="#ffffff" stroke="#2e7d32" stroke-width="2" stroke-opacity="0.9" rx="0" class="quadrant-bg" data-quadrant="AMIABLE" />
+                            <rect x="200" y="200" width="150" height="150" fill="#ffffff" stroke="#f57c00" stroke-width="2" stroke-opacity="0.9" rx="0" class="quadrant-bg" data-quadrant="EXPRESSIVE" />
+                            
+                            <!-- Quadrant labels with professional styling -->
+                            <g class="quadrant-labels">
+                                <!-- Analytical -->
+                                <g class="quadrant-label-group" data-quadrant="ANALYTICAL">
+                                    <text x="125" y="80" text-anchor="middle" class="quadrant-label analytical-color">ANALYTICAL</text>
+                                </g>
+                                
+                                <!-- Driver -->
+                                <g class="quadrant-label-group" data-quadrant="DRIVER">
+                                    <text x="275" y="80" text-anchor="middle" class="quadrant-label driver-color">DRIVER</text>
+                                </g>
+                                
+                                <!-- Amiable -->
+                                <g class="quadrant-label-group" data-quadrant="AMIABLE">
+                                    <text x="125" y="230" text-anchor="middle" class="quadrant-label amiable-color">AMIABLE</text>
+                                </g>
+                                
+                                <!-- Expressive -->
+                                <g class="quadrant-label-group" data-quadrant="EXPRESSIVE">
+                                    <text x="275" y="230" text-anchor="middle" class="quadrant-label expressive-color">EXPRESSIVE</text>
+                                </g>
+                            </g>
+                            
+                            <!-- Simple axis labels -->
+                            <g class="axis-labels">
+                                <!-- Horizontal axis labels -->
+                                <text x="125" y="380" text-anchor="middle" font-size="14" font-weight="600">ASKS</text>
+                                <text x="275" y="380" text-anchor="middle" font-size="14" font-weight="600">TELLS</text>
+                                
+                                <!-- Vertical axis labels -->
+                                <text x="25" y="125" text-anchor="middle" transform="rotate(270,25,125)" font-size="14" font-weight="600">CONTROLS</text>
+                                <text x="25" y="275" text-anchor="middle" transform="rotate(270,25,275)" font-size="14" font-weight="600">EMOTES</text>
+                            </g>
+                            
+                            <!-- Member dots -->
+                            {% for member in members %}
+                                {% if member.result %}
+                                    {% set assertiveness = member.result.assertiveness_score %}
+                                    {% set responsiveness = member.result.responsiveness_score %}
+                                    
+                                    <!-- Clamp scores to 1-4 range -->
+                                    {% set assertiveness = [1, [assertiveness, 4]|min]|max %}
+                                    {% set responsiveness = [1, [responsiveness, 4]|min]|max %}
+                                    
+                                    <!-- Map scores to SVG coordinates (50-350 range) -->
+                                    {% set x = 50 + ((responsiveness - 1) / 3) * 300 %}
+                                    {% set y = 50 + ((4 - assertiveness) / 3) * 300 %}
+                                    
+                                    {% set style_class = member.result.social_style.lower() %}
+                                    {% set name = member.user.name or member.user.email %}
+                                    {% set short_name = name.split(' ')[0] if ' ' in name else name %}
+                                    
+                                    <g class="member-marker">
+                                        {% if style_class == "analytical" %}
+                                        <circle cx="{{ x }}" cy="{{ y }}" r="8" fill="#1565c0" stroke="white" stroke-width="2" />
+                                        {% elif style_class == "driver" %}
+                                        <circle cx="{{ x }}" cy="{{ y }}" r="8" fill="#c62828" stroke="white" stroke-width="2" />
+                                        {% elif style_class == "amiable" %}
+                                        <circle cx="{{ x }}" cy="{{ y }}" r="8" fill="#2e7d32" stroke="white" stroke-width="2" />
+                                        {% elif style_class == "expressive" %}
+                                        <circle cx="{{ x }}" cy="{{ y }}" r="8" fill="#f57c00" stroke="white" stroke-width="2" />
+                                        {% endif %}
+                                        <text x="{{ x }}" y="{{ y - 15 }}" text-anchor="middle" font-size="10" font-weight="bold">{{ short_name }}</text>
+                                    </g>
+                                {% endif %}
+                            {% endfor %}
+                        </svg>
+                    </div>
                 </div>
                 
                 <!-- Legend -->

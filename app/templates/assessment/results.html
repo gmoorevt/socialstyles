@@ -89,53 +89,47 @@
                                             </g>
                                             
                                             <!-- Quadrant backgrounds with solid colors -->
-                                            <rect x="50" y="50" width="150" height="150" fill="#ffffff" stroke="#2e7d32" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="AMIABLE" />
-                                            <rect x="200" y="50" width="150" height="150" fill="#ffffff" stroke="#f57c00" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="EXPRESSIVE" />
-                                            <rect x="50" y="200" width="150" height="150" fill="#ffffff" stroke="#1565c0" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="ANALYTICAL" />
-                                            <rect x="200" y="200" width="150" height="150" fill="#ffffff" stroke="#c62828" stroke-width="0.5" stroke-opacity="0.5" rx="0" class="quadrant-bg" data-quadrant="DRIVER" />
+                                            <rect x="50" y="50" width="150" height="150" fill="#ffffff" stroke="#1565c0" stroke-width="2" stroke-opacity="0.9" rx="0" class="quadrant-bg" data-quadrant="ANALYTICAL" />
+                                            <rect x="200" y="50" width="150" height="150" fill="#ffffff" stroke="#c62828" stroke-width="2" stroke-opacity="0.9" rx="0" class="quadrant-bg" data-quadrant="DRIVER" />
+                                            <rect x="50" y="200" width="150" height="150" fill="#ffffff" stroke="#2e7d32" stroke-width="2" stroke-opacity="0.9" rx="0" class="quadrant-bg" data-quadrant="AMIABLE" />
+                                            <rect x="200" y="200" width="150" height="150" fill="#ffffff" stroke="#f57c00" stroke-width="2" stroke-opacity="0.9" rx="0" class="quadrant-bg" data-quadrant="EXPRESSIVE" />
                                             
                                             <!-- Quadrant labels with professional styling -->
                                             <g class="quadrant-labels">
-                                                <!-- Amiable -->
-                                                <g class="quadrant-label-group" data-quadrant="AMIABLE">
-                                                    <text x="125" y="110" text-anchor="middle" class="quadrant-label amiable-color">AMIABLE</text>
-                                                    <text x="125" y="130" text-anchor="middle" class="quadrant-description">Supportive & Cooperative</text>
-                                                </g>
-                                                
-                                                <!-- Expressive -->
-                                                <g class="quadrant-label-group" data-quadrant="EXPRESSIVE">
-                                                    <text x="275" y="110" text-anchor="middle" class="quadrant-label expressive-color">EXPRESSIVE</text>
-                                                    <text x="275" y="130" text-anchor="middle" class="quadrant-description">Enthusiastic & Creative</text>
-                                                </g>
-                                                
                                                 <!-- Analytical -->
                                                 <g class="quadrant-label-group" data-quadrant="ANALYTICAL">
-                                                    <text x="125" y="260" text-anchor="middle" class="quadrant-label analytical-color">ANALYTICAL</text>
-                                                    <text x="125" y="280" text-anchor="middle" class="quadrant-description">Logical & Methodical</text>
+                                                    <text x="125" y="80" text-anchor="middle" class="quadrant-label analytical-color">ANALYTICAL</text>
+                                                    
                                                 </g>
                                                 
                                                 <!-- Driver -->
                                                 <g class="quadrant-label-group" data-quadrant="DRIVER">
-                                                    <text x="275" y="260" text-anchor="middle" class="quadrant-label driver-color">DRIVER</text>
-                                                    <text x="275" y="280" text-anchor="middle" class="quadrant-description">Direct & Decisive</text>
+                                                    <text x="275" y="80" text-anchor="middle" class="quadrant-label driver-color">DRIVER</text>
+                                                    
+                                                </g>
+                                                
+                                                <!-- Amiable -->
+                                                <g class="quadrant-label-group" data-quadrant="AMIABLE">
+                                                    <text x="125" y="230" text-anchor="middle" class="quadrant-label amiable-color">AMIABLE</text>
+                                                    
+                                                </g>
+                                                
+                                                <!-- Expressive -->
+                                                <g class="quadrant-label-group" data-quadrant="EXPRESSIVE">
+                                                    <text x="275" y="230" text-anchor="middle" class="quadrant-label expressive-color">EXPRESSIVE</text>
+                                                    
                                                 </g>
                                             </g>
                                             
-                                            <!-- Axis labels with arrows -->
+                                            <!-- Simple axis labels -->
                                             <g class="axis-labels">
-                                                <!-- Responsiveness (vertical) axis -->
-                                                <text x="200" y="30" text-anchor="middle" class="axis-label axis-title">RESPONSIVENESS</text>
-                                                <text x="125" y="40" text-anchor="middle" class="axis-label">High</text>
-                                                <text x="275" y="40" text-anchor="middle" class="axis-label">High</text>
-                                                <text x="125" y="370" text-anchor="middle" class="axis-label">Low</text>
-                                                <text x="275" y="370" text-anchor="middle" class="axis-label">Low</text>
+                                                <!-- Horizontal axis labels -->
+                                                <text x="125" y="380" text-anchor="middle" font-size="14" font-weight="600">ASKS</text>
+                                                <text x="275" y="380" text-anchor="middle" font-size="14" font-weight="600">TELLS</text>
                                                 
-                                                <!-- Assertiveness (horizontal) axis -->
-                                                <text x="30" y="200" text-anchor="middle" transform="rotate(270,30,200)" class="axis-label axis-title">ASSERTIVENESS</text>
-                                                <text x="40" y="125" text-anchor="middle" transform="rotate(270,40,125)" class="axis-label">Low</text>
-                                                <text x="40" y="275" text-anchor="middle" transform="rotate(270,40,275)" class="axis-label">Low</text>
-                                                <text x="370" y="125" text-anchor="middle" transform="rotate(90,370,125)" class="axis-label">High</text>
-                                                <text x="370" y="275" text-anchor="middle" transform="rotate(90,370,275)" class="axis-label">High</text>
+                                                <!-- Vertical axis labels -->
+                                                <text x="25" y="125" text-anchor="middle" transform="rotate(270,25,125)" font-size="14" font-weight="600">CONTROLS</text>
+                                                <text x="25" y="275" text-anchor="middle" transform="rotate(270,25,275)" font-size="14" font-weight="600">EMOTES</text>
                                             </g>
                                             
                                             <!-- User position marker will be added via JavaScript -->
@@ -636,17 +630,23 @@
         const assertivenessScore = parseFloat(resultData.dataset.assertiveness);
         const responsivenessScore = parseFloat(resultData.dataset.responsiveness);
         
-        // Calculate which quadrant the user falls into
+        // Calculate which quadrant the user falls into based on new ASKS/TELLS and CONTROLS/EMOTES axes
         const midpoint = 2.5;
         let quadrantName;
+        
+        // Map old values to new orientation:
+        // Low assertiveness (ASKS) + Low responsiveness (CONTROLS) = ANALYTICAL (top-left)
+        // High assertiveness (TELLS) + Low responsiveness (CONTROLS) = DRIVER (top-right)
+        // Low assertiveness (ASKS) + High responsiveness (EMOTES) = AMIABLE (bottom-left)
+        // High assertiveness (TELLS) + High responsiveness (EMOTES) = EXPRESSIVE (bottom-right)
         if (assertivenessScore < midpoint && responsivenessScore < midpoint) {
-            quadrantName = 'ANALYTICAL';
+            quadrantName = 'ANALYTICAL'; // ASKS + CONTROLS = top-left
         } else if (assertivenessScore >= midpoint && responsivenessScore < midpoint) {
-            quadrantName = 'DRIVER';
+            quadrantName = 'DRIVER'; // TELLS + CONTROLS = top-right
         } else if (assertivenessScore < midpoint && responsivenessScore >= midpoint) {
-            quadrantName = 'AMIABLE';
+            quadrantName = 'AMIABLE'; // ASKS + EMOTES = bottom-left
         } else {
-            quadrantName = 'EXPRESSIVE';
+            quadrantName = 'EXPRESSIVE'; // TELLS + EMOTES = bottom-right
         }
         
         // Highlight the active quadrant
@@ -663,16 +663,22 @@
         });
         
         // Map scores to SVG coordinates (50-350 range for both axes)
-        // For assertiveness (horizontal): 1=50, 4=350
-        // For responsiveness (vertical): 1=350, 4=50 (inverted because SVG y-axis is top-down)
+        // In the new layout:
+        // - Assertiveness (now ASKS/TELLS) is still on x-axis: 1=50 (ASKS), 4=350 (TELLS)
+        // - Responsiveness (now CONTROLS/EMOTES) is now y-axis: 1=50 (CONTROLS), 4=350 (EMOTES)
+        //   (Note the y-axis is flipped compared to old layout)
         
         // Ensure scores are within valid range (1-4)
         const clampedAssertiveness = Math.max(1, Math.min(4, assertivenessScore));
         const clampedResponsiveness = Math.max(1, Math.min(4, responsivenessScore));
         
-        // Calculate position with clamped values
+        // Calculate position with clamped values (new orientation)
+        // X position is still based on assertiveness (ASKS/TELLS)
         const xPosition = 50 + ((clampedAssertiveness - 1) / 3) * 300;
-        const yPosition = 350 - ((clampedResponsiveness - 1) / 3) * 300;
+        
+        // Y position is now based on responsiveness but with reverse mapping
+        // Low responsiveness (1) is top (y=50), high responsiveness (4) is bottom (y=350)
+        const yPosition = 50 + ((clampedResponsiveness - 1) / 3) * 300;
         
         // Update SVG marker position
         const userMarker = document.getElementById('user-marker');

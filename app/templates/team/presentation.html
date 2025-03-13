@@ -48,45 +48,23 @@
         }
         
         .grid-container {
-            flex-grow: 1;
-            padding: 2rem 2rem 3rem 2rem;
+            width: 70%;
+            padding: 2rem;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            max-height: 100vh;
-            overflow-y: auto;
         }
         
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .social-styles-grid-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 650px;
-            max-height: 70vh;
-            margin: 0 auto 3rem;
-        }
-        
-        .social-styles-grid-wrapper::before {
-            content: "";
-            display: block;
-            padding-bottom: 100%;
-        }
-        
+        /* Dashboard grid styles */
         .social-styles-grid {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 2px solid #ddd;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            overflow: hidden;
+            width: 90%;
+            max-width: 800px;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            border: 1px solid #ddd;
+            margin: 0 auto 1rem auto;
+            background-color: #f8f9fa;
         }
         
         .grid-lines {
@@ -111,7 +89,7 @@
         
         .vertical-axis {
             position: absolute;
-            width: 3px;
+            width: 2px;
             height: 100%;
             background-color: #000;
             left: 50%;
@@ -121,7 +99,7 @@
         .horizontal-axis {
             position: absolute;
             width: 100%;
-            height: 3px;
+            height: 2px;
             background-color: #000;
             top: 50%;
             transform: translateY(-50%);
@@ -130,29 +108,33 @@
         .axis-label {
             position: absolute;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .assertiveness-high {
-            top: 20px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
         }
         
         .assertiveness-low {
-            bottom: 20px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
         }
         
         .responsiveness-high {
-            right: 20px;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
         }
         
         .responsiveness-low {
-            left: 20px;
+            left: 10px;
             top: 50%;
             transform: translateY(-50%);
         }
@@ -160,29 +142,32 @@
         .quadrant-label {
             position: absolute;
             font-weight: bold;
-            font-size: 2rem;
-            color: rgba(0,0,0,0.7);
+            font-size: 1.5rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 4px;
+            z-index: 5;
         }
         
-        .driver-label {
+        .analytical-label {
             top: 25%;
             left: 25%;
             transform: translate(-50%, -50%);
         }
         
-        .expressive-label {
+        .driver-label {
             top: 25%;
             right: 25%;
             transform: translate(50%, -50%);
         }
         
-        .analytical-label {
+        .amiable-label {
             bottom: 25%;
             left: 25%;
             transform: translate(-50%, 50%);
         }
         
-        .amiable-label {
+        .expressive-label {
             bottom: 25%;
             right: 25%;
             transform: translate(50%, 50%);
@@ -190,213 +175,330 @@
         
         .member-dot {
             position: absolute;
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            border: 3px solid #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            border: 2px solid #fff;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
             transform: translate(-50%, -50%);
             transition: all 0.3s ease;
+            z-index: 5;
+            cursor: pointer;
+        }
+        
+        .member-dot:hover {
+            width: 22px;
+            height: 22px;
+            z-index: 100;
         }
         
         .member-name {
             position: absolute;
-            background-color: rgba(255,255,255,0.9);
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.9rem;
             white-space: nowrap;
-            z-index: 10;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transform: translate(-50%, -100%);
-            margin-top: -15px;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease;
+            z-index: 4;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            pointer-events: none;
         }
         
-        .driver-dot {
-            background-color: #dc3545; /* red */
-        }
-        
-        .expressive-dot {
-            background-color: #fd7e14; /* orange */
-        }
-        
-        .analytical-dot {
-            background-color: #0d6efd; /* blue */
-        }
-        
-        .amiable-dot {
-            background-color: #198754; /* green */
-        }
-        
-        .legend {
-            display: flex;
-            justify-content: center;
-            margin-top: 2rem;
-            margin-bottom: 1.5rem;
-            background-color: white;
-            padding: 1rem;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin: 0 1rem;
-            font-size: 1.2rem;
-        }
-        
-        .legend-dot {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-right: 8px;
-            border: 2px solid white;
-            box-shadow: 0 0 5px rgba(0,0,0,0.3);
-        }
-        
-        .join-text {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-        
-        .instruction-text {
-            font-size: 1.2rem;
+        .team-info {
+            text-align: center;
             margin-bottom: 2rem;
         }
         
-        .team-name {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
+        .join-instructions {
+            text-align: center;
+            margin-top: 1rem;
         }
         
-        .refresh-button {
-            position: absolute;
-            bottom: 1rem;
-            right: 1rem;
-            z-index: 100;
+        .shake-animation {
+            animation: shake 0.5s;
         }
         
-        @media (max-width: 992px) {
-            .presentation-container {
-                flex-direction: column;
-            }
-            
-            .qr-sidebar {
-                width: 100%;
-                height: 40vh;
-            }
-            
-            .qr-code {
-                max-width: 200px;
-            }
+        @keyframes shake {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            25% { transform: translate(-50%, -50%) rotate(5deg); }
+            50% { transform: translate(-50%, -50%) rotate(0deg); }
+            75% { transform: translate(-50%, -50%) rotate(-5deg); }
+            100% { transform: translate(-50%, -50%) rotate(0deg); }
         }
         
-        @media (max-height: 800px) {
-            .social-styles-grid-wrapper {
-                max-height: 60vh;
-                margin-bottom: 2rem;
-            }
-            
-            .grid-container {
-                padding-bottom: 4rem;
-            }
+        .member-added {
+            animation: pulse 1s;
+        }
+        
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.5); }
+            100% { transform: translate(-50%, -50%) scale(1); }
         }
     </style>
 </head>
 <body>
     <div class="presentation-container">
-        <!-- QR Code Sidebar -->
         <div class="qr-sidebar">
-            <h2 class="join-text">Join Our Team</h2>
-            <p class="instruction-text">Scan this QR code to join our team and complete your assessment</p>
+            <h2>Join the Team</h2>
+            <p>Scan this QR code with your mobile device to join the team and take the assessment</p>
             
             <div class="qr-code">
-                <img src="data:image/png;base64,{{ qr_image }}" alt="Team Join QR Code">
+                <img src="data:image/png;base64,{{ qr_image }}" alt="QR Code for joining team">
             </div>
             
-            <p class="mt-3">Or visit: <br><strong>{{ join_url }}</strong></p>
+            <div class="join-instructions">
+                <p>Or visit:</p>
+                <a href="{{ join_url }}" class="text-light">{{ join_url }}</a>
+            </div>
         </div>
         
-        <!-- Social Styles Grid -->
         <div class="grid-container">
-            <div class="header">
-                <h1 class="team-name">{{ team.name }} Social Styles</h1>
-                <p class="text-muted">{{ members|length }} team members with assessment results</p>
+            <div class="team-info">
+                <h1>{{ team.name }}</h1>
+                <p>{{ team.description }}</p>
             </div>
             
-            <div class="social-styles-grid-wrapper">
-                <div class="social-styles-grid">
-                    <!-- Grid lines -->
-                    <div class="grid-lines">
-                        {% for i in range(0, 10) %}
-                            {% for j in range(0, 10) %}
-                                <div class="grid-line"></div>
-                            {% endfor %}
+            <div class="social-styles-grid">
+                <!-- Grid lines -->
+                <div class="grid-lines">
+                    {% for i in range(10) %}
+                        {% for j in range(10) %}
+                            <div class="grid-line"></div>
                         {% endfor %}
-                    </div>
-                    
-                    <!-- Axes -->
-                    <div class="axes">
-                        <div class="vertical-axis"></div>
-                        <div class="horizontal-axis"></div>
-                        
-                        <div class="axis-label assertiveness-high">HIGH ASSERTIVENESS</div>
-                        <div class="axis-label assertiveness-low">LOW ASSERTIVENESS</div>
-                        <div class="axis-label responsiveness-high">HIGH RESPONSIVENESS</div>
-                        <div class="axis-label responsiveness-low">LOW RESPONSIVENESS</div>
-                        
-                        <div class="quadrant-label driver-label">DRIVER</div>
-                        <div class="quadrant-label expressive-label">EXPRESSIVE</div>
-                        <div class="quadrant-label analytical-label">ANALYTICAL</div>
-                        <div class="quadrant-label amiable-label">AMIABLE</div>
-                    </div>
-                    
-                    <!-- Member Dots -->
-                    {% for member in members %}
-                        {% if member.result %}
-                            {% set x = (member.result.responsiveness_score - 1) / 3 * 100 %}
-                            {% set y = 100 - ((member.result.assertiveness_score - 1) / 3 * 100) %}
-                            {% set style_class = member.result.social_style.lower() ~ "-dot" %}
-                            
-                            <div class="member-dot {{ style_class }}" style="left: {{ x }}%; top: {{ y }}%;"></div>
-                            <div class="member-name" style="left: {{ x }}%; top: {{ y }}%;">
-                                {{ member.user.name or member.user.email }}
-                            </div>
-                        {% endif %}
                     {% endfor %}
+                </div>
+                
+                <!-- Axes -->
+                <div class="axes">
+                    <div class="vertical-axis"></div>
+                    <div class="horizontal-axis"></div>
                     
-                    <!-- Refresh Button -->
-                    <a href="javascript:location.reload()" class="btn btn-primary refresh-button">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </a>
+                    <!-- Axis labels -->
+                    <div class="axis-label assertiveness-high">CONTROLS</div>
+                    <div class="axis-label assertiveness-low">EMOTES</div>
+                    <div class="axis-label responsiveness-high">TELLS</div>
+                    <div class="axis-label responsiveness-low">ASKS</div>
                 </div>
-            </div>
-            
-            <!-- Legend -->
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-dot driver-dot"></div> Driver
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot expressive-dot"></div> Expressive
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot analytical-dot"></div> Analytical
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot amiable-dot"></div> Amiable
+                
+                <!-- Quadrant labels -->
+                <div class="quadrant-label analytical-label">Analytical</div>
+                <div class="quadrant-label driver-label">Driver</div>
+                <div class="quadrant-label amiable-label">Amiable</div>
+                <div class="quadrant-label expressive-label">Expressive</div>
+                
+                <!-- Team members -->
+                <div id="team-members">
+                    {% for member in members %}
+                    {% set assertiveness = member.result.assertiveness_score %}
+                    {% set responsiveness = member.result.responsiveness_score %}
+                    
+                    <!-- Clamp scores to 1-4 range and map to position -->
+                    {% set assertiveness = [1, [assertiveness, 4]|min]|max %}
+                    {% set responsiveness = [1, [responsiveness, 4]|min]|max %}
+                    
+                    <!-- Map to 0-100% for positioning (reversed for assertiveness) -->
+                    {% set x_pos = (responsiveness - 1) / 3 * 100 %}
+                    {% set y_pos = (4 - assertiveness) / 3 * 100 %}
+                    
+                    <!-- Map the scores to quadrants for color coding -->
+                    {% if assertiveness >= 2.5 and responsiveness < 2.5 %}
+                        {% set color = "#c62828" %} <!-- Driver: Red (top-right) -->
+                        {% set style = "DRIVER" %}
+                    {% elif assertiveness >= 2.5 and responsiveness >= 2.5 %}
+                        {% set color = "#f57c00" %} <!-- Expressive: Orange (bottom-right) -->
+                        {% set style = "EXPRESSIVE" %}
+                    {% elif assertiveness < 2.5 and responsiveness < 2.5 %}
+                        {% set color = "#1565c0" %} <!-- Analytical: Blue (top-left) -->
+                        {% set style = "ANALYTICAL" %}
+                    {% else %}
+                        {% set color = "#2e7d32" %} <!-- Amiable: Green (bottom-left) -->
+                        {% set style = "AMIABLE" %}
+                    {% endif %}
+                    
+                    <div class="member-dot" 
+                         id="member-{{ member.user.id }}"
+                         style="left: {{ x_pos }}%; top: {{ y_pos }}%; background-color: {{ color }};"
+                         data-user-id="{{ member.user.id }}"
+                         data-assertiveness="{{ assertiveness }}"
+                         data-responsiveness="{{ responsiveness }}"
+                         title="{{ member.user.name }}"></div>
+                    
+                    <div class="member-name" 
+                         id="name-{{ member.user.id }}"
+                         style="left: {{ x_pos }}%; top: {{ y_pos + 5 }}%;">
+                        {{ member.user.name }}
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
     
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
     <script>
-        // Auto-refresh the page every 2 minutes to show new results
-        setTimeout(function() {
-            location.reload();
-        }, 120000);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Connect to the WebSocket server
+            const socket = io();
+            const teamId = '{{ team_id }}';
+            
+            // Join the team-specific room
+            socket.on('connect', function() {
+                socket.emit('join', {room: `team_${teamId}`});
+                console.log('Connected to WebSocket server');
+            });
+            
+            // Listen for new assessment results
+            socket.on('new_assessment_result', function(data) {
+                console.log('New assessment result received:', data);
+                
+                if (data.team_id == teamId) {
+                    // Check if this user already has a dot
+                    const existingDot = document.getElementById(`member-${data.user_id}`);
+                    
+                    if (existingDot) {
+                        // Update existing dot
+                        updateMemberPosition(
+                            existingDot, 
+                            data.assertiveness_score, 
+                            data.responsiveness_score,
+                            data.user_name
+                        );
+                        
+                        // Add shake animation
+                        existingDot.classList.add('shake-animation');
+                        setTimeout(() => {
+                            existingDot.classList.remove('shake-animation');
+                        }, 500);
+                    } else {
+                        // Add new dot
+                        addNewMember(
+                            data.user_id,
+                            data.user_name,
+                            data.assertiveness_score,
+                            data.responsiveness_score
+                        );
+                    }
+                }
+            });
+            
+            // Function to update member position
+            function updateMemberPosition(dotElement, assertiveness, responsiveness, name) {
+                // Clamp scores to 1-4 range
+                assertiveness = Math.max(1, Math.min(parseFloat(assertiveness), 4));
+                responsiveness = Math.max(1, Math.min(parseFloat(responsiveness), 4));
+                
+                // Calculate new position based on 1-4 scale
+                const xPos = ((responsiveness - 1) / 3) * 100;
+                const yPos = ((4 - assertiveness) / 3) * 100;
+                
+                // Map the scores to quadrants for color coding
+                let color;
+                let style;
+                
+                if (assertiveness >= 2.5 && responsiveness < 2.5) {
+                    color = "#c62828"; // Driver: Red (top-right)
+                    style = "DRIVER";
+                } else if (assertiveness >= 2.5 && responsiveness >= 2.5) {
+                    color = "#f57c00"; // Expressive: Orange (bottom-right)
+                    style = "EXPRESSIVE";
+                } else if (assertiveness < 2.5 && responsiveness < 2.5) {
+                    color = "#1565c0"; // Analytical: Blue (top-left)
+                    style = "ANALYTICAL";
+                } else {
+                    color = "#2e7d32"; // Amiable: Green (bottom-left)
+                    style = "AMIABLE";
+                }
+                
+                // Update dot
+                dotElement.style.left = `${xPos}%`;
+                dotElement.style.top = `${yPos}%`;
+                dotElement.style.backgroundColor = color;
+                dotElement.setAttribute('data-assertiveness', assertiveness);
+                dotElement.setAttribute('data-responsiveness', responsiveness);
+                
+                // Update name label
+                const nameLabel = document.getElementById(`name-${dotElement.getAttribute('data-user-id')}`);
+                if (nameLabel) {
+                    nameLabel.style.left = `${xPos}%`;
+                    nameLabel.style.top = `${yPos + 5}%`;
+                    nameLabel.textContent = name;
+                }
+            }
+            
+            // Function to add a new member dot
+            function addNewMember(userId, name, assertiveness, responsiveness) {
+                const teamMembers = document.getElementById('team-members');
+                
+                // Clamp scores to 1-4 range
+                assertiveness = Math.max(1, Math.min(parseFloat(assertiveness), 4));
+                responsiveness = Math.max(1, Math.min(parseFloat(responsiveness), 4));
+                
+                // Calculate position based on 1-4 scale
+                const xPos = ((responsiveness - 1) / 3) * 100;
+                const yPos = ((4 - assertiveness) / 3) * 100;
+                
+                // Map the scores to quadrants for color coding
+                let color;
+                let style;
+                
+                if (assertiveness >= 2.5 && responsiveness < 2.5) {
+                    color = "#c62828"; // Driver: Red (top-right)
+                    style = "DRIVER";
+                } else if (assertiveness >= 2.5 && responsiveness >= 2.5) {
+                    color = "#f57c00"; // Expressive: Orange (bottom-right)
+                    style = "EXPRESSIVE";
+                } else if (assertiveness < 2.5 && responsiveness < 2.5) {
+                    color = "#1565c0"; // Analytical: Blue (top-left)
+                    style = "ANALYTICAL";
+                } else {
+                    color = "#2e7d32"; // Amiable: Green (bottom-left)
+                    style = "AMIABLE";
+                }
+                
+                // Create new dot
+                const dot = document.createElement('div');
+                dot.className = 'member-dot member-added';
+                dot.id = `member-${userId}`;
+                dot.style.left = `${xPos}%`;
+                dot.style.top = `${yPos}%`;
+                dot.style.backgroundColor = color;
+                dot.setAttribute('data-user-id', userId);
+                dot.setAttribute('data-assertiveness', assertiveness);
+                dot.setAttribute('data-responsiveness', responsiveness);
+                dot.title = name;
+                
+                // Create name label
+                const nameLabel = document.createElement('div');
+                nameLabel.className = 'member-name';
+                nameLabel.id = `name-${userId}`;
+                nameLabel.style.left = `${xPos}%`;
+                nameLabel.style.top = `${yPos + 5}%`;
+                nameLabel.textContent = name;
+                
+                // Add to the DOM
+                teamMembers.appendChild(dot);
+                teamMembers.appendChild(nameLabel);
+            }
+            
+            // Add hover effect for member dots
+            document.querySelectorAll('.member-dot').forEach(dot => {
+                dot.addEventListener('mouseenter', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    document.getElementById(`name-${userId}`).style.opacity = '1';
+                    document.getElementById(`name-${userId}`).style.zIndex = '10';
+                });
+                
+                dot.addEventListener('mouseleave', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    document.getElementById(`name-${userId}`).style.opacity = '0.8';
+                    document.getElementById(`name-${userId}`).style.zIndex = '4';
+                });
+            });
+        });
     </script>
 </body>
 </html> 
