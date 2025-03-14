@@ -2,6 +2,7 @@
 
 # Social Styles Assessment - Improved DigitalOcean Deployment Script
 # This script provides a streamlined process for deploying the application to DigitalOcean
+# Version 2.0: Now with WebSocket support for real-time updates
 
 # Configuration - MODIFY THESE VALUES
 DROPLET_IP="159.89.95.194"
@@ -428,6 +429,12 @@ server {
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
         
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400;
+        
         # Cloudflare specific headers
         proxy_set_header CF-Connecting-IP \$http_cf_connecting_ip;
         proxy_set_header CF-IPCountry \$http_cf_ipcountry;
@@ -438,6 +445,19 @@ server {
     location /static {
         alias $APP_DIR/app/static;
         expires 30d;
+    }
+    
+    location /socket.io {
+        proxy_pass http://127.0.0.1:8000/socket.io;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_buffering off;
+        proxy_read_timeout 86400;
     }
 }
 EOF
@@ -470,7 +490,8 @@ User=$APP_NAME
 Group=www-data
 WorkingDirectory=$APP_DIR
 Environment="PATH=$APP_DIR/venv/bin"
-ExecStart=$APP_DIR/venv/bin/gunicorn -c gunicorn_config.py wsgi:app
+# Using gunicorn with eventlet worker class for WebSocket support
+ExecStart=$APP_DIR/venv/bin/gunicorn -k eventlet -c gunicorn_config.py wsgi:app
 Restart=always
 RestartSec=5
 StartLimitIntervalSec=0
@@ -525,8 +546,14 @@ step9() {
     run_remote "systemctl status nginx --no-pager && \
                 nginx -t"
     
+    # Check if Gunicorn is running with eventlet worker
+    run_remote "ps aux | grep gunicorn | grep eventlet || echo 'Warning: Gunicorn may not be using eventlet worker'"
+    
     # Try to access the application
     run_remote "curl -I http://localhost:8000/ || echo 'Warning: Could not access application directly'"
+    
+    # Test WebSocket endpoint (will just check if it returns 400 which is good - means it's ready for WebSocket handshake)
+    run_remote "curl -I http://localhost:8000/socket.io/ || echo 'Warning: Could not access WebSocket endpoint'"
     
     print_message "Deployment test completed!"
     echo
@@ -538,6 +565,7 @@ step9() {
     print_message "2. Add an A record for www pointing to $DROPLET_IP"
     print_message "3. Set SSL/TLS encryption mode to Full"
     print_message "4. Enable Always Use HTTPS in Edge Certificates section"
+    print_message "5. In Network tab, ensure WebSockets are allowed and not blocked"
     
     return 0
 }
@@ -603,10 +631,16 @@ update_app() {
     # Run database migrations
     run_remote "cd $APP_DIR && \
                 export FLASK_APP=wsgi.py && \
+                sudo -u $APP_NAME venv/bin/flask db migrate -m 'update migration' && \
                 sudo -u $APP_NAME venv/bin/flask db upgrade"
     
-    # Restart service
-    run_remote "systemctl restart socialstyles.service"
+    # Make sure eventlet is installed (for WebSocket support)
+    run_remote "cd $APP_DIR && \
+                sudo -u $APP_NAME venv/bin/pip install eventlet flask-socketio"
+    
+    # Restart services
+    run_remote "systemctl restart socialstyles.service && \
+                systemctl restart nginx"
     
     print_message "Application updated successfully!"
     return 0

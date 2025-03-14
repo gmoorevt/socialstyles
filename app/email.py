@@ -29,7 +29,12 @@ def send_email(to, subject, template, **kwargs):
     aws_region = os.environ.get('AWS_REGION')
     aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    sender_email = os.environ.get('MAIL_DEFAULT_SENDER')    
+    sender_email = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@teamsocialstyles.com')    
+    
+    # Ensure we have a sender email
+    if not sender_email:
+        sender_email = 'noreply@teamsocialstyles.com'
+        logger.warning("MAIL_DEFAULT_SENDER not set, using default: noreply@teamsocialstyles.com")
     
     # Render the email templates
     text_body = render_template(f'{template}.txt', **kwargs)

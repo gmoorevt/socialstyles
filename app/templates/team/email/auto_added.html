@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Membership Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>You've Been Added to a Team!</h1>
+        </div>
+        
+        <p>Hello,</p>
+        
+        <p>You have been added to the <strong>{{ team.name }}</strong> team on the Social Styles Assessment platform.</p>
+        
+        {% if team.description %}
+        <p><strong>Team Description:</strong> {{ team.description }}</p>
+        {% endif %}
+        
+        <p>As a team member, you'll be able to:</p>
+        <ul>
+            <li>Complete your own social styles assessment</li>
+            <li>View your team's collective social styles on an interactive dashboard</li>
+            <li>Gain insights into how your team collaborates and communicates</li>
+        </ul>
+        
+        <p>Ready to get started? Click the button below to access the team:</p>
+        
+        <div style="text-align: center;">
+            <a href="{{ token_url }}" class="btn">Go to Team</a>
+        </div>
+        
+        <p style="margin-top: 20px;">If the button doesn't work, you can copy and paste this link into your browser:</p>
+        <p style="word-break: break-all;"><a href="{{ token_url }}">{{ token_url }}</a></p>
+    </div>
+    
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+    </div>
+</body>
+</html> 

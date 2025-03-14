@@ -12,8 +12,8 @@ bind = os.getenv("GUNICORN_BIND", "0.0.0.0:8000")
 # For production, use (2 * CPU cores) + 1
 workers = int(os.getenv("GUNICORN_WORKERS", multiprocessing.cpu_count() * 2 + 1))
 
-# Worker class - use sync for development, gevent or uvicorn for production
-worker_class = os.getenv("GUNICORN_WORKER_CLASS", "sync")
+# Worker class - use eventlet for WebSocket support
+worker_class = os.getenv("GUNICORN_WORKER_CLASS", "eventlet")
 
 # Maximum number of simultaneous clients
 max_requests = 1000

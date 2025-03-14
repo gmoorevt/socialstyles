@@ -2,6 +2,27 @@ from datetime import datetime, timedelta
 import uuid
 from app import db
 from flask import url_for
+import string
+import random
+
+# Base62 encoding for team links
+BASE62_CHARS = string.ascii_uppercase + string.ascii_lowercase + string.digits
+
+def base62_encode(num):
+    """Encode a number to Base62"""
+    if num == 0:
+        return BASE62_CHARS[0]
+    
+    arr = []
+    base = len(BASE62_CHARS)
+    
+    while num:
+        remainder = num % base
+        num //= base
+        arr.append(BASE62_CHARS[remainder])
+    
+    arr.reverse()
+    return ''.join(arr)
 
 # Association table for team memberships
 class TeamMember(db.Model):
@@ -64,12 +85,15 @@ class Team(db.Model):
     
     def get_join_url(self):
         """Get the URL for joining this team"""
-        return url_for('team.join', token=self.generate_join_token(), _external=True)
+        return url_for('team.quick_join', token=self.generate_join_token(), _external=True)
     
     def generate_join_token(self):
-        """Generate a token for joining the team"""
-        # Simple UUID-based token, could be enhanced with JWT if needed
-        return str(uuid.uuid4())
+        """Generate a Base62 token for joining the team"""
+        # Base62 encoding of team_id and a random component for security
+        random_component = random.randint(1000000, 9999999)
+        encoded_id = base62_encode(self.id)
+        encoded_random = base62_encode(random_component)
+        return f"{encoded_id}-{encoded_random}-{self.name.replace(' ', '_')}"
     
     def __repr__(self):
         return f'<Team {self.name}>'
@@ -81,7 +105,7 @@ class TeamInvite(db.Model):
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'), nullable=False)
     email = db.Column(db.String(120), nullable=False)
     token = db.Column(db.String(255), unique=True, nullable=False, index=True)
-    status = db.Column(db.String(20), default='pending')  # 'pending', 'accepted', 'rejected', 'expired'
+    status = db.Column(db.String(20), default='pending')  # 'pending', 'accepted', 'rejected', 'expired', 'auto_accepted'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     expires_at = db.Column(db.DateTime)
     

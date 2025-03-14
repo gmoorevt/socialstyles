@@ -1,4 +1,4 @@
-Version: 1.2.0
+Version: 1.3.0
 Release Date: March 8, 2025
 Description: Initial production deployment with Cloudflare integration
 

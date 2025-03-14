@@ -1,0 +1,20 @@
+You've Been Added to a Team!
+
+Hello,
+
+You have been added to the {{ team.name }} team on the Social Styles Assessment platform.
+
+{% if team.description %}
+Team Description: {{ team.description }}
+{% endif %}
+
+As a team member, you'll be able to:
+* Complete your own social styles assessment
+* View your team's collective social styles on an interactive dashboard
+* Gain insights into how your team collaborates and communicates
+
+Ready to get started? Access the team by visiting this link: 
+{{ token_url }}
+
+---
+This is an automated message. Please do not reply to this email. 

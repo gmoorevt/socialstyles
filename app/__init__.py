@@ -66,6 +66,10 @@ def create_app(config_name=None):
     from app.team import team as team_blueprint
     app.register_blueprint(team_blueprint, url_prefix='/team')
     
+    # Initialize WebSockets
+    from app.websockets import init_websockets, socketio
+    init_websockets(app)
+    
     # Register custom commands
     from app.commands import register_commands
     register_commands(app)

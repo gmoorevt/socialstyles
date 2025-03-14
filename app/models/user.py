@@ -17,6 +17,7 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)  # Track last login time
     is_admin = db.Column(db.Boolean, default=False)  # Admin flag
+    is_anonymous_assessment = db.Column(db.Boolean, default=False)  # Flag for users created from anonymous assessments
     
     # Relationship with assessment results
     assessment_results = db.relationship('AssessmentResult', backref='user', lazy='dynamic')

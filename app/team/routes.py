@@ -16,12 +16,10 @@ def list_teams():
     """List all teams for the current user"""
     user_teams = current_user.get_teams()
     owned_teams = current_user.owned_teams.all()
-    pending_invites = TeamInvite.query.filter_by(email=current_user.email, status='pending').all()
     
     return render_template('team/teams.html', 
                           user_teams=user_teams,
                           owned_teams=owned_teams,
-                          pending_invites=pending_invites,
                           title='My Teams')
 
 @team.route('/teams/create', methods=['GET', 'POST'])
@@ -86,13 +84,12 @@ def view_team(team_id):
             'latest_result': latest_result
         })
     
-    pending_invites = team.invites.filter_by(status='pending').all()
+    # Note: No longer displaying pending invites as they're auto-accepted
     is_owner = team.is_owner(current_user)
     
     return render_template('team/view_team.html',
                           team=team,
                           members=team_members,
-                          pending_invites=pending_invites,
                           is_owner=is_owner,
                           title=team.name)
 
@@ -109,6 +106,7 @@ def invite_members(team_id):
     form = InviteMembersForm()
     if form.validate_on_submit():
         emails = [email.strip() for email in form.emails.data.split(',')]
+        users_added = 0
         invites_sent = 0
         
         for email in emails:
@@ -119,30 +117,41 @@ def invite_members(team_id):
                     flash(f'{email} is already a member of this team.', 'info')
                     continue
                 
-                # Check if invitation already exists
-                existing_invite = TeamInvite.query.filter_by(
-                    team_id=team.id, 
-                    email=email, 
-                    status='pending'
-                ).first()
-                
-                if existing_invite:
-                    flash(f'An invitation for {email} is already pending.', 'info')
-                    continue
-                
-                # Create and send invitation
-                invite = TeamInvite(
-                    team_id=team.id,
-                    email=email,
-                )
-                db.session.add(invite)
-                send_team_invitation(invite)
-                invites_sent += 1
+                # If user exists, add them directly to the team
+                if user:
+                    team.add_member(user)
+                    users_added += 1
+                    # Send notification email
+                    send_team_notification(team, user.email)
+                else:
+                    # Check if invitation already exists
+                    existing_invite = TeamInvite.query.filter_by(
+                        team_id=team.id, 
+                        email=email, 
+                        status='pending'
+                    ).first()
+                    
+                    if existing_invite:
+                        flash(f'An invitation for {email} is already pending.', 'info')
+                        continue
+                    
+                    # Create and send invitation for users who don't have accounts yet
+                    invite = TeamInvite(
+                        team_id=team.id,
+                        email=email,
+                        status='auto_accepted'  # Mark as auto-accepted
+                    )
+                    db.session.add(invite)
+                    send_team_invitation(invite)
+                    invites_sent += 1
         
         db.session.commit()
         
+        if users_added > 0:
+            flash(f'{users_added} users have been added to the team!', 'success')
+        
         if invites_sent > 0:
-            flash(f'{invites_sent} invitations sent successfully!', 'success')
+            flash(f'{invites_sent} invitations sent to users who don\'t have accounts yet.', 'success')
         
         return redirect(url_for('team.view_team', team_id=team.id))
     
@@ -150,48 +159,6 @@ def invite_members(team_id):
                           team=team,
                           form=form,
                           title=f'Invite to {team.name}')
-
-@team.route('/invites/<token>/accept')
-@login_required
-def accept_invite(token):
-    """Accept a team invitation"""
-    invite = TeamInvite.query.filter_by(token=token).first_or_404()
-    
-    if invite.status != 'pending':
-        flash('This invitation has already been processed.', 'info')
-        return redirect(url_for('team.list_teams'))
-    
-    if invite.is_expired:
-        flash('This invitation has expired.', 'danger')
-        return redirect(url_for('team.list_teams'))
-    
-    if invite.email != current_user.email:
-        flash('This invitation was sent to a different email address.', 'danger')
-        return redirect(url_for('team.list_teams'))
-    
-    if invite.accept(current_user):
-        db.session.commit()
-        flash('You have successfully joined the team!', 'success')
-        return redirect(url_for('team.view_team', team_id=invite.team_id))
-    else:
-        flash('Failed to join the team. Please try again.', 'danger')
-        return redirect(url_for('team.list_teams'))
-
-@team.route('/invites/<token>/reject')
-@login_required
-def reject_invite(token):
-    """Reject a team invitation"""
-    invite = TeamInvite.query.filter_by(token=token).first_or_404()
-    
-    if invite.email != current_user.email:
-        flash('This invitation was sent to a different email address.', 'danger')
-        return redirect(url_for('team.list_teams'))
-    
-    if invite.reject():
-        db.session.commit()
-        flash('Invitation rejected.', 'info')
-    
-    return redirect(url_for('team.list_teams'))
 
 @team.route('/teams/<int:team_id>/dashboard')
 @login_required
@@ -214,8 +181,9 @@ def team_dashboard(team_id):
                 'result': latest_result
             })
     
-    # Generate the team join QR code - now points to quick-join route
-    join_url = url_for('team.quick_join', team_id=team.id, _external=True)
+    # Generate the team join QR code with Base62 token
+    token = team.generate_join_token()
+    join_url = url_for('team.quick_join', token=token, _external=True)
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -258,8 +226,9 @@ def team_presentation(team_id):
                 'result': latest_result
             })
     
-    # Generate the team join QR code - now points to quick-join route
-    join_url = url_for('team.quick_join', team_id=team.id, _external=True)
+    # Generate the team join QR code with Base62 token
+    token = team.generate_join_token()
+    join_url = url_for('team.quick_join', token=token, _external=True)
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -274,11 +243,14 @@ def team_presentation(team_id):
     img.save(buffer)
     qr_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
     
+    # Include dashboard grid data for the presentation view
+    # The grid data will be passed to the template for cleaner display
     return render_template('team/presentation.html',
                           team=team,
                           members=team_members,
                           qr_image=qr_image,
                           join_url=join_url,
+                          team_id=team.id,
                           title=f'{team.name} - Presentation')
 
 @team.route('/teams/<int:team_id>/remove/<int:user_id>', methods=['POST'])
@@ -342,106 +314,120 @@ def delete_team(team_id):
     return redirect(url_for('team.list_teams'))
 
 @team.route('/join/<token>')
-@login_required
 def join(token):
-    """Join a team via token"""
-    # First, check if it's an invitation token
-    invite = TeamInvite.query.filter_by(token=token).first()
-    if invite:
-        # Handle as a regular invitation
-        if invite.email == current_user.email:
-            return redirect(url_for('team.accept_invite', token=token))
-        else:
-            flash('This invitation was sent to a different email address.', 'danger')
-            return redirect(url_for('team.list_teams'))
+    """Join a team using a token - redirects to quick_join with appropriate parameters"""
+    try:
+        # Parse the Base62 token
+        parts = token.split('-')
+        if len(parts) >= 2:
+            # Extract team name from token if present
+            team_name = parts[2].replace('_', ' ') if len(parts) > 2 else None
+            
+            # Find team by name or redirect to teams list
+            team = None
+            if team_name:
+                team = Team.query.filter_by(name=team_name).first()
+            
+            if team:
+                return redirect(url_for('team.quick_join', token=token))
+    except Exception as e:
+        current_app.logger.error(f"Error parsing join token: {e}")
     
-    # If not an invitation, try to find the team by a join token
-    # This would require additional logic to store and validate join tokens
-    # For this implementation, we'll just show an error
     flash('Invalid or expired join link. Please ask for a new invitation.', 'danger')
-    return redirect(url_for('team.list_teams'))
+    return redirect(url_for('main.index'))
 
 def send_team_invitation(invite):
     """Send a team invitation email"""
     team = Team.query.get(invite.team_id)
-    token_url = url_for('team.accept_invite', token=invite.token, _external=True)
+    
+    # Use a direct link to take the assessment instead of an acceptance link
+    token_url = url_for('team.join', token=team.generate_join_token(), _external=True)
     
     send_email(
         to=invite.email,
-        subject=f"Invitation to join {team.name} team",
-        template='team/email/invitation',
+        subject=f"You've been added to the {team.name} team",
+        template='team/email/auto_added',
         team=team,
         token_url=token_url
     )
     
     return True
 
-@team.route('/quick-join/<int:team_id>', methods=['GET', 'POST'])
-def quick_join(team_id):
-    """Streamlined join process initiated from QR code"""
-    team = Team.query.get_or_404(team_id)
+def send_team_notification(team, email):
+    """Send a notification that the user has been added to a team"""
+    # Generate a direct link to the team
+    team_url = url_for('team.view_team', team_id=team.id, _external=True)
+    
+    send_email(
+        to=email,
+        subject=f"You've been added to the {team.name} team",
+        template='team/email/auto_added',
+        team=team,
+        token_url=team_url
+    )
+    
+    return True
+
+@team.route('/quick-join/<token>', methods=['GET', 'POST'])
+def quick_join(token):
+    """Streamlined join process initiated from QR code or join link using Base62 token"""
+    try:
+        # Parse the Base62 token
+        parts = token.split('-')
+        team_name = parts[2].replace('_', ' ') if len(parts) > 2 else None
+        
+        # Find team by name
+        team = None
+        if team_name:
+            team = Team.query.filter_by(name=team_name).first()
+        
+        if not team:
+            flash('Invalid team link. Please ask for a new invitation.', 'danger')
+            return redirect(url_for('main.index'))
+    except Exception as e:
+        current_app.logger.error(f"Error parsing join token: {e}")
+        flash('Invalid team link. Please ask for a new invitation.', 'danger')
+        return redirect(url_for('main.index'))
     
     # If user is already logged in
     if current_user.is_authenticated:
         # If already a member of this team, go to assessment
         if team.is_member(current_user):
             return redirect(url_for('assessment.take_assessment', assessment_id=1))
-        # If not a member, add them to the team
+        # If not a member, add them to the team without confirmation
         else:
             team.add_member(current_user)
             db.session.commit()
             flash(f'You have been added to the team "{team.name}"!', 'success')
             return redirect(url_for('assessment.take_assessment', assessment_id=1))
     
+    # Store the team ID in session for use in post-assessment
+    session['pending_team_join'] = team.id
+    
     # For new or not logged in users
     form = QuickRegisterForm()
     if form.validate_on_submit():
+        # Save the user information in session for later registration
+        session['quick_register_name'] = form.name.data
+        session['quick_register_email'] = form.email.data
+        session['quick_register_team_id'] = team.id
+        
         # Check if user exists
         user = User.query.filter_by(email=form.email.data).first()
         
         if user:
-            # Existing user, log them in
-            login_user(user)
-            
-            # If not already a member, add to team
-            if not team.is_member(user):
-                team.add_member(user)
-                db.session.commit()
-                flash(f'Welcome back! You have been added to the team "{team.name}"', 'success')
-            
-            # Send to assessment
-            return redirect(url_for('assessment.take_assessment', assessment_id=1))
+            # If user exists, associate with assessment and redirect to login
+            flash('An account with this email already exists. Please log in to continue.', 'info')
+            return redirect(url_for('auth.login', next=url_for('assessment.take_assessment', assessment_id=1)))
         else:
-            # Create a new user with temporary password
-            temp_password = generate_password_hash('changeme')
-            new_user = User(
-                email=form.email.data,
-                name=form.name.data,
-                password_hash=temp_password
-            )
-            db.session.add(new_user)
-            db.session.flush()  # Get user ID
-            
-            # Add user to team
-            team.add_member(new_user)
-            db.session.commit()
-            
-            # Log in the new user
-            login_user(new_user)
-            
-            # Store in session that user needs to set password after assessment
-            session['needs_password_setup'] = True
-            session['from_team_join'] = team.id
-            
-            flash('Welcome! Please complete the assessment.', 'success')
-            return redirect(url_for('assessment.take_assessment', assessment_id=1))
+            # New user - proceed directly to assessment
+            # We'll register them after assessment if they want
+            return redirect(url_for('assessment.take_assessment', assessment_id=1, guest=True))
     
-    return render_template(
-        'team/quick_register.html',
-        form=form,
-        team=team,
-        title=f'Join {team.name}'
-    )
+    return render_template('team/quick_register.html', 
+                           form=form, 
+                           team=team,
+                           title='Join Team')
 
 @team.route('/set-password', methods=['GET', 'POST'])
 @login_required

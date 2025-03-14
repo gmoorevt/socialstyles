@@ -123,34 +123,6 @@
     </div>
     {% endif %}
 
-    <!-- Pending invitations -->
-    {% if pending_invites %}
-    <div class="card mb-4">
-        <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0">Pending Invitations</h5>
-        </div>
-        <div class="card-body">
-            <div class="list-group">
-                {% for invite in pending_invites %}
-                <div class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">{{ invite.team.name }}</h5>
-                            <small class="text-muted">Invited on {{ invite.created_at.strftime('%B %d, %Y') }}</small>
-                            <p class="mb-1">Owner: {{ invite.team.owner.name or invite.team.owner.email }}</p>
-                        </div>
-                        <div>
-                            <a href="{{ url_for('team.accept_invite', token=invite.token) }}" class="btn btn-sm btn-success me-2">Accept</a>
-                            <a href="{{ url_for('team.reject_invite', token=invite.token) }}" class="btn btn-sm btn-danger">Reject</a>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    
     <!-- How It Works Section -->
     <div class="card mb-4">
         <div class="card-header bg-info text-white">

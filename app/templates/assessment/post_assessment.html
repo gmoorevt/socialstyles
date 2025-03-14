@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .result-summary {
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .chart-container {
+        max-width: 400px;
+        margin: 0 auto 2rem auto;
+    }
+    
+    .chart-img {
+        width: 100%;
+        height: auto;
+    }
+    
+    .options-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+    
+    @media (min-width: 768px) {
+        .options-container {
+            flex-direction: row;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4 text-center">Your Assessment Results</h1>
+            
+            <div class="result-summary">
+                <h3>Congratulations on completing the assessment!</h3>
+                <p class="lead">Here's a preview of your results:</p>
+                
+                <div class="chart-container">
+                    <img src="data:image/png;base64,{{ chart_img }}" alt="Social Style Chart" class="chart-img">
+                </div>
+                
+                <div class="scores">
+                    <p><strong>Assertiveness:</strong> {{ assertiveness_score | round(1) }}</p>
+                    <p><strong>Responsiveness:</strong> {{ responsiveness_score | round(1) }}</p>
+                </div>
+            </div>
+            
+            <div class="text-center mb-4">
+                <h2>Would you like to save your results?</h2>
+                <p class="lead">Register an account to view detailed results, download reports, and track your progress over time.</p>
+            </div>
+            
+            <div class="options-container">
+                <div class="card p-4 flex-fill">
+                    <div class="card-body">
+                        <h3 class="card-title text-center mb-4">Create an Account</h3>
+                        
+                        <form method="POST" action="{{ url_for('assessment.post_assessment') }}">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Your Name</label>
+                                {{ form.name(class="form-control form-control-lg", id="name") }}
+                                {% if form.name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                {{ form.email(class="form-control form-control-lg", id="email") }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                {{ form.password(class="form-control form-control-lg", id="password") }}
+                                {% if form.password.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.password.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="password2" class="form-label">Confirm Password</label>
+                                {{ form.password2(class="form-control form-control-lg", id="password2") }}
+                                {% if form.password2.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.password2.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">Register & Save Results</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card p-4 flex-fill">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div>
+                            <h3 class="card-title text-center mb-4">Continue Without Saving</h3>
+                            <p>If you prefer not to create an account right now, you can continue without saving your results.</p>
+                            <p>Note that your assessment data will not be retained and you won't be able to access these results later.</p>
+                            {% if session.get('pending_team_join') %}
+                            <p class="text-info">Your results will still be included in the team overview.</p>
+                            {% endif %}
+                        </div>
+                        <div class="d-grid mt-4">
+                            <a href="{{ url_for('assessment.continue_without_saving') }}" class="btn btn-outline-secondary btn-lg">Continue Without Account</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
