@@ -136,60 +136,61 @@ This document outlines the recommended development workflow for the Social Style
    git push origin vX.Y.Z
    ```
 
-### Deployment Options
+### Deployment Process
 
-#### Option 1: Using the Deployment Script
+The primary method for deployment is using the `improved_deploy.sh` script:
 
-1. **Run the deployment script**:
+1. **Configure deployment settings**:
+   - Update the configuration variables at the top of `improved_deploy.sh`:
+     - `DROPLET_IP`: Your DigitalOcean server IP
+     - `DOMAIN_NAME`: Your application domain
+     - `SSH_KEY_PATH`: Path to your SSH key
+     - `GITHUB_REPO`: Repository URL
+     - `GITHUB_BRANCH`: Branch to deploy
+     - Database settings if needed
+
+2. **Set up environment variables**:
+   - Create or update `.env.production` with your production settings
+
+3. **Run the deployment script**:
    ```bash
-   ./deploy_to_digitalocean.sh
-   ```
-   This script will:
-   - Clone the repository on the server
-   - Set up the environment
-   - Configure Nginx
-   - Restart the application
-
-#### Option 2: Step-by-Step Deployment
-
-1. **Run the step-by-step deployment script**:
-   ```bash
-   ./deploy_steps.sh
-   ```
-   This allows you to:
-   - Execute each deployment step individually
-   - Troubleshoot issues at each stage
-   - Skip steps that don't need to be repeated
-
-#### Option 3: Manual Deployment
-
-For smaller updates, you can manually update the server:
-
-1. **SSH into the server**:
-   ```bash
-   ssh -i ~/.ssh/id_ed25519 root@134.209.128.212
+   chmod +x improved_deploy.sh
+   ./improved_deploy.sh
    ```
 
-2. **Update the code**:
-   ```bash
-   cd /var/www/socialstyles
-   git pull
-   ```
+4. **Select the appropriate deployment option**:
+   - **Option 1 (Full Deployment)**: For new servers or complete setup
+   - **Option 2 (Update Application Only)**: For code updates only
+   - **Option 3 (Database Setup/Migration)**: For database changes
+   - Individual steps as needed for specific changes
 
-3. **Install any new dependencies**:
-   ```bash
-   sudo -u socialstyles venv/bin/pip install -r requirements.txt
-   ```
+The script provides detailed feedback on each step of the deployment process.
 
-4. **Run database migrations if needed**:
-   ```bash
-   sudo -u socialstyles venv/bin/flask db upgrade
-   ```
+### Common Deployment Scenarios
 
-5. **Restart the application**:
-   ```bash
-   systemctl restart socialstyles.service
-   ```
+#### Initial Deployment
+
+For the first deployment to a new server:
+```bash
+./improved_deploy.sh
+# Select Option 1: Full Deployment
+```
+
+#### Regular Code Updates
+
+For updating the application code after changes:
+```bash
+./improved_deploy.sh
+# Select Option 2: Update Application Only
+```
+
+#### Database Schema Changes
+
+When you've made changes to database models:
+```bash
+./improved_deploy.sh
+# Select Option 3: Database Setup/Migration
+```
 
 ## 4. Post-Deployment Verification
 

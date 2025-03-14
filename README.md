@@ -52,13 +52,21 @@ A web-based application for taking the Social Styles assessment, built with Flas
 
 ## Deployment
 
-The application includes a deployment script for Digital Ocean:
+The application includes a comprehensive deployment script for Digital Ocean:
 
-```
-./deploy_to_digitalocean.sh
+```bash
+./improved_deploy.sh
 ```
 
-Make sure to update the configuration variables in the script before running.
+The script provides an interactive menu with various deployment options:
+- Full deployment (for new servers)
+- Application update only (for code updates)
+- Database operations (migrations and setup)
+- Individual steps for customized deployments
+
+Make sure to update the configuration variables at the top of the script before running.
+
+For detailed deployment instructions, see the [Deployment Guide](DEPLOYMENT_GUIDE.md).
 
 ## Social Styles Framework
 

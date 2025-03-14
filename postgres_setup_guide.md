@@ -27,50 +27,53 @@ Once your database cluster is created, you'll need to:
 
 ## Step 2: Update Your Application to Use PostgreSQL
 
-We've created two scripts to help you set up PostgreSQL for your Social Styles application:
+The `improved_deploy.sh` script includes built-in functionality for PostgreSQL setup and data migration:
 
-1. `setup_postgres.sh`: Updates your application configuration to use PostgreSQL and initializes the database
-2. `migrate_data.sh`: Migrates existing data from SQLite to PostgreSQL (if needed)
+### Configuring PostgreSQL in the Deployment Script
 
-### Running the Setup Script
-
-1. Run the setup script:
+1. Update the PostgreSQL settings in the `improved_deploy.sh` script:
    ```bash
-   ./setup_postgres.sh
+   # PostgreSQL settings
+   DB_USER="your_database_user" # PostgreSQL database user
+   DB_NAME="your_database_name" # PostgreSQL database name
    ```
 
-2. Enter your PostgreSQL connection details when prompted:
-   - Database Name: The name of your database (e.g., `socialstyles`)
-   - Database User: The username for your database
-   - Database Password: The password for your database
-   - Database Host: The hostname or IP address of your database server
-   - Database Port: The port number (default is 5432)
+2. Update your `.env.production` file with the PostgreSQL connection string:
+   ```
+   DATABASE_URL=postgresql://username:password@hostname:port/database?sslmode=require
+   ```
+
+### Using the Deployment Script for PostgreSQL Setup
+
+1. Run the deployment script:
+   ```bash
+   ./improved_deploy.sh
+   ```
+
+2. Select Option 3: "Database Setup/Migration" from the menu.
 
 The script will:
 - Install PostgreSQL client and dependencies on your server
-- Install the psycopg2 Python package for PostgreSQL connectivity
-- Update your application's configuration to use PostgreSQL
-- Initialize the database with the required tables and initial data
+- Configure your application to use PostgreSQL
+- Run database migrations
+- Initialize the application data
 
 ### Migrating Existing Data (Optional)
 
-If you have existing data in SQLite that you want to migrate to PostgreSQL, run the migration script:
+If you have existing data in SQLite that you want to migrate to PostgreSQL:
 
-```bash
-./migrate_data.sh
-```
+1. Run the deployment script:
+   ```bash
+   ./improved_deploy.sh
+   ```
 
-This script will:
-- Find your SQLite database file
-- Connect to both SQLite and PostgreSQL databases
-- Migrate all tables and data from SQLite to PostgreSQL
-- Handle data type conversions as needed
+2. Select Option 4: "Database Migration" from the menu.
 
 ## Step 3: Verify the Setup
 
-After running the scripts, you should verify that your application is working correctly with PostgreSQL:
+After running the deployment script, you should verify that your application is working correctly with PostgreSQL:
 
-1. Visit your application at https://teamsocialstyles.com
+1. Visit your application URL
 2. Try to register a new user
 3. Log in with an existing user (if you migrated data)
 4. Take an assessment and check if the results are saved correctly
@@ -81,7 +84,7 @@ If you encounter any issues, check the following:
 
 ### Database Connection Issues
 
-1. Verify that your PostgreSQL connection details are correct
+1. Verify that your PostgreSQL connection details are correct in your `.env.production` file
 2. Make sure your Digital Ocean droplet can access the PostgreSQL server (check firewall rules)
 3. Check if the PostgreSQL server is running and accepting connections
 
@@ -89,27 +92,23 @@ If you encounter any issues, check the following:
 
 1. Check the application logs for error messages:
    ```bash
-   ssh root@67.205.184.178 "journalctl -u socialstyles.service -n 50"
+   ./improved_deploy.sh
+   # Select Option 6: "View Application Logs" from the menu
    ```
 
 2. Restart the application service:
    ```bash
-   ssh root@67.205.184.178 "systemctl restart socialstyles.service"
+   ./improved_deploy.sh
+   # Select Option 5: "Restart Application" from the menu
    ```
 
 ### Database Migration Issues
 
-1. If data migration fails, you can try running the migration script again
-2. For specific table migration issues, you might need to manually migrate the data
+1. If data migration fails, you can try running the database migration again
+2. For specific table migration issues, check the migrations log output
 
 ## Conclusion
 
 Your Social Styles Assessment application should now be using PostgreSQL as its database backend. This provides better performance, reliability, and scalability compared to SQLite.
 
-If you need to make any changes to the database configuration in the future, you can update the `.env.production` file on your server:
-
-```bash
-ssh root@67.205.184.178 "nano /var/www/socialstyles/.env.production"
-```
-
-And update the `DATABASE_URL` line with your new connection details. 
+If you need to make any changes to the database configuration in the future, you can update the `.env.production` file and redeploy using the `improved_deploy.sh` script. 

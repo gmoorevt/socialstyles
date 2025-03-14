@@ -2,7 +2,34 @@
 
 This guide provides detailed steps for troubleshooting and solving common Flask-Migrate issues when working with PostgreSQL databases.
 
-## Common Issues and Solutions
+## Using the Deployment Script for Database Operations
+
+The `improved_deploy.sh` script includes options for database operations that should be your first choice for routine database management:
+
+### Database Setup and Migration
+
+```bash
+./improved_deploy.sh
+# Select Option 3: Database Setup/Migration
+```
+
+This option handles:
+- Database initialization
+- Running migrations
+- Creating initial data
+
+### Database Backup and Restore
+
+```bash
+./improved_deploy.sh
+# Select Option 10: Create Database Backup
+# OR
+# Select Option 11: Restore from Backup
+```
+
+## Manual Troubleshooting for Common Issues
+
+If you encounter issues that the deployment script cannot resolve, use the following manual solutions:
 
 ### 1. Missing Migrations Directory
 

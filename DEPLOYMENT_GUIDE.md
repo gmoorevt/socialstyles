@@ -1,6 +1,6 @@
 # Social Styles Assessment Deployment Guide
 
-This guide provides detailed instructions for deploying the Social Styles Assessment application to a DigitalOcean server using our improved deployment script.
+This guide provides detailed instructions for deploying the Social Styles Assessment application to a DigitalOcean server using our `improved_deploy.sh` script.
 
 ## Prerequisites
 
@@ -12,9 +12,37 @@ Before starting the deployment process, ensure you have the following:
 4. A local copy of the application codebase
 5. A PostgreSQL database (can be a managed service like DigitalOcean's)
 
-## Environment Setup
+## Quick Deployment Overview
 
-The application requires a `.env` file containing all necessary environment variables. Before deployment, create a `.env` file in the project root with the following variables:
+To deploy the application:
+
+1. Configure the script variables at the top of `improved_deploy.sh`
+2. Set up your `.env.production` file with necessary environment variables
+3. Run the script: `./improved_deploy.sh`
+4. Select the appropriate deployment option from the menu
+
+## Configuration Setup
+
+### Step 1: Update Script Configuration
+
+Edit the configuration variables at the top of the `improved_deploy.sh` file:
+
+```bash
+# Configuration - MODIFY THESE VALUES
+DROPLET_IP="your-droplet-ip"
+DOMAIN_NAME="your-domain.com"
+SSH_KEY_PATH="$HOME/.ssh/your-key-file"
+APP_NAME="socialstyles"
+APP_DIR="/var/www/$APP_NAME"
+GITHUB_REPO="https://github.com/yourusername/socialstyles.git"
+GITHUB_BRANCH="main"  # The branch to deploy
+DB_USER="social_user" # PostgreSQL database user
+DB_NAME="social_styles" # PostgreSQL database name
+```
+
+### Step 2: Set Up Environment Variables
+
+Create a `.env.production` file in the same directory as the deployment script. This file will be copied to the server as `.env` and should contain your production environment variables:
 
 ```
 FLASK_APP=wsgi.py
@@ -38,170 +66,188 @@ ADMIN_EMAIL=admin@example.com
 DATABASE_URL=postgresql://username:password@hostname:port/database?sslmode=require
 ```
 
-Replace the placeholder values with your actual configuration. The `DATABASE_URL` should point to your PostgreSQL database.
+## Deployment Options
 
-## Deployment Steps
+The `improved_deploy.sh` script provides several options for deployment. Here are the main ones:
 
-The deployment process is handled by the `improved_deploy.sh` script, which breaks down the process into manageable steps. Here's an overview of each step:
+### Full Deployment (Option 1)
 
-### 1. Check Prerequisites and Setup
+This option performs a complete deployment including:
+- Server setup and dependency installation
+- PostgreSQL configuration
+- Application deployment and configuration
+- Nginx setup with SSL
+- Systemd service configuration
+- Monitoring setup
 
-Verifies that all prerequisites are in place:
-- SSH key exists and is accessible
-- Server is reachable
-- Git repository is accessible
-- `.env` file is correctly configured
+Recommended for first-time deployments or when setting up a new server.
 
-### 2. Update Server and Install Dependencies
+### Update Application Only (Option 2)
 
-Updates the server and installs all necessary packages:
-- Python and development tools
-- Nginx web server
-- PostgreSQL client
-- Git and other utilities
+This option updates the application code without changing server configuration:
+- Pulls the latest code from the repository
+- Updates dependencies
+- Runs database migrations
+- Restarts the application
 
-### 3. Set up PostgreSQL Database
+Ideal for regular updates after the initial setup.
 
-Verifies the connection to the PostgreSQL database using the credentials in the `.env` file.
+### Database Setup/Migration (Option 3)
 
-### 4. Clone Repository and Set up Environment
+This option focuses on database operations:
+- Sets up the database connection
+- Runs migrations
+- Initializes application data
 
-- Clones the application repository
-- Sets up a Python virtual environment
-- Installs all dependencies
-- Uploads the `.env` file
+Useful when you've made database schema changes.
 
-### 5. Initialize Application Database
+### Manual Steps
 
-- Initializes the Flask database migrations
-- Runs migrations to create database schema
-- Populates initial assessment data
+The script also offers individual steps that can be run separately:
+- Update server packages
+- Install dependencies
+- Set up PostgreSQL
+- Clone/update repository
+- Set up Python environment
+- Configure Nginx
+- Set up systemd service
+- Set up monitoring
 
-### 6. Configure Nginx and SSL
+## Deployment Process
 
-Sets up Nginx as a reverse proxy:
-- Creates a server block for the domain
-- Configures Cloudflare integration
-- Sets up static file serving
+### Running the Script
 
-### 7. Set up Systemd Service
+1. Make the script executable:
+   ```bash
+   chmod +x improved_deploy.sh
+   ```
 
-Creates a systemd service to manage the application:
-- Automatic startup on system boot
-- Restart on failure
-- Running with correct permissions
+2. Run the script:
+   ```bash
+   ./improved_deploy.sh
+   ```
 
-### 8. Set up Service Monitoring
+3. Select the appropriate option from the menu.
 
-Adds a monitoring script and cron job to ensure the application stays running.
+4. The script will execute the selected operations and provide feedback on each step.
 
-### 9. Test Deployment
+### Post-Deployment Verification
 
-Tests the deployment by:
-- Checking service status
-- Testing Nginx configuration
-- Verifying application accessibility
+After deployment completes, verify that:
+
+1. The application is accessible at your domain
+2. The systemd service is running: `systemctl status socialstyles.service`
+3. Nginx is configured correctly: `nginx -t`
+4. You can log in and use the application
 
 ## Cloudflare Setup
 
-After deploying the application, set up Cloudflare for added security and performance:
+For added security and performance, set up Cloudflare:
 
 1. Add your domain to Cloudflare
-2. Create DNS records:
-   - A record for root domain @ pointing to your server IP
-   - A record for www subdomain pointing to your server IP
-3. Enable SSL/TLS with Full mode
-4. Enable Always Use HTTPS option
+2. Set up DNS records pointing to your DigitalOcean server
+3. Configure SSL/TLS settings
+4. Enable Always Use HTTPS
 
-## Updating the Application
-
-To update the application after making changes to the codebase:
-
-1. Run option 11 from the deployment script menu ("Update application only")
-2. The script will:
-   - Pull the latest changes from the git repository
-   - Update dependencies
-   - Run database migrations
-   - Restart the application
+The `improved_deploy.sh` script includes Cloudflare-ready Nginx configurations.
 
 ## Troubleshooting
 
 If you encounter issues during deployment:
 
-1. **SSH Connection Issues**: 
-   - Verify your SSH key is correctly set up
-   - Check that the server IP is correct
-   - Ensure the server's firewall allows SSH connections
+### Connection Issues
+- Verify your SSH key path and permissions
+- Check that you can manually SSH to the server
+- Ensure the server IP is correct
 
-2. **Database Connection Issues**:
-   - Verify the database connection string
-   - Check if the database server accepts connections from your application server
-   - Ensure the database user has appropriate permissions
+### Database Issues
+- Check your PostgreSQL connection string
+- Verify that the database and user exist
+- Ensure the database is accessible from your server
 
-3. **Application Not Starting**:
-   - Check the application logs with: `journalctl -u socialstyles.service`
-   - Verify the `.env` file contains all required variables
-   - Check that the virtual environment is correctly set up
+### Application Not Starting
+- Check logs: `journalctl -u socialstyles.service`
+- Verify environment variables in the `.env` file
+- Ensure all dependencies are installed
 
-4. **Nginx Configuration Issues**:
-   - Test the Nginx configuration with: `nginx -t`
-   - Check Nginx error logs: `/var/log/nginx/error.log`
-   - Verify that the application is running and accessible locally
-
-## Custom Database Setup
-
-If you need to set up a new PostgreSQL database, follow these steps:
-
-1. Install PostgreSQL on your server or use a managed service
-2. Create a new database and user:
-   ```sql
-   CREATE DATABASE social_styles;
-   CREATE USER social_user WITH PASSWORD 'your-password';
-   GRANT ALL PRIVILEGES ON DATABASE social_styles TO social_user;
-   ```
-
-3. Update your `.env` file with the appropriate connection string
-4. Run the deployment script starting from step 5 (Initialize Application Database)
+### Nginx Issues
+- Check configuration: `nginx -t`
+- View logs: `/var/log/nginx/error.log`
+- Verify that ports are not blocked by a firewall
 
 ## Backup and Restore
 
-It's important to regularly back up your database:
+The `improved_deploy.sh` script includes utilities for database backups:
 
-1. To backup:
-   ```bash
-   pg_dump -U username -h hostname database_name > backup_filename.sql
-   ```
+1. To create a backup, use option 10 in the menu
+2. The backup will be stored on the server and can be downloaded
+3. To restore from a backup, use option 11
 
-2. To restore:
-   ```bash
-   psql -U username -h hostname database_name < backup_filename.sql
-   ```
+For automated backups, consider setting up a cron job on the server.
 
-For automation, consider setting up a cron job to run the backup regularly.
+## Service Management
+
+The `improved_deploy.sh` script configures your application as a systemd service that starts automatically on server boot. Here's how to manage the service:
+
+### Checking Service Status
+
+```bash
+ssh -i ~/.ssh/your-key root@your-server-ip "systemctl status socialstyles.service"
+```
+
+### Manual Service Control
+
+If you need to manually manage the service:
+
+- **Start the service**:
+  ```bash
+  systemctl start socialstyles.service
+  ```
+
+- **Stop the service**:
+  ```bash
+  systemctl stop socialstyles.service
+  ```
+
+- **Restart the service**:
+  ```bash
+  systemctl restart socialstyles.service
+  ```
+
+- **View service logs**:
+  ```bash
+  journalctl -u socialstyles.service -n 100
+  ```
+
+### Automatic Service Monitoring
+
+The deployment script sets up a monitoring cron job that automatically checks if your service is running and restarts it if needed. This provides additional reliability for your application.
+
+### After Server Reboot
+
+After your DigitalOcean server reboots, the systemd service will automatically start your application. You don't need to take any manual actions.
 
 ## Security Considerations
 
-For enhanced security:
+The deployment script implements several security best practices:
+- Proper file permissions
+- Running the application as a dedicated user
+- Setting up SSL with Nginx
+- Configuring firewalls
 
-1. Implement a firewall (ufw) to restrict access
-2. Configure fail2ban to prevent brute force attacks
-3. Regularly update the server with security patches
-4. Use strong, unique passwords for all services
-5. Consider setting up automatic security updates
+## Advanced Usage
 
-## Performance Optimization
+### Custom Branch Deployment
 
-For better performance:
+To deploy a specific branch, update the `GITHUB_BRANCH` variable in the script before running.
 
-1. Configure caching in Nginx for static files
-2. Consider adding a CDN for static assets
-3. Optimize database queries where possible
-4. Scale vertically (bigger droplet) or horizontally (multiple servers) as needed
+### Custom Domain Configuration
+
+The script automatically configures Nginx for your domain. If you need to use multiple domains, you can modify the Nginx configuration template in the script.
 
 ## Need Help?
 
-If you encounter issues not covered in this guide, consult:
-- The project's internal documentation
-- The Flask, Nginx, or PostgreSQL documentation
-- DigitalOcean's community tutorials
-- Open an issue in the project repository 
+If you encounter issues not covered in this guide:
+- Check the script's built-in help (option 12 in the menu)
+- Consult the project documentation
+- Review the script for specific commands being run 
