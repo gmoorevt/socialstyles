@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, send_file, session
+from flask import render_template, redirect, url_for, flash, request, jsonify, send_file, session, current_app
 from flask_login import login_required, current_user, login_user
 from . import assessment
 from .. import db
@@ -8,11 +8,13 @@ from .forms import AssessmentForm
 from ..auth.forms import RegistrationForm
 from .utils import generate_pdf_report, generate_social_style_chart
 from werkzeug.security import generate_password_hash
-from ..websockets.events import broadcast_new_assessment
+from werkzeug.utils import secure_filename
 import json
 import io
 import matplotlib
 import uuid
+import os
+from datetime import datetime, timedelta
 matplotlib.use('Agg')  # Use non-interactive backend
 
 @assessment.route('/dashboard')
@@ -76,18 +78,6 @@ def take_assessment(assessment_id):
             
             db.session.add(result)
             db.session.commit()
-            
-            # Broadcast the new result to team members if user is part of a team
-            from app.models.team import TeamMember
-            team_memberships = TeamMember.query.filter_by(user_id=current_user.id).all()
-            for membership in team_memberships:
-                broadcast_new_assessment(
-                    team_id=membership.team_id,
-                    user_id=current_user.id,
-                    user_name=current_user.name or current_user.email,
-                    assertiveness_score=result.assertiveness_score,
-                    responsiveness_score=result.responsiveness_score
-                )
             
             flash('Assessment completed successfully!', 'success')
             return redirect(url_for('assessment.results', result_id=result.id))
@@ -157,15 +147,6 @@ def post_assessment():
                 team = Team.query.get(session.get('pending_team_join'))
                 if team and not team.is_member(existing_user):
                     team.add_member(existing_user)
-                    
-                    # Broadcast the new result to team members
-                    broadcast_new_assessment(
-                        team_id=team.id,
-                        user_id=existing_user.id,
-                        user_name=existing_user.name or existing_user.email,
-                        assertiveness_score=result.assertiveness_score,
-                        responsiveness_score=result.responsiveness_score
-                    )
             
             db.session.commit()
             
@@ -209,15 +190,6 @@ def post_assessment():
                 team = Team.query.get(session.get('pending_team_join'))
                 if team:
                     team.add_member(new_user)
-                    
-                    # Broadcast the new result to team members
-                    broadcast_new_assessment(
-                        team_id=team.id,
-                        user_id=new_user.id,
-                        user_name=new_user.name or new_user.email,
-                        assertiveness_score=result.assertiveness_score,
-                        responsiveness_score=result.responsiveness_score
-                    )
             
             db.session.commit()
             
@@ -285,15 +257,6 @@ def continue_without_saving():
             # Add user to team if not already a member
             if not team.is_member(user):
                 team.add_member(user)
-            
-            # Broadcast the new assessment result for the presentation view
-            broadcast_new_assessment(
-                team_id=team.id,
-                user_id=user.id,
-                user_name=user.name or user.email,
-                assertiveness_score=result.assertiveness_score,
-                responsiveness_score=result.responsiveness_score
-            )
             
             db.session.commit()
             

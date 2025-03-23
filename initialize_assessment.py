@@ -1,10 +1,11 @@
 import json
+import os
 from app import create_app, db
 from app.models.assessment import Assessment, AssessmentResult
 
 def initialize_assessment():
     """Initialize the database with the Social Styles Assessment."""
-    app = create_app()
+    app = create_app(os.getenv('FLASK_CONFIG', 'development'))
     
     with app.app_context():
         # Create all tables if they don't exist

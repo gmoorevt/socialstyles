@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -8,6 +8,7 @@ import os
 from app.utils import get_version_info
 import logging
 import sys
+from config import config
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -25,28 +26,16 @@ logger = logging.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-def create_app(config_name=None):
-    """Application factory pattern for creating Flask app"""
+def create_app(config_name):
+    """
+    Create the Flask application instance
+    """
     app = Flask(__name__)
-    
-    # Determine config based on environment if not explicitly provided
-    if config_name is None:
-        config_name = os.environ.get('FLASK_ENV', 'development')
-        if config_name == 'production':
-            config_name = 'production'
-        else:
-            config_name = 'development'
-    
-    # Import configuration
-    from config import config
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
-    
-    # Initialize extensions with app
+
     db.init_app(app)
-    migrate.init_app(app, db)
     login_manager.init_app(app)
-    login_manager.login_view = 'auth.login'
     mail.init_app(app)
     csrf.init_app(app)
     
@@ -60,39 +49,16 @@ def create_app(config_name=None):
     from app.assessment import assessment as assessment_blueprint
     app.register_blueprint(assessment_blueprint, url_prefix='/assessment')
     
-    from app.admin import admin as admin_blueprint
-    app.register_blueprint(admin_blueprint, url_prefix='/admin')
-    
     from app.team import team as team_blueprint
     app.register_blueprint(team_blueprint, url_prefix='/team')
     
-    # Initialize WebSockets
-    from app.websockets import init_websockets, socketio
-    init_websockets(app)
+    # Configure error handlers
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('404.html'), 404
     
-    # Register custom commands
-    from app.commands import register_commands
-    register_commands(app)
-    
-    # Add version info to template context
-    @app.context_processor
-    def inject_version():
-        return get_version_info()
-    
-    # Shell context processor for Flask CLI
-    @app.shell_context_processor
-    def make_shell_context():
-        # Import all models here to make them available in shell context
-        from app.models.user import User
-        from app.models.assessment import Assessment, AssessmentResult
-        from app.models.team import Team
-        
-        return {
-            'db': db, 
-            'User': User, 
-            'Assessment': Assessment, 
-            'AssessmentResult': AssessmentResult,
-            'Team': Team
-        }
+    @app.errorhandler(500)
+    def internal_server_error(e):
+        return render_template('500.html'), 500
         
     return app
