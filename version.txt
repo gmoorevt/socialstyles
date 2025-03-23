@@ -1,6 +1,6 @@
-Version: 1.3.0
-Release Date: March 8, 2025
-Description: Initial production deployment with Cloudflare integration
+Version: 1.4.0
+Release Date: May 20, 2023
+Description: Streamlined application initialization with enhanced CLI management
 
 Features:
 - Social Styles Assessment functionality
@@ -8,6 +8,7 @@ Features:
 - Dashboard for viewing assessment results
 - PDF report generation
 - Responsive design for mobile and desktop
+- CLI command for assessment initialization
 
 Deployment:
 - DigitalOcean droplet
