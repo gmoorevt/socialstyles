@@ -2,6 +2,7 @@
 
 # Social Styles Assessment - Docker Deployment Script
 # This script deploys the application using Docker
+# Uses external PostgreSQL database service
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -45,6 +46,18 @@ if [ ! -f ".env" ]; then
     exit 1
 fi
 
+# Validate DATABASE_URL in .env
+if ! grep -q "^DATABASE_URL=" .env; then
+    print_error "DATABASE_URL not found in .env file."
+    print_message "Please add a valid PostgreSQL connection string to your .env file."
+    print_message "Format: DATABASE_URL=postgresql://username:password@hostname:port/database"
+    exit 1
+fi
+
+# Extract database connection info for validation
+DB_URL=$(grep "^DATABASE_URL=" .env | cut -d'=' -f2-)
+print_message "Found database connection string in .env file."
+
 # Display menu
 show_menu() {
     echo "=== Social Styles Docker Deployment Steps ==="
@@ -56,6 +69,7 @@ show_menu() {
     echo "6. Full deployment (runs steps 1-3)"
     echo "7. Check container status"
     echo "8. Troubleshoot common issues"
+    echo "9. Test database connection"
     echo "0. Exit"
     echo "======================================"
 }
@@ -111,7 +125,7 @@ step2() {
     sleep 5
     
     # Check if container is running
-    if docker ps | grep -q "social-styles_web"; then
+    if docker ps | grep -q "social-styles-web\|social_styles-web"; then
         print_message "Docker containers started successfully!"
         return 0
     else
@@ -142,26 +156,14 @@ step3() {
         return 1
     fi
     
-    # Check Python environment
-    print_message "Checking Python environment in container..."
-    if ! docker-compose exec -T web python --version; then
-        print_error "Python environment is not working properly in the container."
+    # Check if PostgreSQL is accessible
+    print_message "Checking database connection..."
+    if ! docker-compose exec -T web python -c "from app import create_app, db; app = create_app('development'); app.app_context().push(); print('Trying to connect to:', db.engine.url); connection = db.engine.connect(); print('Database connection successful')" 2>&1; then
+        print_error "Cannot connect to the PostgreSQL database."
+        print_message "Please check your DATABASE_URL in the .env file and ensure the database is accessible."
+        print_message "You can use option 9 to test the database connection."
         return 1
     fi
-    
-    # Check if manage.py exists
-    print_message "Checking if manage.py exists..."
-    if ! docker-compose exec -T web ls -la manage.py; then
-        print_error "manage.py file not found in the container."
-        print_message "Checking container working directory..."
-        docker-compose exec -T web pwd
-        docker-compose exec -T web ls -la
-        return 1
-    fi
-    
-    # Debug database connection
-    print_message "Debugging database connection..."
-    docker-compose exec -T web env | grep DATABASE_URL
     
     # Run migrations with detailed output
     print_message "Running database migrations..."
@@ -170,8 +172,8 @@ step3() {
     
     if [ $migrate_status -ne 0 ]; then
         print_error "Failed to run database migrations."
-        print_message "Trying to see if we can connect to the database..."
-        docker-compose exec -T web python -c "from app import create_app, db; app = create_app('development'); app.app_context().push(); print('Database connection status:', db.engine.connect())"
+        print_message "Try running the migrations with more detailed output:"
+        docker-compose exec -T web flask db upgrade --verbose
         return 1
     fi
     
@@ -216,7 +218,7 @@ step7() {
     
     echo
     print_message "Container details:"
-    docker inspect social-styles_web || print_warning "Container not found"
+    docker-compose ps
 }
 
 # Step 8: Troubleshoot common issues
@@ -245,6 +247,17 @@ step8() {
         print_message "Open Docker Desktop (Mac/Windows)"
     else
         print_message "Docker daemon is running. ✅"
+    fi
+    
+    # Validate database URL
+    print_message "Validating DATABASE_URL format..."
+    db_url=$(grep "^DATABASE_URL=" .env | cut -d'=' -f2-)
+    
+    if [[ "$db_url" != postgresql://* ]]; then
+        print_error "DATABASE_URL does not appear to be a valid PostgreSQL connection string."
+        print_message "It should start with 'postgresql://' and include username, password, host, port, and database name."
+    else
+        print_message "DATABASE_URL format looks valid. ✅"
     fi
     
     # Check disk space
@@ -285,11 +298,75 @@ step8() {
     fi
 }
 
+# Step 9: Test database connection
+step9() {
+    print_step "Testing database connection..."
+    
+    # Extract connection details
+    db_url=$(grep "^DATABASE_URL=" .env | cut -d'=' -f2-)
+    
+    if [[ -z "$db_url" ]]; then
+        print_error "DATABASE_URL not found in .env file."
+        return 1
+    fi
+    
+    # Create a simple Python script to test the connection
+    cat > test_db_connection.py << EOF
+import os
+import sys
+from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
+
+# Get database URL from environment
+db_url = os.environ.get('DATABASE_URL')
+if not db_url:
+    print("Error: DATABASE_URL environment variable not set")
+    sys.exit(1)
+
+print(f"Testing connection to: {db_url.split('@')[1] if '@' in db_url else db_url}")
+
+try:
+    # Create engine and attempt connection
+    engine = create_engine(db_url)
+    connection = engine.connect()
+    print("Success: Connection to database established!")
+    connection.close()
+except SQLAlchemyError as e:
+    print(f"Error: Failed to connect to database: {e}")
+    sys.exit(1)
+EOF
+    
+    # Run the test script in a temporary container
+    print_message "Running database connection test..."
+    docker run --rm -v "$(pwd)/test_db_connection.py:/app/test.py" \
+               --env-file .env \
+               --network=host \
+               python:3.11-slim bash -c "pip install sqlalchemy psycopg2-binary && python /app/test.py"
+    
+    local test_status=$?
+    rm -f test_db_connection.py
+    
+    if [ $test_status -ne 0 ]; then
+        print_error "Database connection test failed."
+        print_message "Please check your DATABASE_URL in the .env file and ensure the database is accessible."
+        return 1
+    else
+        print_message "Database connection test successful! ✅"
+        return 0
+    fi
+}
+
 # Run all steps
 run_all() {
     local failed=0
     
-    step1 || { failed=1; print_error "Step 1 failed"; }
+    # Test database connection first
+    print_message "Testing database connection before proceeding..."
+    step9 || { failed=1; print_error "Database connection test failed. Fix database issues before continuing."; }
+    
+    if [ $failed -eq 0 ]; then
+        step1 || { failed=1; print_error "Step 1 failed"; }
+    fi
     
     if [ $failed -eq 0 ]; then
         step2 || { failed=1; print_error "Step 2 failed"; }
@@ -310,7 +387,7 @@ run_all() {
 # Main loop
 while true; do
     show_menu
-    read -p "Enter your choice (0-8): " choice
+    read -p "Enter your choice (0-9): " choice
     
     case $choice in
         1) step1 ;;
@@ -321,6 +398,7 @@ while true; do
         6) run_all ;;
         7) step7 ;;
         8) step8 ;;
+        9) step9 ;;
         0) exit 0 ;;
         *) print_error "Invalid choice. Please try again." ;;
     esac
