@@ -24,13 +24,48 @@
                     <h5 class="mb-0 fw-semibold">Instructions</h5>
                 </div>
                 <div class="card-body">
-                    <p>For each pair of characteristics, select the point on the scale that best represents your typical behavior in most situations.</p>
-                    
+                    {% if assertiveness_questions and assertiveness_questions[0].get('format') == 'likert' %}
+                    <!-- Likert Scale Instructions -->
+                    <p>For each statement below, rate how much you agree or disagree using the scale provided.</p>
+
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle-fill me-2"></i>
                         <strong>Note:</strong> Answer based on how you typically behave, not how you think you should behave or how you behave in specific situations.
                     </div>
-                    
+
+                    <div class="scale-container">
+                        <h6 class="fw-semibold mb-3">Rating Scale:</h6>
+                        <div class="scale-line-container">
+                            <div class="scale-line-modern"></div>
+                            <div class="scale-points-container">
+                                <div class="scale-point-modern">
+                                    <div class="scale-circle">1</div>
+                                    <div class="scale-label">Strongly<br>Disagree</div>
+                                </div>
+                                <div class="scale-point-modern">
+                                    <div class="scale-circle">2</div>
+                                    <div class="scale-label">Somewhat<br>Disagree</div>
+                                </div>
+                                <div class="scale-point-modern">
+                                    <div class="scale-circle">3</div>
+                                    <div class="scale-label">Somewhat<br>Agree</div>
+                                </div>
+                                <div class="scale-point-modern">
+                                    <div class="scale-circle">4</div>
+                                    <div class="scale-label">Strongly<br>Agree</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Paired Opposites Instructions -->
+                    <p>For each pair of characteristics, select the point on the scale that best represents your typical behavior in most situations.</p>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Note:</strong> Answer based on how you typically behave, not how you think you should behave or how you behave in specific situations.
+                    </div>
+
                     <div class="scale-container">
                         <h6 class="fw-semibold mb-3">Rating Scale:</h6>
                         <div class="scale-line-container">
@@ -55,6 +90,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -63,7 +99,7 @@
     <!-- Assessment Form -->
     <form method="POST" action="{{ url_for('assessment.take_assessment', assessment_id=assessment.id) }}">
         {{ form.csrf_token }}
-        
+
         <!-- Assertiveness Section -->
         <div class="row mb-4">
             <div class="col-12">
@@ -73,15 +109,47 @@
                     </div>
                     <div class="card-body">
                         <p class="text-muted mb-4">These questions measure how you assert yourself in interactions with others.</p>
-                        
+
                         {% for question in assertiveness_questions %}
                         <div class="question-card mb-4" id="question-{{ question.id }}">
                             <div class="question-header">
                                 <div class="question-number-circle">{{ loop.index }}</div>
+                                {% if question.get('format') == 'likert' %}
+                                <div class="question-title">{{ question.text }}</div>
+                                {% else %}
                                 <div class="question-title">Rate yourself between these characteristics</div>
+                                {% endif %}
                             </div>
-                            
+
                             <div class="question-content">
+                                {% if question.get('format') == 'likert' %}
+                                <!-- Likert Scale Format -->
+                                <div class="likert-container">
+                                    <div class="rating-scale-modern likert-scale">
+                                        <div class="rating-options">
+                                            {% for i in range(1, 5) %}
+                                            <div class="rating-option likert-option">
+                                                <input type="radio" class="rating-input"
+                                                       name="assertiveness_{{ question.id }}"
+                                                       id="assertiveness_{{ question.id }}_{{ i }}"
+                                                       value="{{ i }}"
+                                                       required>
+                                                <label class="rating-label likert-label" for="assertiveness_{{ question.id }}_{{ i }}">
+                                                    <div class="rating-circle">{{ i }}</div>
+                                                    <div class="likert-text">
+                                                        {% if i == 1 %}Strongly Disagree
+                                                        {% elif i == 2 %}Somewhat Disagree
+                                                        {% elif i == 3 %}Somewhat Agree
+                                                        {% else %}Strongly Agree{% endif %}
+                                                    </div>
+                                                </label>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <!-- Paired Opposites Format -->
                                 <div class="paired-opposites-container">
                                     <div class="characteristic-box">
                                         <span class="d-none d-md-inline">{{ question.left_characteristic }}</span>
@@ -90,18 +158,18 @@
                                             {{ question.left_characteristic }}
                                         </span>
                                     </div>
-                                    
+
                                     <div class="d-md-none mobile-scale-label">Select a number from 1-4 indicating which characteristic best describes you</div>
-                                    
+
                                     <div class="rating-scale-modern">
                                         <div class="rating-line"></div>
                                         <div class="rating-options">
                                             {% for i in range(1, 5) %}
                                             <div class="rating-option">
-                                                <input type="radio" class="rating-input" 
-                                                       name="assertiveness_{{ question.id }}" 
-                                                       id="assertiveness_{{ question.id }}_{{ i }}" 
-                                                       value="{{ i }}" 
+                                                <input type="radio" class="rating-input"
+                                                       name="assertiveness_{{ question.id }}"
+                                                       id="assertiveness_{{ question.id }}_{{ i }}"
+                                                       value="{{ i }}"
                                                        required>
                                                 <label class="rating-label" for="assertiveness_{{ question.id }}_{{ i }}">
                                                     <div class="rating-circle">{{ i }}</div>
@@ -110,7 +178,7 @@
                                             {% endfor %}
                                         </div>
                                     </div>
-                                    
+
                                     <div class="characteristic-box">
                                         <span class="d-none d-md-inline">{{ question.right_characteristic }}</span>
                                         <span class="d-md-none">
@@ -119,6 +187,7 @@
                                         </span>
                                     </div>
                                 </div>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
@@ -126,7 +195,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Responsiveness Section -->
         <div class="row mb-4">
             <div class="col-12">
@@ -136,15 +205,47 @@
                     </div>
                     <div class="card-body">
                         <p class="text-muted mb-4">These questions measure how you respond emotionally in interactions with others.</p>
-                        
+
                         {% for question in responsiveness_questions %}
                         <div class="question-card mb-4" id="question-{{ question.id }}">
                             <div class="question-header">
                                 <div class="question-number-circle">{{ loop.index }}</div>
+                                {% if question.get('format') == 'likert' %}
+                                <div class="question-title">{{ question.text }}</div>
+                                {% else %}
                                 <div class="question-title">Rate yourself between these characteristics</div>
+                                {% endif %}
                             </div>
-                            
+
                             <div class="question-content">
+                                {% if question.get('format') == 'likert' %}
+                                <!-- Likert Scale Format -->
+                                <div class="likert-container">
+                                    <div class="rating-scale-modern likert-scale">
+                                        <div class="rating-options">
+                                            {% for i in range(1, 5) %}
+                                            <div class="rating-option likert-option">
+                                                <input type="radio" class="rating-input"
+                                                       name="responsiveness_{{ question.id }}"
+                                                       id="responsiveness_{{ question.id }}_{{ i }}"
+                                                       value="{{ i }}"
+                                                       required>
+                                                <label class="rating-label likert-label" for="responsiveness_{{ question.id }}_{{ i }}">
+                                                    <div class="rating-circle">{{ i }}</div>
+                                                    <div class="likert-text">
+                                                        {% if i == 1 %}Strongly Disagree
+                                                        {% elif i == 2 %}Somewhat Disagree
+                                                        {% elif i == 3 %}Somewhat Agree
+                                                        {% else %}Strongly Agree{% endif %}
+                                                    </div>
+                                                </label>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <!-- Paired Opposites Format -->
                                 <div class="paired-opposites-container">
                                     <div class="characteristic-box">
                                         <span class="d-none d-md-inline">{{ question.left_characteristic }}</span>
@@ -153,18 +254,18 @@
                                             {{ question.left_characteristic }}
                                         </span>
                                     </div>
-                                    
+
                                     <div class="d-md-none mobile-scale-label">Select a number from 1-4 indicating which characteristic best describes you</div>
-                                    
+
                                     <div class="rating-scale-modern">
                                         <div class="rating-line"></div>
                                         <div class="rating-options">
                                             {% for i in range(1, 5) %}
                                             <div class="rating-option">
-                                                <input type="radio" class="rating-input" 
-                                                       name="responsiveness_{{ question.id }}" 
-                                                       id="responsiveness_{{ question.id }}_{{ i }}" 
-                                                       value="{{ i }}" 
+                                                <input type="radio" class="rating-input"
+                                                       name="responsiveness_{{ question.id }}"
+                                                       id="responsiveness_{{ question.id }}_{{ i }}"
+                                                       value="{{ i }}"
                                                        required>
                                                 <label class="rating-label" for="responsiveness_{{ question.id }}_{{ i }}">
                                                     <div class="rating-circle">{{ i }}</div>
@@ -173,7 +274,7 @@
                                             {% endfor %}
                                         </div>
                                     </div>
-                                    
+
                                     <div class="characteristic-box">
                                         <span class="d-none d-md-inline">{{ question.right_characteristic }}</span>
                                         <span class="d-md-none">
@@ -182,6 +283,7 @@
                                         </span>
                                     </div>
                                 </div>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
@@ -189,77 +291,313 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Submit Button -->
         <div class="row">
-            <div class="col-12 text-center">
-                <button type="submit" class="btn btn-primary btn-lg px-5 py-3 shadow">
-                    <i class="bi bi-check-circle-fill me-2"></i>Submit Assessment
-                </button>
+            <div class="col-12">
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        Submit Assessment
+                    </button>
+                </div>
             </div>
         </div>
     </form>
 </div>
 
-<!-- Progress Indicator -->
-<div class="position-fixed bottom-0 end-0 p-3">
-    <div class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true" id="progressToast">
-        <div class="d-flex">
-            <div class="toast-body">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                <span id="progressText">0% Complete</span>
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    </div>
-</div>
+<style>
+/* Likert Scale Specific Styles */
+.likert-container {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
 
-<!-- Hidden data for JavaScript -->
-<div id="assessment-data" 
-     data-assertiveness-count="{{ assertiveness_questions|length }}" 
-     data-responsiveness-count="{{ responsiveness_questions|length }}"
-     style="display: none;"></div>
+.likert-scale {
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+.likert-scale .rating-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.likert-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.likert-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.likert-label:hover {
+    border-color: #0d6efd;
+    background-color: #e7f1ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.likert-label .rating-circle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #0d6efd;
+    margin-bottom: 0.5rem;
+}
+
+.likert-text {
+    font-size: 0.85rem;
+    text-align: center;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.rating-input:checked + .likert-label {
+    border-color: #0d6efd;
+    background-color: #0d6efd;
+}
+
+.rating-input:checked + .likert-label .rating-circle,
+.rating-input:checked + .likert-label .likert-text {
+    color: white;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .likert-scale .rating-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .likert-label {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .likert-text {
+        font-size: 0.75rem;
+    }
+}
+
+/* Existing paired opposites styles remain unchanged */
+.question-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    border: 2px solid #f0f0f0;
+}
+
+.question-card:hover {
+    border-color: #e0e0e0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.question-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.question-number-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.question-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.paired-opposites-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.characteristic-box {
+    flex: 0 0 auto;
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #495057;
+    min-width: 120px;
+    text-align: center;
+}
+
+.rating-scale-modern {
+    flex: 1;
+    position: relative;
+    min-width: 200px;
+}
+
+.rating-line {
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transform: translateY(-50%);
+    z-index: 0;
+}
+
+.rating-options {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+    padding: 0 5%;
+}
+
+.rating-option {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.rating-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.rating-label {
+    cursor: pointer;
+    display: inline-block;
+}
+
+.rating-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: white;
+    border: 3px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.rating-label:hover .rating-circle {
+    border-color: #667eea;
+    background-color: #f0f0ff;
+    transform: scale(1.1);
+}
+
+.rating-input:checked + .rating-label .rating-circle {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.scale-container {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.scale-line-container {
+    position: relative;
+}
+
+.scale-line-modern {
+    height: 2px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    margin: 0 auto;
+    width: 80%;
+    margin-top: 3rem;
+}
+
+.scale-points-container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: -22px;
+}
+
+.scale-point-modern {
+    text-align: center;
+    flex: 1;
+}
+
+.scale-point-modern .scale-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.scale-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .paired-opposites-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .characteristic-box {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .rating-scale-modern {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .mobile-scale-label {
+        text-align: center;
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin: 0.5rem 0;
+    }
+
+    .scale-line-modern {
+        width: 90%;
+    }
+}
+</style>
 {% endblock %}
-
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Show progress toast on page load
-        var progressToast = new bootstrap.Toast(document.getElementById('progressToast'));
-        progressToast.show();
-        
-        // Get question counts from data attributes
-        var assessmentData = document.getElementById('assessment-data');
-        var assertivenessCount = parseInt(assessmentData.getAttribute('data-assertiveness-count') || 0);
-        var responsivenessCount = parseInt(assessmentData.getAttribute('data-responsiveness-count') || 0);
-        var totalQuestions = assertivenessCount + responsivenessCount;
-        
-        var radioInputs = document.querySelectorAll('.rating-input');
-        var progressText = document.getElementById('progressText');
-        
-        function updateProgress() {
-            var answeredQuestions = document.querySelectorAll('.rating-input:checked').length;
-            var progressPercentage = Math.round((answeredQuestions / totalQuestions) * 100);
-            progressText.textContent = progressPercentage + "% Complete";
-            
-            // Add 'answered' class to parent question card
-            radioInputs.forEach(function(input) {
-                if (input.checked) {
-                    var questionCard = input.closest('.question-card');
-                    if (questionCard) {
-                        questionCard.classList.add('answered');
-                    }
-                }
-            });
-        }
-        
-        // Update progress when a radio button is clicked
-        radioInputs.forEach(function(input) {
-            input.addEventListener('change', updateProgress);
-        });
-        
-        // Initial progress update
-        updateProgress();
-    });
-</script>
-{% endblock %} 

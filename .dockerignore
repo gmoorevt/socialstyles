@@ -1,0 +1,65 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.env*
+!.env.example
+venv/
+.venv/
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Logs and databases
+logs/
+*.log
+*.sqlite
+*.db
+*.sql
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Documentation and deployment files
+*.md
+LICENSE
+*.sh
+!docker-entrypoint.sh
+
+# Test files
+test_*.py
+tests/
+htmlcov/
+.coverage
+
+# Temporary files
+tmp/
+temp/ 

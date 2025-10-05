@@ -22,25 +22,25 @@ def generate_social_style_chart(assertiveness_score, responsiveness_score):
     # Create figure and axis
     fig, ax = plt.figure(figsize=(8, 8)), plt.subplot(111)
     
-    # Set up the plot
-    ax.set_xlim(1, 5)
-    ax.set_ylim(1, 5)
+    # Set up the plot (1-4 scale to match scoring system)
+    ax.set_xlim(1, 4)
+    ax.set_ylim(1, 4)
     ax.set_xlabel('Assertiveness', fontsize=14)
     ax.set_ylabel('Responsiveness', fontsize=14)
     ax.set_title('Social Styles Assessment Results', fontsize=16)
-    
+
     # Add grid lines
     ax.grid(True, linestyle='--', alpha=0.7)
+
+    # Add quadrant lines at 2.5 (midpoint of 1-4 scale)
+    ax.axhline(y=2.5, color='black', linestyle='-', alpha=0.5)
+    ax.axvline(x=2.5, color='black', linestyle='-', alpha=0.5)
     
-    # Add quadrant lines
-    ax.axhline(y=3, color='black', linestyle='-', alpha=0.5)
-    ax.axvline(x=3, color='black', linestyle='-', alpha=0.5)
-    
-    # Add quadrant labels
-    ax.text(2, 2, 'ANALYTICAL', ha='center', va='center', fontsize=12)
-    ax.text(4, 2, 'DRIVER', ha='center', va='center', fontsize=12)
-    ax.text(2, 4, 'AMIABLE', ha='center', va='center', fontsize=12)
-    ax.text(4, 4, 'EXPRESSIVE', ha='center', va='center', fontsize=12)
+    # Add quadrant labels (adjusted for 1-4 scale with 2.5 cutoff)
+    ax.text(1.75, 1.75, 'ANALYTICAL', ha='center', va='center', fontsize=12)
+    ax.text(3.25, 1.75, 'DRIVER', ha='center', va='center', fontsize=12)
+    ax.text(1.75, 3.25, 'AMIABLE', ha='center', va='center', fontsize=12)
+    ax.text(3.25, 3.25, 'EXPRESSIVE', ha='center', va='center', fontsize=12)
     
     # Plot the user's position
     ax.plot(assertiveness_score, responsiveness_score, 'ro', markersize=10)
