@@ -1,0 +1,207 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Set environment variables
+      run: |
+        echo "DATABASE_URL=postgresql://test_user:test_pass@localhost:5432/test_db" >> $GITHUB_ENV
+        echo "SECRET_KEY=test-secret-key" >> $GITHUB_ENV
+        echo "FLASK_ENV=testing" >> $GITHUB_ENV
+
+    - name: Run tests
+      run: |
+        python test_assessment_math.py
+        python test_team_dashboard.py
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://teamsocialstyles.com
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create deployment tag
+      run: |
+        VERSION=$(date +%Y%m%d.%H%M%S)
+        echo "DEPLOY_VERSION=v${VERSION}" >> $GITHUB_ENV
+        git tag "v${VERSION}"
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
+
+    - name: Backup database
+      env:
+        PROD_HOST: ${{ secrets.PROD_SSH_HOST }}
+        PROD_USER: ${{ secrets.PROD_SSH_USER }}
+      run: |
+        ssh-keyscan -H $PROD_HOST >> ~/.ssh/known_hosts
+
+        ssh $PROD_USER@$PROD_HOST << 'EOF'
+          set -e
+
+          echo "💾 Creating database backup..."
+
+          BACKUP_DIR="/var/backups/socialstyles"
+          mkdir -p $BACKUP_DIR
+
+          BACKUP_FILE="$BACKUP_DIR/backup-$(date +%Y%m%d-%H%M%S).sql.gz"
+
+          cd /var/www/socialstyles
+          source .env
+
+          # Extract database details from DATABASE_URL
+          DB_URL=$DATABASE_URL
+
+          # Simple backup using pg_dump if PostgreSQL URL is available
+          if [[ $DB_URL == postgresql://* ]]; then
+            export PGPASSWORD=$(echo $DB_URL | sed -E 's/.*:\/\/[^:]*:([^@]*).*/\1/')
+            DB_HOST=$(echo $DB_URL | sed -E 's/.*@([^:]*).*/\1/')
+            DB_USER=$(echo $DB_URL | sed -E 's/.*:\/\/([^:]*).*/\1/')
+            DB_NAME=$(echo $DB_URL | sed -E 's/.*\/([^?]*).*/\1/')
+
+            pg_dump -h $DB_HOST -U $DB_USER $DB_NAME | gzip > $BACKUP_FILE
+            echo "✅ Backup created: $BACKUP_FILE"
+          else
+            echo "⚠️  DATABASE_URL not in expected format, skipping backup"
+          fi
+
+          # Keep only last 7 days of backups
+          find $BACKUP_DIR -name "backup-*.sql.gz" -mtime +7 -delete
+        EOF
+
+    - name: Deploy to production
+      env:
+        PROD_HOST: ${{ secrets.PROD_SSH_HOST }}
+        PROD_USER: ${{ secrets.PROD_SSH_USER }}
+        APP_DIR: /var/www/socialstyles
+      run: |
+        ssh $PROD_USER@$PROD_HOST << 'EOF'
+          set -e
+
+          echo "🚀 Deploying to production..."
+
+          # Navigate to app directory
+          cd ${{ env.APP_DIR }}
+
+          # Store current version for rollback
+          PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "unknown")
+          echo "Previous version: $PREVIOUS_VERSION"
+
+          # Pull latest changes
+          git fetch origin main
+          git reset --hard origin/main
+
+          # Install dependencies
+          sudo -u socialstyles venv/bin/pip install -r requirements.txt --quiet
+
+          # Run database migrations (with safety check)
+          echo "📊 Running database migrations..."
+          sudo -u socialstyles venv/bin/flask db upgrade || {
+            echo "❌ Migration failed!"
+            echo "Rolling back to $PREVIOUS_VERSION..."
+            git checkout $PREVIOUS_VERSION
+            sudo systemctl restart socialstyles
+            exit 1
+          }
+
+          # Graceful restart (zero-downtime)
+          echo "🔄 Restarting application..."
+
+          # Using systemd reload for zero-downtime
+          sudo systemctl reload socialstyles || sudo systemctl restart socialstyles
+
+          # Wait for application to start
+          sleep 5
+
+          # Health check
+          echo "🏥 Running health check..."
+
+          MAX_RETRIES=5
+          RETRY_COUNT=0
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -f http://localhost:8000/health > /dev/null 2>&1; then
+              echo "✅ Production deployment successful!"
+              echo "Version: ${{ env.DEPLOY_VERSION }}"
+              exit 0
+            fi
+
+            echo "⏳ Waiting for application... (attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)"
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            sleep 3
+          done
+
+          # Health check failed - rollback
+          echo "❌ Health check failed after $MAX_RETRIES attempts!"
+          echo "Rolling back to $PREVIOUS_VERSION..."
+
+          git checkout $PREVIOUS_VERSION
+          sudo -u socialstyles venv/bin/pip install -r requirements.txt --quiet
+          sudo systemctl restart socialstyles
+
+          exit 1
+        EOF
+
+    - name: Push deployment tag
+      if: success()
+      run: |
+        git push origin ${{ env.DEPLOY_VERSION }}
+
+    - name: Deployment summary
+      if: always()
+      run: |
+        echo "🎉 Production deployment completed"
+        echo "Version: ${{ env.DEPLOY_VERSION }}"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Visit: https://teamsocialstyles.com"
+
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "❌ Deployment failed!"
+        echo "Check logs and rollback if necessary"
+        echo "Rollback command: ssh ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} 'cd /var/www/socialstyles && git checkout <previous-tag> && systemctl restart socialstyles'"

@@ -1,0 +1,142 @@
+name: Rollback Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'Version tag to rollback to (e.g., v20250104.120000)'
+        required: true
+        type: string
+      restore_database:
+        description: 'Restore database from backup?'
+        required: true
+        type: choice
+        options:
+          - 'no'
+          - 'yes'
+        default: 'no'
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://teamsocialstyles.com
+
+    steps:
+    - name: Validate inputs
+      run: |
+        echo "Rolling back to version: ${{ inputs.version_tag }}"
+        echo "Restore database: ${{ inputs.restore_database }}"
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
+
+    - name: Rollback application
+      env:
+        PROD_HOST: ${{ secrets.PROD_SSH_HOST }}
+        PROD_USER: ${{ secrets.PROD_SSH_USER }}
+        VERSION_TAG: ${{ inputs.version_tag }}
+        RESTORE_DB: ${{ inputs.restore_database }}
+      run: |
+        ssh-keyscan -H $PROD_HOST >> ~/.ssh/known_hosts
+
+        ssh $PROD_USER@$PROD_HOST << 'EOF'
+          set -e
+
+          APP_DIR="/var/www/socialstyles"
+          BACKUP_DIR="/var/backups/socialstyles"
+
+          cd $APP_DIR
+
+          echo "🔄 Starting rollback to ${{ env.VERSION_TAG }}..."
+
+          # Verify version exists
+          if ! git rev-parse ${{ env.VERSION_TAG }} >/dev/null 2>&1; then
+            echo "❌ Version ${{ env.VERSION_TAG }} not found!"
+            git tag -l | tail -10
+            exit 1
+          fi
+
+          # Show current version
+          CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "unknown")
+          echo "Current version: $CURRENT_VERSION"
+          echo "Rolling back to: ${{ env.VERSION_TAG }}"
+
+          # Checkout version
+          git fetch --all --tags
+          git checkout ${{ env.VERSION_TAG }}
+
+          # Install dependencies
+          sudo -u socialstyles venv/bin/pip install -r requirements.txt --quiet
+
+          # Database rollback (if requested)
+          if [ "${{ env.RESTORE_DB }}" = "yes" ]; then
+            echo "💾 Restoring database from backup..."
+
+            # Find most recent backup
+            LATEST_BACKUP=$(ls -t $BACKUP_DIR/backup-*.sql.gz 2>/dev/null | head -1)
+
+            if [ -z "$LATEST_BACKUP" ]; then
+              echo "⚠️  No backup found in $BACKUP_DIR"
+              echo "Continuing with code rollback only..."
+            else
+              echo "Restoring from: $LATEST_BACKUP"
+
+              source .env
+              export PGPASSWORD=$(echo $DATABASE_URL | sed -E 's/.*:\/\/[^:]*:([^@]*).*/\1/')
+              DB_HOST=$(echo $DATABASE_URL | sed -E 's/.*@([^:]*).*/\1/')
+              DB_USER=$(echo $DATABASE_URL | sed -E 's/.*:\/\/([^:]*).*/\1/')
+              DB_NAME=$(echo $DATABASE_URL | sed -E 's/.*\/([^?]*).*/\1/')
+
+              gunzip -c "$LATEST_BACKUP" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME
+
+              echo "✅ Database restored"
+            fi
+          fi
+
+          # Restart application
+          echo "🔄 Restarting application..."
+          sudo systemctl restart socialstyles
+
+          # Wait for startup
+          sleep 5
+
+          # Health check
+          echo "🏥 Running health check..."
+
+          MAX_RETRIES=5
+          RETRY_COUNT=0
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -f http://localhost:8000/health > /dev/null 2>&1; then
+              echo "✅ Rollback successful!"
+              echo "Application is now running version: ${{ env.VERSION_TAG }}"
+              exit 0
+            fi
+
+            echo "⏳ Waiting for application... (attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)"
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            sleep 3
+          done
+
+          echo "❌ Health check failed!"
+          exit 1
+        EOF
+
+    - name: Rollback summary
+      if: always()
+      run: |
+        echo "🔄 Rollback operation completed"
+        echo "Version: ${{ inputs.version_tag }}"
+        echo "Database restored: ${{ inputs.restore_database }}"
+        echo "Visit: https://teamsocialstyles.com"
+
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "❌ Rollback failed!"
+        echo "Manual intervention may be required"
+        echo "SSH to server: ssh ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }}"

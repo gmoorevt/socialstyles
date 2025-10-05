@@ -1,0 +1,69 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [ staging ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+    - name: Deploy to staging server
+      env:
+        STAGING_HOST: ${{ secrets.STAGING_SSH_HOST }}
+        STAGING_USER: ${{ secrets.STAGING_SSH_USER }}
+        APP_DIR: /var/www/socialstyles-staging
+      run: |
+        # Add server to known hosts
+        ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts
+
+        # Deploy via SSH
+        ssh $STAGING_USER@$STAGING_HOST << 'EOF'
+          set -e
+
+          echo "📦 Deploying to staging..."
+
+          # Navigate to app directory
+          cd ${{ env.APP_DIR }}
+
+          # Pull latest changes
+          git fetch origin staging
+          git reset --hard origin/staging
+
+          # Install dependencies
+          sudo -u socialstyles venv/bin/pip install -r requirements.txt
+
+          # Run database migrations
+          sudo -u socialstyles venv/bin/flask db upgrade || echo "⚠️  Migration failed or no changes"
+
+          # Restart application
+          sudo systemctl restart socialstyles-staging
+
+          # Wait for application to start
+          sleep 3
+
+          # Health check
+          if curl -f http://localhost:8001/health > /dev/null 2>&1; then
+            echo "✅ Staging deployment successful!"
+          else
+            echo "❌ Health check failed!"
+            exit 1
+          fi
+        EOF
+
+    - name: Deployment summary
+      if: always()
+      run: |
+        echo "🚀 Staging deployment completed"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Visit: https://staging.teamsocialstyles.com"
