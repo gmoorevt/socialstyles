@@ -4,7 +4,7 @@ set -e
 # Simple deploy: push to main, SSH to server, pull & restart
 # Usage: ./deploy.sh
 
-SERVER="root@134.209.128.212"
+SERVER="root@134.199.243.119"
 APP_DIR="/var/www/socialstyles"
 
 echo "==> Running tests..."
