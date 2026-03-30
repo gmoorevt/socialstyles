@@ -16,11 +16,23 @@ from app.models import User, Team, TeamMember, AssessmentResult, Assessment
 from werkzeug.security import generate_password_hash
 
 
+_app = None
+
+def get_app():
+    global _app
+    if _app is None:
+        _app = create_app(os.getenv('FLASK_CONFIG', 'testing'))
+        with _app.app_context():
+            db.create_all()
+    return _app
+
+
 def setup_test_data():
     """Create test users, teams, and assessments"""
-    app = create_app(os.getenv('FLASK_CONFIG', 'development'))
+    app = get_app()
 
     with app.app_context():
+
         print("=" * 80)
         print("TEAM DASHBOARD TEST - Setting up test data")
         print("=" * 80)
@@ -91,8 +103,14 @@ def setup_test_data():
             # Get or create assessment
             assessment = Assessment.query.first()
             if not assessment:
-                print("   ✗ No assessment found in database! Run initialize_assessment.py first.")
-                return False
+                assessment = Assessment(
+                    name='Social Styles Assessment',
+                    description='Test assessment',
+                    questions='[]',
+                    is_active=True
+                )
+                db.session.add(assessment)
+                db.session.flush()
 
             # Create assessment result
             result = AssessmentResult(
@@ -185,7 +203,7 @@ def setup_test_data():
 
 def test_dashboard_data(team_id):
     """Test that the dashboard data is correctly calculated"""
-    app = create_app(os.getenv('FLASK_CONFIG', 'development'))
+    app = get_app()
 
     with app.app_context():
         print("=" * 80)

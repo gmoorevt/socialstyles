@@ -44,6 +44,7 @@ jobs:
         echo "DATABASE_URL=postgresql://test_user:test_pass@localhost:5432/test_db" >> $GITHUB_ENV
         echo "SECRET_KEY=test-secret-key" >> $GITHUB_ENV
         echo "FLASK_ENV=testing" >> $GITHUB_ENV
+        echo "FLASK_CONFIG=testing" >> $GITHUB_ENV
 
     - name: Run tests
       run: |
