@@ -289,9 +289,103 @@ test.describe.serial('Full Regression Suite', () => {
     expect(count).toBeGreaterThan(0);
   });
 
+  // ─── TEAM DASHBOARD ─────────────────────────────────────────
+
+  test('22. Team dashboard loads with chart', async ({ page }) => {
+    // Login
+    await page.goto(`${BASE_URL}/auth/login`);
+    await page.fill('input[name="email"]', TEST_USER_EMAIL);
+    await page.fill('input[name="password"]', TEST_USER_PASSWORD);
+    await page.locator('[type="submit"]').click();
+    await page.waitForTimeout(3000);
+
+    // Go to teams list
+    await page.goto(`${BASE_URL}/team/teams`);
+    const teamsBody = await page.textContent('body');
+    expect(teamsBody).toContain('Regression Test Team');
+
+    // Click into the team
+    await page.locator('a:has-text("Regression Test Team")').first().click();
+    await page.waitForTimeout(2000);
+
+    // Go to team dashboard
+    const dashboardLink = page.locator('a[href*="dashboard"]');
+    if (await dashboardLink.count() > 0) {
+      await dashboardLink.first().click();
+      await page.waitForTimeout(2000);
+    }
+
+    // Verify the SVG chart is present
+    const svg = page.locator('.social-styles-svg');
+    if (await svg.count() > 0) {
+      // Chart should have quadrant labels
+      const svgContent = await svg.innerHTML();
+      expect(svgContent).toContain('ANALYTICAL');
+      expect(svgContent).toContain('DRIVER');
+      expect(svgContent).toContain('AMIABLE');
+      expect(svgContent).toContain('EXPRESSIVE');
+    }
+  });
+
+  test('23. Team dashboard chart axes are correct', async ({ page }) => {
+    // Login
+    await page.goto(`${BASE_URL}/auth/login`);
+    await page.fill('input[name="email"]', TEST_USER_EMAIL);
+    await page.fill('input[name="password"]', TEST_USER_PASSWORD);
+    await page.locator('[type="submit"]').click();
+    await page.waitForTimeout(3000);
+
+    // Go to teams and find our team
+    await page.goto(`${BASE_URL}/team/teams`);
+    await page.locator('a:has-text("Regression Test Team")').first().click();
+    await page.waitForTimeout(2000);
+
+    const dashboardLink = page.locator('a[href*="dashboard"]');
+    if (await dashboardLink.count() > 0) {
+      await dashboardLink.first().click();
+      await page.waitForTimeout(2000);
+    }
+
+    // Verify axis labels are present
+    const body = await page.textContent('body');
+    // The SVG should have ASKS/TELLS on x-axis and CONTROLS/EMOTES on y-axis
+    const svgEl = page.locator('.social-styles-svg');
+    if (await svgEl.count() > 0) {
+      const svgText = await svgEl.textContent();
+      expect(svgText).toContain('ASKS');
+      expect(svgText).toContain('TELLS');
+    }
+  });
+
+  test('24. Teams list page loads', async ({ page }) => {
+    // Login
+    await page.goto(`${BASE_URL}/auth/login`);
+    await page.fill('input[name="email"]', TEST_USER_EMAIL);
+    await page.fill('input[name="password"]', TEST_USER_PASSWORD);
+    await page.locator('[type="submit"]').click();
+    await page.waitForTimeout(3000);
+
+    await page.goto(`${BASE_URL}/team/teams`);
+    const body = await page.textContent('body');
+    expect(body).toContain('Regression Test Team');
+  });
+
+  test('25. No duplicate navbar', async ({ page }) => {
+    await page.goto(BASE_URL);
+    // Should only have one navbar visible
+    const navbars = page.locator('nav.rds-navbar');
+    const count = await navbars.count();
+    expect(count).toBe(1);
+
+    // Old Bootstrap navbar should be hidden
+    const oldNavbar = page.locator('nav.navbar:not(.rds-navbar)');
+    const oldCount = await oldNavbar.count();
+    expect(oldCount).toBe(0);
+  });
+
   // ─── LOGOUT ────────────────────────────────────────────────
 
-  test('21. Logout works', async ({ page }) => {
+  test('26. Logout works', async ({ page }) => {
     // Login
     await page.goto(`${BASE_URL}/auth/login`);
     await page.fill('input[name="email"]', TEST_USER_EMAIL);

@@ -1,60 +1,254 @@
 {% extends "base.html" %}
 
-{% block title %}My Dashboard{% endblock %}
+{% block title %}My Dashboard — Social Styles{% endblock %}
 
 {% block styles %}
 <style>
-    /* Fix for modal flashing issue */
-    .modal {
-        pointer-events: none;
+    /* Modal z-index fix */
+    .modal { pointer-events: none; }
+    .modal-dialog { pointer-events: all; }
+    .modal-backdrop { z-index: 1040; }
+    .modal { z-index: 1050; }
+    .modal-footer .btn { position: relative; z-index: 1060; }
+
+    /* Dashboard main overrides */
+    main { background-color: #fafafa; }
+
+    .rds-page-header {
+        background: #ffffff;
+        border-bottom: 1px solid #ebebeb;
+        padding: 2.5rem 0 2rem;
+        margin-bottom: 0;
     }
-    .modal-dialog {
-        pointer-events: all;
-    }
-    
-    /* Prevent table hover effects from affecting modals */
-    .modal-backdrop {
-        z-index: 1040;
-    }
-    .modal {
-        z-index: 1050;
-    }
-    
-    /* Make sure buttons in modals are clickable */
-    .modal-footer .btn {
-        position: relative;
-        z-index: 1060;
+
+    .rds-dashboard-body {
+        padding: 2.5rem 0 4rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>My Dashboard</h1>
-            <a href="{{ url_for('assessment.list_assessments') }}" class="btn btn-primary">
-                <i class="fas fa-plus-circle me-2"></i>Take New Assessment
+
+<!-- ── Page Header ───────────────────────────────────────────── -->
+<div class="rds-page-header">
+    <div class="rds-page-container">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-4">
+            <div>
+                <p class="rds-page-header__eyebrow">Welcome back, {{ current_user.name.split(' ')[0] }}</p>
+                <h1 class="rds-page-header__title">My Dashboard</h1>
+                {% if results %}
+                <p class="rds-page-header__subtitle">
+                    {{ results|length }} assessment{{ 's' if results|length != 1 else '' }} completed
+                </p>
+                {% endif %}
+            </div>
+            <a href="{{ url_for('assessment.list_assessments') }}"
+               class="btn-rds btn-rds--primary">
+                <i class="bi bi-plus-lg me-1"></i>
+                Take New Assessment
             </a>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-light">
-                <h2 class="h5 mb-0">My Assessment Results</h2>
+<!-- ── Dashboard Body ─────────────────────────────────────────── -->
+<div class="rds-dashboard-body">
+    <div class="rds-page-container">
+
+        {% if results %}
+
+        <!-- Stats Strip -->
+        <div class="rds-stats-strip rds-animate-in mb-8">
+            <div class="rds-stat-tile">
+                <div class="rds-stat-tile__value">{{ results|length }}</div>
+                <div class="rds-stat-tile__label">Assessments taken</div>
             </div>
-            <div class="card-body p-0">
-                {% if results %}
+            <div class="rds-stat-tile">
+                <div class="rds-stat-tile__value">{{ results[0].social_style|title }}</div>
+                <div class="rds-stat-tile__label">Latest style</div>
+            </div>
+            <div class="rds-stat-tile">
+                <div class="rds-stat-tile__value">{{ "%.1f"|format(results[0].assertiveness_score) }}</div>
+                <div class="rds-stat-tile__label">Assertiveness</div>
+            </div>
+            <div class="rds-stat-tile">
+                <div class="rds-stat-tile__value">{{ "%.1f"|format(results[0].responsiveness_score) }}</div>
+                <div class="rds-stat-tile__label">Responsiveness</div>
+            </div>
+        </div>
+
+        <!-- Two-Column Layout: Latest + History -->
+        <div class="row g-5 mb-5">
+
+            <!-- Latest Style Card -->
+            <div class="col-lg-5 rds-animate-in rds-animate-in--delay-1">
+                <div class="rds-latest-style-card rds-latest-style-card--{{ results[0].social_style|lower }}">
+                    <div class="mb-3" style="position:relative;z-index:1;">
+                        <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;opacity:0.7;margin-bottom:0.5rem;">
+                            Your Latest Style
+                        </p>
+                        <h2 style="font-size:2rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:1rem;">
+                            {{ results[0].social_style|title }}
+                        </h2>
+                    </div>
+
+                    <!-- Score Bars -->
+                    <div style="position:relative;z-index:1;margin-bottom:1.5rem;">
+                        <div class="rds-score-bar" style="margin-bottom:1rem;">
+                            <div class="rds-score-bar__header">
+                                <span class="rds-score-bar__label" style="color:rgba(255,255,255,0.8);font-size:0.75rem;">Assertiveness</span>
+                                <span class="rds-score-bar__value" style="color:white;font-size:0.875rem;">{{ "%.1f"|format(results[0].assertiveness_score) }} / 4.0</span>
+                            </div>
+                            <div class="rds-score-bar__track" style="background:rgba(255,255,255,0.2);">
+                                <div class="rds-score-bar__fill"
+                                     style="background:rgba(255,255,255,0.9);width:{{ (results[0].assertiveness_score / 4 * 100)|round }}%"></div>
+                            </div>
+                        </div>
+                        <div class="rds-score-bar">
+                            <div class="rds-score-bar__header">
+                                <span class="rds-score-bar__label" style="color:rgba(255,255,255,0.8);font-size:0.75rem;">Responsiveness</span>
+                                <span class="rds-score-bar__value" style="color:white;font-size:0.875rem;">{{ "%.1f"|format(results[0].responsiveness_score) }} / 4.0</span>
+                            </div>
+                            <div class="rds-score-bar__track" style="background:rgba(255,255,255,0.2);">
+                                <div class="rds-score-bar__fill"
+                                     style="background:rgba(255,255,255,0.9);width:{{ (results[0].responsiveness_score / 4 * 100)|round }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Traits -->
+                    <ul style="list-style:none;padding:0;margin:0 0 1.5rem;position:relative;z-index:1;">
+                        {% if results[0].social_style == 'DRIVER' %}
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+                            <i class="bi bi-check2 me-2"></i>Direct and decisive
+                        </li>
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+                            <i class="bi bi-check2 me-2"></i>Results-oriented
+                        </li>
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;">
+                            <i class="bi bi-check2 me-2"></i>Efficient and action-oriented
+                        </li>
+                        {% elif results[0].social_style == 'EXPRESSIVE' %}
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+                            <i class="bi bi-check2 me-2"></i>Enthusiastic and energetic
+                        </li>
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+                            <i class="bi bi-check2 me-2"></i>People-oriented and sociable
+                        </li>
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;">
+                            <i class="bi bi-check2 me-2"></i>Creative and persuasive
+                        </li>
+                        {% elif results[0].social_style == 'AMIABLE' %}
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+                            <i class="bi bi-check2 me-2"></i>Supportive and cooperative
+                        </li>
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+                            <i class="bi bi-check2 me-2"></i>Patient and empathetic
+                        </li>
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;">
+                            <i class="bi bi-check2 me-2"></i>Team-oriented and harmonious
+                        </li>
+                        {% elif results[0].social_style == 'ANALYTICAL' %}
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+                            <i class="bi bi-check2 me-2"></i>Logical and methodical
+                        </li>
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+                            <i class="bi bi-check2 me-2"></i>Detail-oriented and thorough
+                        </li>
+                        <li style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:0.35rem 0;">
+                            <i class="bi bi-check2 me-2"></i>Careful and systematic
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    <div style="position:relative;z-index:1;">
+                        <a href="{{ url_for('assessment.results', result_id=results[0].id) }}"
+                           style="display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.2);
+                                  color:white;border:1.5px solid rgba(255,255,255,0.4);border-radius:0.5rem;
+                                  padding:0.625rem 1.25rem;font-size:0.875rem;font-weight:600;
+                                  text-decoration:none;transition:all 0.2s ease;"
+                           onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+                           onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                            View Detailed Results
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment History -->
+            <div class="col-lg-7 rds-animate-in rds-animate-in--delay-2">
+                <div class="rds-card h-100">
+                    <div class="rds-card__header d-flex align-items-center justify-content-between">
+                        <h2 class="h5 mb-0 fw-bold">Assessment History</h2>
+                        {% if results|length > 1 %}
+                        <span style="font-size:0.75rem;color:#767676;font-weight:600;">
+                            {{ results|length }} total
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="rds-card__body p-0">
+                        {% if results|length > 1 %}
+                        <div class="table-responsive">
+                            <table class="rds-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Style</th>
+                                        <th>Assertiveness</th>
+                                        <th>Responsiveness</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in results[:8] %}
+                                    <tr>
+                                        <td style="font-weight:500;color:#484848;">
+                                            {{ result.created_at.strftime('%b %d, %Y') }}
+                                        </td>
+                                        <td>
+                                            <span class="rds-style-badge rds-style-badge--{{ result.social_style|lower }}">
+                                                {{ result.social_style }}
+                                            </span>
+                                        </td>
+                                        <td style="font-weight:600;">{{ "%.1f"|format(result.assertiveness_score) }}</td>
+                                        <td style="font-weight:600;">{{ "%.1f"|format(result.responsiveness_score) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div style="padding:2.5rem;text-align:center;color:#767676;">
+                            <i class="bi bi-graph-up" style="font-size:2rem;opacity:0.4;display:block;margin-bottom:0.75rem;"></i>
+                            <p style="margin:0;font-size:0.875rem;">
+                                Take the assessment again in the future to track how your social style evolves over time.
+                            </p>
+                            <a href="{{ url_for('assessment.list_assessments') }}"
+                               class="btn-rds btn-rds--ghost btn-rds--sm mt-4">
+                                <i class="bi bi-arrow-clockwise me-1"></i>
+                                Retake Assessment
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- All Results Table -->
+        <div class="rds-animate-in rds-animate-in--delay-3">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h2 class="h5 fw-bold mb-0">All Results</h2>
+            </div>
+            <div class="rds-table-wrapper">
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="rds-table">
                         <thead>
                             <tr>
                                 <th>Assessment</th>
-                                <th>Date Taken</th>
-                                <th>Social Style</th>
+                                <th>Date</th>
+                                <th>Style</th>
                                 <th>Assertiveness</th>
                                 <th>Responsiveness</th>
                                 <th>Actions</th>
@@ -63,162 +257,100 @@
                         <tbody>
                             {% for result in results %}
                             <tr>
-                                <td>{{ result.assessment.name }}</td>
-                                <td>{{ result.created_at.strftime('%b %d, %Y') }}</td>
+                                <td style="font-weight:500;color:#222;">{{ result.assessment.name }}</td>
+                                <td style="color:#767676;">{{ result.created_at.strftime('%b %d, %Y') }}</td>
                                 <td>
-                                    <span class="badge bg-primary">{{ result.social_style }}</span>
+                                    <span class="rds-style-badge rds-style-badge--{{ result.social_style|lower }}">
+                                        {{ result.social_style }}
+                                    </span>
                                 </td>
-                                <td>{{ "%.1f"|format(result.assertiveness_score) }}/4.0</td>
-                                <td>{{ "%.1f"|format(result.responsiveness_score) }}/4.0</td>
+                                <td style="font-weight:600;">{{ "%.1f"|format(result.assertiveness_score) }}/4.0</td>
+                                <td style="font-weight:600;">{{ "%.1f"|format(result.responsiveness_score) }}/4.0</td>
                                 <td>
-                                    <a href="{{ url_for('assessment.results', result_id=result.id) }}" class="btn btn-sm btn-outline-primary me-1">
-                                        <i class="fas fa-eye"></i> View
-                                    </a>
-                                    <a href="{{ url_for('assessment.download_report', result_id=result.id) }}" class="btn btn-sm btn-outline-secondary me-1">
-                                        <i class="fas fa-download"></i> PDF
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" 
-                                            data-bs-toggle="modal" data-bs-target="#deleteModal{{ result.id }}">
-                                        <i class="fas fa-trash me-1"></i> Delete
-                                    </button>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ url_for('assessment.results', result_id=result.id) }}"
+                                           class="btn-rds btn-rds--ghost btn-rds--sm">
+                                            <i class="bi bi-eye"></i>
+                                            <span class="d-none d-md-inline ms-1">View</span>
+                                        </a>
+                                        <a href="{{ url_for('assessment.download_report', result_id=result.id) }}"
+                                           class="btn-rds btn-rds--ghost btn-rds--sm">
+                                            <i class="bi bi-download"></i>
+                                            <span class="d-none d-md-inline ms-1">PDF</span>
+                                        </a>
+                                        <button type="button"
+                                                class="btn-rds btn-rds--sm"
+                                                style="background:#fff5f5;color:#c13515;border:1.5px solid rgba(193,53,21,0.25);"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal{{ result.id }}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                
-                {% else %}
-                <div class="p-4 text-center">
-                    <p class="mb-4">You haven't taken any assessments yet.</p>
-                    <a href="{{ url_for('assessment.list_assessments') }}" class="btn btn-primary">
-                        <i class="fas fa-clipboard-list me-2"></i>Take Your First Assessment
-                    </a>
-                </div>
-                {% endif %}
             </div>
         </div>
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="rds-empty-state rds-animate-in">
+            <div class="rds-empty-state__icon"><i class="bi bi-clipboard"></i></div>
+            <h2 class="rds-empty-state__title">No assessments yet</h2>
+            <p class="rds-empty-state__desc">
+                Take your first Social Styles assessment to discover your communication style
+                and unlock personalized insights.
+            </p>
+            <a href="{{ url_for('assessment.list_assessments') }}"
+               class="btn-rds btn-rds--primary btn-rds--lg">
+                <i class="bi bi-clipboard-check me-2"></i>
+                Take Your First Assessment
+            </a>
+        </div>
+        {% endif %}
+
     </div>
 </div>
 
-{% if results %}
-<div class="row">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-light">
-                <h2 class="h5 mb-0">Your Latest Social Style</h2>
-            </div>
-            <div class="card-body">
-                <div class="text-center mb-3">
-                    <span class="badge bg-primary fs-5 px-4 py-2">{{ results[0].social_style }}</span>
-                </div>
-                <p>Your most recent assessment shows that your primary social style is <strong>{{ results[0].social_style }}</strong>.</p>
-                <p>This means you tend to be:</p>
-                <ul>
-                    {% if results[0].social_style == 'DRIVER' %}
-                    <li>Direct and decisive</li>
-                    <li>Results-oriented</li>
-                    <li>Task-focused rather than people-focused</li>
-                    <li>Efficient and action-oriented</li>
-                    {% elif results[0].social_style == 'EXPRESSIVE' %}
-                    <li>Enthusiastic and energetic</li>
-                    <li>People-oriented and sociable</li>
-                    <li>Creative and spontaneous</li>
-                    <li>Persuasive and inspiring</li>
-                    {% elif results[0].social_style == 'AMIABLE' %}
-                    <li>Supportive and cooperative</li>
-                    <li>Relationship-focused</li>
-                    <li>Patient and empathetic</li>
-                    <li>Team-oriented and harmonious</li>
-                    {% elif results[0].social_style == 'ANALYTICAL' %}
-                    <li>Logical and methodical</li>
-                    <li>Detail-oriented and thorough</li>
-                    <li>Careful and precise</li>
-                    <li>Thoughtful and systematic</li>
-                    {% endif %}
-                </ul>
-                <div class="text-center mt-3">
-                    <a href="{{ url_for('assessment.results', result_id=results[0].id) }}" class="btn btn-primary">
-                        <i class="fas fa-chart-bar me-2"></i>View Detailed Results
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-light">
-                <h2 class="h5 mb-0">Assessment History</h2>
-            </div>
-            <div class="card-body">
-                {% if results|length > 1 %}
-                <p>You have taken {{ results|length }} assessments. Here's how your social style has evolved:</p>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Social Style</th>
-                                <th>Assertiveness</th>
-                                <th>Responsiveness</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for result in results[:5] %}
-                            <tr>
-                                <td>{{ result.created_at.strftime('%b %d, %Y') }}</td>
-                                <td>{{ result.social_style }}</td>
-                                <td>{{ "%.1f"|format(result.assertiveness_score) }}</td>
-                                <td>{{ "%.1f"|format(result.responsiveness_score) }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <p>You have taken 1 assessment so far. Take the assessment again in the future to track how your social style evolves over time.</p>
-                <div class="text-center mt-4">
-                    <a href="{{ url_for('assessment.list_assessments') }}" class="btn btn-outline-primary">
-                        <i class="fas fa-redo me-2"></i>Take Assessment Again
-                    </a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<!-- Delete Confirmation Modals - Moved to the end of the content block -->
+<!-- ── Delete Confirmation Modals ───────────────────────────── -->
 {% if results %}
     {% for result in results %}
-    <div class="modal fade" id="deleteModal{{ result.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ result.id }}" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="deleteModalLabel{{ result.id }}">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion
+    <div class="modal fade" id="deleteModal{{ result.id }}" tabindex="-1"
+         aria-labelledby="deleteModalLabel{{ result.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border:none;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="border-bottom:1px solid #ebebeb;padding:1.5rem;">
+                    <h5 class="modal-title fw-bold" id="deleteModalLabel{{ result.id }}">
+                        Delete Assessment Result
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="text-center mb-3">
-                        <i class="fas fa-trash-alt text-danger" style="font-size: 3rem;"></i>
+                <div class="modal-body" style="padding:1.5rem;">
+                    <div style="background:#fff5f5;border-radius:12px;padding:1.25rem;margin-bottom:1rem;text-align:center;">
+                        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size:2rem;"></i>
                     </div>
-                    <p>Are you sure you want to delete this assessment result?</p>
-                    <p class="text-danger"><strong>This action cannot be undone.</strong></p>
-                    <p>Assessment: {{ result.assessment.name }}<br>
-                    Date: {{ result.created_at.strftime('%b %d, %Y') }}<br>
-                    Social Style: {{ result.social_style }}</p>
+                    <p style="color:#484848;margin-bottom:0.5rem;">
+                        Are you sure you want to delete this assessment result? This action cannot be undone.
+                    </p>
+                    <div style="background:#fafafa;border-radius:8px;padding:0.875rem;margin-top:1rem;font-size:0.875rem;color:#767676;">
+                        <strong style="color:#333;">{{ result.assessment.name }}</strong><br>
+                        {{ result.created_at.strftime('%B %d, %Y') }} &mdash;
+                        <span class="rds-style-badge rds-style-badge--{{ result.social_style|lower }}" style="font-size:0.7rem;">{{ result.social_style }}</span>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i> Cancel
+                <div class="modal-footer" style="border-top:1px solid #ebebeb;padding:1rem 1.5rem;gap:0.75rem;">
+                    <button type="button" class="btn-rds btn-rds--ghost" data-bs-dismiss="modal">
+                        Cancel
                     </button>
                     <form action="{{ url_for('assessment.delete_result', result_id=result.id) }}" method="POST">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash-alt me-1"></i> Delete
+                        <button type="submit"
+                                class="btn-rds"
+                                style="background:#c13515;color:white;border-color:#c13515;">
+                            <i class="bi bi-trash me-1"></i>Delete Result
                         </button>
                     </form>
                 </div>
@@ -227,50 +359,33 @@
     </div>
     {% endfor %}
 {% endif %}
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize all modals properly
+    document.addEventListener('DOMContentLoaded', () => {
         const deleteModals = document.querySelectorAll('.modal');
         deleteModals.forEach(modalElement => {
             const modal = new bootstrap.Modal(modalElement, {
-                backdrop: 'static',  // Prevent closing when clicking outside
-                keyboard: true       // Allow ESC key to close
+                backdrop: 'static',
+                keyboard: true,
             });
-            
-            // Store the modal instance for later use
             modalElement._bsModal = modal;
         });
-        
-        // Handle delete button clicks
+
         const deleteButtons = document.querySelectorAll('[data-bs-toggle="modal"]');
         deleteButtons.forEach(button => {
-            button.addEventListener('click', function(event) {
-                // Prevent event bubbling
+            button.addEventListener('click', event => {
                 event.stopPropagation();
                 event.preventDefault();
-                
-                // Get the target modal ID and show it
-                const targetModalId = this.getAttribute('data-bs-target');
-                const modalElement = document.querySelector(targetModalId);
-                
-                if (modalElement && modalElement._bsModal) {
-                    modalElement._bsModal.show();
+                const targetId = button.getAttribute('data-bs-target');
+                const modalEl = document.querySelector(targetId);
+                if (modalEl && modalEl._bsModal) {
+                    modalEl._bsModal.show();
                 }
-            });
-        });
-        
-        // Ensure table row hover doesn't affect modals
-        const tableRows = document.querySelectorAll('table tr');
-        tableRows.forEach(row => {
-            row.addEventListener('mouseenter', function() {
-                document.querySelectorAll('.modal.show').forEach(modal => {
-                    modal.style.pointerEvents = 'auto';
-                });
             });
         });
     });
 </script>
-{% endblock %} 
+{% endblock %}

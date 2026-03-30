@@ -4,109 +4,188 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Social Styles Assessment{% endblock %}</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <!-- Custom CSS -->
+    <!-- Original CSS (kept for assessment question styles) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Redesign System CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/redesign.css') }}">
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='favicon/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon/favicon-16x16.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='favicon/site.webmanifest') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}">
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    </style>
     {% block styles %}{% endblock %}
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                <i class="bi bi-diagram-3 me-2"></i>Social Styles
+    <nav class="rds-navbar navbar navbar-expand-lg" id="main-navbar">
+        <div class="container" style="max-width:1280px;">
+            <a class="rds-navbar__brand" href="{{ url_for('main.index') }}">
+                <span class="rds-navbar__brand-icon">
+                    <i class="bi bi-diagram-3-fill"></i>
+                </span>
+                Social Styles
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}" href="{{ url_for('main.about') }}">About</a>
-                    </li>
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'assessment.dashboard' %}active{% endif %}" href="{{ url_for('assessment.dashboard') }}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'assessment.list_assessments' %}active{% endif %}" href="{{ url_for('assessment.list_assessments') }}">Take Assessment</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint.startswith('team.') %}active{% endif %}" href="{{ url_for('team.list_teams') }}">
-                            <i class="bi bi-people me-1"></i>Teams
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-                <ul class="navbar-nav">
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle me-1"></i>{{ current_user.name }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('assessment.dashboard') }}">My Dashboard</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('team.list_teams') }}">
-                                <i class="bi bi-people me-1"></i>My Teams
-                            </a></li>
-                            {% if current_user.is_admin %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">
-                                <i class="bi bi-gear-fill me-1"></i>Admin Dashboard
-                            </a></li>
-                            {% endif %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
-                        </ul>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}" href="{{ url_for('auth.login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'auth.register' %}active{% endif %}" href="{{ url_for('auth.register') }}">Register</a>
-                    </li>
-                    {% endif %}
-                </ul>
+
+            <!-- Desktop Nav (left) -->
+            <ul class="rds-navbar__nav ms-4">
+                <li>
+                    <a class="rds-navbar__nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
+                       href="{{ url_for('main.index') }}">Home</a>
+                </li>
+                <li>
+                    <a class="rds-navbar__nav-link {% if request.endpoint == 'main.about' %}active{% endif %}"
+                       href="{{ url_for('main.about') }}">About</a>
+                </li>
+                {% if current_user.is_authenticated %}
+                <li>
+                    <a class="rds-navbar__nav-link {% if request.endpoint == 'assessment.dashboard' %}active{% endif %}"
+                       href="{{ url_for('assessment.dashboard') }}">Dashboard</a>
+                </li>
+                <li>
+                    <a class="rds-navbar__nav-link {% if request.endpoint == 'assessment.list_assessments' %}active{% endif %}"
+                       href="{{ url_for('assessment.list_assessments') }}">Take Assessment</a>
+                </li>
+                <li>
+                    <a class="rds-navbar__nav-link {% if request.endpoint.startswith('team.') %}active{% endif %}"
+                       href="{{ url_for('team.list_teams') }}">
+                        <i class="bi bi-people"></i> Teams
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <!-- Desktop Nav (right) -->
+            <div class="rds-navbar__actions ms-auto">
+                {% if current_user.is_authenticated %}
+                <div class="dropdown">
+                    <a class="rds-navbar__user-btn dropdown-toggle"
+                       href="#" id="navbarDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        {{ current_user.name }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1"
+                        style="border-radius:12px; min-width:200px;" aria-labelledby="navbarDropdown">
+                        <li class="px-3 pt-3 pb-2">
+                            <p class="mb-0" style="font-size:0.75rem;color:#767676;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Account</p>
+                        </li>
+                        <li><a class="dropdown-item py-2" href="{{ url_for('assessment.dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>My Dashboard</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ url_for('team.list_teams') }}">
+                            <i class="bi bi-people me-2"></i>My Teams</a></li>
+                        {% if current_user.is_admin %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2" href="{{ url_for('admin.dashboard') }}">
+                            <i class="bi bi-gear-fill me-2"></i>Admin Dashboard</a></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+                {% else %}
+                <a class="rds-navbar__nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}"
+                   href="{{ url_for('auth.login') }}">Log in</a>
+                <a class="btn-rds btn-rds--primary ms-2"
+                   href="{{ url_for('auth.register') }}"
+                   style="padding:0.5rem 1.25rem;font-size:0.875rem;">Get Started</a>
+                {% endif %}
+
+                <!-- Mobile toggle -->
+                <button class="rds-navbar__toggle ms-3" id="mobile-menu-toggle" aria-label="Open menu">
+                    <i class="bi bi-list" id="menu-icon"></i>
+                </button>
             </div>
         </div>
     </nav>
 
+    <!-- Mobile Menu Overlay -->
+    <div class="rds-mobile-menu" id="mobile-menu">
+        <nav>
+            <a class="rds-mobile-menu__link" href="{{ url_for('main.index') }}">
+                <i class="bi bi-house-door"></i> Home
+            </a>
+            <a class="rds-mobile-menu__link" href="{{ url_for('main.about') }}">
+                <i class="bi bi-info-circle"></i> About
+            </a>
+            {% if current_user.is_authenticated %}
+            <a class="rds-mobile-menu__link" href="{{ url_for('assessment.dashboard') }}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a class="rds-mobile-menu__link" href="{{ url_for('assessment.list_assessments') }}">
+                <i class="bi bi-clipboard-check"></i> Take Assessment
+            </a>
+            <a class="rds-mobile-menu__link" href="{{ url_for('team.list_teams') }}">
+                <i class="bi bi-people"></i> Teams
+            </a>
+            <div class="rds-mobile-menu__divider"></div>
+            {% if current_user.is_admin %}
+            <a class="rds-mobile-menu__link" href="{{ url_for('admin.dashboard') }}">
+                <i class="bi bi-gear-fill"></i> Admin
+            </a>
+            {% endif %}
+            <a class="rds-mobile-menu__link" href="{{ url_for('auth.logout') }}" style="color:#c13515;">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+            {% else %}
+            <div class="rds-mobile-menu__divider"></div>
+            <a class="rds-mobile-menu__link" href="{{ url_for('auth.login') }}">
+                <i class="bi bi-person"></i> Log in
+            </a>
+            <div class="px-1 mt-3">
+                <a class="btn-rds btn-rds--primary d-block text-center" href="{{ url_for('auth.register') }}">
+                    Get Started — it's free
+                </a>
+            </div>
+            {% endif %}
+        </nav>
+    </div>
+
     <!-- Flash Messages -->
-    <div class="container mt-3">
+    <div style="max-width:1280px;margin:0 auto;padding:0 1.5rem;">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
+                <div class="mt-4">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    <div class="rds-flash rds-flash--{{ category }} alert alert-dismissible fade show" role="alert">
                         {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 {% endfor %}
+                </div>
             {% endif %}
         {% endwith %}
     </div>
 
     <!-- Main Content -->
-    <main class="container py-4">
+    <main>
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-light py-4 mt-5">
-        <div class="container text-center">
-            <p class="mb-0">&copy; 2024 Social Styles Assessment. All rights reserved. <span class="text-muted small">v{{ version }}</span></p>
+    <footer class="rds-footer">
+        <div class="rds-page-container">
+            <div class="rds-footer__inner">
+                <span class="rds-footer__brand">
+                    <i class="bi bi-diagram-3-fill me-2"></i>Social Styles
+                </span>
+                <span class="rds-footer__copy">
+                    &copy; 2024 Social Styles Assessment. All rights reserved.
+                    <span class="ms-2" style="opacity:0.5;">v{{ version }}</span>
+                </span>
+            </div>
         </div>
     </footer>
 
@@ -114,17 +193,39 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    
-    <!-- Check for password setup redirect (for QR code flow) -->
+
+    <script>
+        // Navbar scroll shadow
+        const navbar = document.getElementById('main-navbar');
+        if (navbar) {
+            window.addEventListener('scroll', () => {
+                navbar.classList.toggle('scrolled', window.scrollY > 8);
+            }, { passive: true });
+        }
+
+        // Mobile menu toggle
+        const toggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+
+        if (toggle && mobileMenu) {
+            toggle.addEventListener('click', () => {
+                const isOpen = mobileMenu.classList.toggle('open');
+                menuIcon.className = isOpen ? 'bi bi-x-lg' : 'bi bi-list';
+                document.body.style.overflow = isOpen ? 'hidden' : '';
+            });
+        }
+    </script>
+
+    <!-- Password setup redirect (for QR code flow) -->
     {% if current_user.is_authenticated and session.get('needs_password_setup') and request.endpoint != 'team.set_password' %}
     <script>
-        // Redirect to password setup if not already on that page and not in the middle of an assessment
         if (!window.location.pathname.includes('/take/')) {
             window.location.href = "{{ url_for('team.set_password') }}";
         }
     </script>
     {% endif %}
-    
+
     {% block scripts %}{% endblock %}
 </body>
-</html> 
+</html>

@@ -197,4 +197,5 @@ htmlcov/
 .pytest_cache/
 
 # Kubernetes
-kubeconfig 
+kubeconfig test-results/
+resources/
