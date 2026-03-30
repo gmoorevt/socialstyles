@@ -3,34 +3,32 @@
 {% block title %}Available Assessments{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <h1 class="mb-4">Available Assessments</h1>
-        <p class="lead mb-4">Select an assessment to take from the list below.</p>
-    </div>
-</div>
+<div class="container" style="max-width:960px; padding-top:var(--space-10); padding-bottom:var(--space-16);">
+    <h1 style="font-size:var(--font-size-4xl); font-weight:var(--font-weight-extrabold); margin-bottom:var(--space-2);">Available Assessments</h1>
+    <p style="color:var(--color-gray-500); font-size:var(--font-size-lg); margin-bottom:var(--space-8);">Select an assessment to take from the list below.</p>
 
-<div class="row">
-    {% for assessment in assessments %}
-    <div class="col-md-6 mb-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="card-title h4">{{ assessment.name }}</h2>
-                <p class="card-text">{{ assessment.description }}</p>
-            </div>
-            <div class="card-footer bg-white">
-                <a href="{{ url_for('assessment.take_assessment', assessment_id=assessment.id) }}" class="btn btn-primary">
-                    <i class="fas fa-clipboard-list me-2"></i>Take Assessment
-                </a>
+    <div class="row g-4">
+        {% for assessment in assessments %}
+        <div class="col-md-6">
+            <div class="rds-card" style="height:100%; display:flex; flex-direction:column;">
+                <div style="flex:1; padding:var(--space-6);">
+                    <h2 style="font-size:var(--font-size-xl); font-weight:var(--font-weight-bold); margin-bottom:var(--space-3);">{{ assessment.name }}</h2>
+                    <p style="color:var(--color-gray-500); margin-bottom:var(--space-4);">{{ assessment.description }}</p>
+                </div>
+                <div style="padding:0 var(--space-6) var(--space-6);">
+                    <a href="{{ url_for('assessment.take_assessment', assessment_id=assessment.id) }}" class="btn-rds btn-rds--primary" style="display:inline-flex; align-items:center; gap:var(--space-2);">
+                        <i class="bi bi-clipboard2-check"></i> Take Assessment
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-    {% else %}
-    <div class="col-md-12">
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>No assessments are currently available.
+        {% else %}
+        <div class="col-12">
+            <div class="rds-card" style="padding:var(--space-8); text-align:center; color:var(--color-gray-500);">
+                <i class="bi bi-info-circle" style="font-size:1.25rem; margin-right:var(--space-2);"></i>No assessments are currently available.
+            </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endblock %} 
