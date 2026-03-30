@@ -3,14 +3,14 @@ const { defineConfig, devices } = require('@playwright/test');
 
 module.exports = defineConfig({
   testDir: './',
-  testMatch: 'test_e2e_assessment.js',
+  testMatch: ['test_e2e_assessment.js', 'test_regression.js'],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:5001',
+    baseURL: process.env.TEST_URL || 'http://localhost:5001',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
