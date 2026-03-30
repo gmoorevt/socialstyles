@@ -9,6 +9,7 @@ class Assessment(db.Model):
     name = db.Column(db.String(64), nullable=False)
     description = db.Column(db.Text)
     questions = db.Column(db.Text)  # JSON string of questions
+    is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationship with assessment results

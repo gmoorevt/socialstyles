@@ -35,22 +35,26 @@ def create_app(config_name):
     config[config_name].init_app(app)
 
     db.init_app(app)
+    migrate.init_app(app, db)
     login_manager.init_app(app)
     mail.init_app(app)
     csrf.init_app(app)
-    
+
     # Register blueprints
     from app.main import main as main_blueprint
     app.register_blueprint(main_blueprint)
-    
+
     from app.auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
-    
+
     from app.assessment import assessment as assessment_blueprint
     app.register_blueprint(assessment_blueprint, url_prefix='/assessment')
-    
+
     from app.team import team as team_blueprint
     app.register_blueprint(team_blueprint, url_prefix='/team')
+
+    from app.admin import admin as admin_blueprint
+    app.register_blueprint(admin_blueprint, url_prefix='/admin')
     
     # Configure error handlers
     @app.errorhandler(404)

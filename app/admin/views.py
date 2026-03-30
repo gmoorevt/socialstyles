@@ -199,7 +199,7 @@ def add_assessment():
         name=name,
         description=description,
         questions='[]',  # Empty JSON array for questions
-        is_active=False  # Start as inactive until questions are added
+        is_active=False
     )
     
     db.session.add(assessment)
@@ -257,19 +257,21 @@ def statistics():
     user_counts = []
     for month in months:
         year, month_num = month.split('-')
-        # Count users created in this month
+        year, month_num = int(year), int(month_num)
         count = User.query.filter(
-            func.strftime('%Y-%m', User.created_at) == month
+            func.extract('year', User.created_at) == year,
+            func.extract('month', User.created_at) == month_num
         ).count()
         user_counts.append(count)
-    
+
     # Assessment results by month
     result_counts = []
     for month in months:
         year, month_num = month.split('-')
-        # Count results created in this month
+        year, month_num = int(year), int(month_num)
         count = AssessmentResult.query.filter(
-            func.strftime('%Y-%m', AssessmentResult.created_at) == month
+            func.extract('year', AssessmentResult.created_at) == year,
+            func.extract('month', AssessmentResult.created_at) == month_num
         ).count()
         result_counts.append(count)
     
@@ -281,17 +283,16 @@ def statistics():
         count = AssessmentResult.query.filter_by(social_style=style).count()
         style_counts.append(count)
     
-    # User activity by day of week (0=Monday, 6=Sunday)
+    # User activity by day of week (0=Sunday in PostgreSQL dow, 1=Monday...6=Saturday)
     day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     day_counts = [0] * 7
-    
-    # Query active users by day of week
+
+    # PostgreSQL extract(dow) returns 0=Sunday, 1=Monday...6=Saturday
     for i in range(7):
-        # SQLite day of week is 0-6 where 0 is Sunday, so we need to adjust
-        sqlite_day = (i + 1) % 7  # Convert Monday=0 to Sunday=0 format
+        pg_dow = (i + 1) % 7  # Monday=1, Tuesday=2,...Sunday=0
         count = db.session.query(func.count(User.id)).filter(
             User.last_login.isnot(None),
-            func.strftime('%w', User.last_login) == str(sqlite_day)
+            func.extract('dow', User.last_login) == pg_dow
         ).scalar() or 0
         day_counts[i] = count
     

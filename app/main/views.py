@@ -1,6 +1,10 @@
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, jsonify
 from flask_login import current_user
 from . import main
+
+@main.route('/health')
+def health():
+    return jsonify(status='healthy'), 200
 
 @main.route('/')
 def index():
