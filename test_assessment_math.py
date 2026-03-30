@@ -105,7 +105,7 @@ TEST_SCENARIOS = [
         "responsiveness": [3, 4, 3, 4, 3, 4, 3, 4, 3, 4, 3, 4, 3, 4, 3],
         "expected_style": "EXPRESSIVE",
         "expected_assertiveness": 3.53,
-        "expected_responsiveness": 3.53
+        "expected_responsiveness": 3.47
     },
     {
         "name": "Borderline EXPRESSIVE (both at 2.5)",
@@ -266,7 +266,7 @@ def run_tests():
     range_tests = [
         ([1]*15, 1.0, "minimum"),
         ([4]*15, 4.0, "maximum"),
-        ([2,3]*7 + [2], 2.5, "midpoint"),
+        ([2,3]*7 + [2], 2.47, "midpoint"),
     ]
 
     for responses, expected, desc in range_tests:
