@@ -1,44 +1,92 @@
 {% extends "base.html" %}
+
 {% block title %}Reset Password{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">Reset Password</h4>
-            </div>
-            <div class="card-body">
-                <p class="card-text">Enter your email address and we'll send you a link to reset your password.</p>
-                
-                <form method="POST">
-                    {{ form.hidden_tag() }}
-                    
-                    <div class="mb-3">
-                        {{ form.email.label(class="form-label") }}
-                        {% if form.email.errors %}
-                            {{ form.email(class="form-control is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in form.email.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {{ form.email(class="form-control") }}
-                        {% endif %}
-                    </div>
-                    
-                    <div class="d-grid gap-2">
-                        {{ form.submit(class="btn btn-primary") }}
-                    </div>
-                </form>
-            </div>
-            <div class="card-footer text-center">
-                <div class="small">
-                    <a href="{{ url_for('auth.login') }}">Back to Login</a>
-                </div>
-            </div>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-5" style="padding-top: var(--space-12); padding-bottom: var(--space-12);">
+
+      <!-- Brand mark -->
+      <div class="text-center" style="margin-bottom: var(--space-8);">
+        <div style="
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 3.5rem;
+          height: 3.5rem;
+          background: var(--color-brand-light);
+          border-radius: var(--border-radius-lg);
+          margin-bottom: var(--space-4);
+        ">
+          <i class="bi bi-envelope-open" style="font-size: 1.75rem; color: var(--color-brand);"></i>
         </div>
+        <h1 style="
+          font-size: var(--font-size-2xl);
+          font-weight: var(--font-weight-bold);
+          color: var(--color-neutral-900);
+          margin: 0;
+          line-height: var(--line-height-heading);
+        ">Forgot your password?</h1>
+        <p style="
+          color: var(--color-neutral-600);
+          font-size: var(--font-size-sm);
+          margin-top: var(--space-2);
+          margin-bottom: 0;
+        ">No problem. Enter your email and we'll send a reset link.</p>
+      </div>
+
+      <div class="rds-card">
+        <div class="rds-card__body">
+          <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <!-- Email -->
+            <div style="margin-bottom: var(--space-6);">
+              <label for="email" class="rds-label">Email address</label>
+              {% if form.email.errors %}
+                {{ form.email(
+                    class="rds-input rds-input--error",
+                    id="email",
+                    placeholder="you@example.com",
+                    autocomplete="email"
+                ) }}
+                {% for error in form.email.errors %}
+                  <p class="rds-field-error">
+                    <i class="bi bi-exclamation-circle" style="margin-right: var(--space-1);"></i>{{ error }}
+                  </p>
+                {% endfor %}
+              {% else %}
+                {{ form.email(
+                    class="rds-input",
+                    id="email",
+                    placeholder="you@example.com",
+                    autocomplete="email"
+                ) }}
+              {% endif %}
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-rds btn-rds--primary" style="width: 100%; justify-content: center;">
+              <i class="bi bi-send" style="font-size: 0.9em;"></i>
+              Send reset link
+            </button>
+          </form>
+        </div>
+
+        <div class="rds-card__footer text-center">
+          <p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-neutral-600);">
+            Remembered it?
+            <a href="{{ url_for('auth.login') }}" style="
+              color: var(--color-brand);
+              font-weight: var(--font-weight-semibold);
+              text-decoration: none;
+            ">Back to sign in</a>
+          </p>
+        </div>
+      </div>
+
     </div>
+  </div>
 </div>
-{% endblock %} 
+{% endblock %}
