@@ -15,11 +15,9 @@ from werkzeug.security import generate_password_hash
 def list_teams():
     """List all teams for the current user"""
     user_teams = current_user.get_teams()
-    owned_teams = current_user.owned_teams.all()
-    
-    return render_template('team/teams.html', 
+
+    return render_template('team/teams.html',
                           user_teams=user_teams,
-                          owned_teams=owned_teams,
                           title='My Teams')
 
 @team.route('/teams/create', methods=['GET', 'POST'])
