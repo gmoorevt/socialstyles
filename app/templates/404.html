@@ -1,9 +1,46 @@
 {% extends "base.html" %}
 {% block title %}Page Not Found{% endblock %}
 {% block content %}
-<div class="container text-center mt-5">
-    <h1>404</h1>
-    <p>The page you're looking for doesn't exist.</p>
-    <a href="{{ url_for('main.index') }}" class="btn btn-primary">Go Home</a>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 text-center" style="padding-top: var(--space-20); padding-bottom: var(--space-20);">
+      <div style="
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 5rem;
+        height: 5rem;
+        background: var(--color-brand-light);
+        border-radius: var(--border-radius-xl);
+        margin-bottom: var(--space-6);
+      ">
+        <i class="bi bi-compass" style="font-size: 2.5rem; color: var(--color-brand);"></i>
+      </div>
+      <h1 style="
+        font-size: var(--font-size-5xl);
+        font-weight: var(--font-weight-extrabold);
+        color: var(--color-neutral-900);
+        margin: 0 0 var(--space-2) 0;
+        line-height: 1;
+      ">404</h1>
+      <h2 style="
+        font-size: var(--font-size-xl);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-neutral-700);
+        margin: 0 0 var(--space-3) 0;
+      ">Page not found</h2>
+      <p style="
+        color: var(--color-neutral-500);
+        font-size: var(--font-size-base);
+        margin: 0 0 var(--space-8) 0;
+        max-width: 28rem;
+        margin-left: auto;
+        margin-right: auto;
+      ">The page you're looking for doesn't exist or may have been moved.</p>
+      <a href="{{ url_for('main.index') }}" class="btn-rds btn-rds--primary">
+        <i class="bi bi-house" style="margin-right: var(--space-2);"></i>Go home
+      </a>
+    </div>
+  </div>
 </div>
 {% endblock %}

@@ -1,40 +1,97 @@
 {% extends "base.html" %}
-{% from "macros.html" import render_field %}
+
+{% block title %}Join {{ team.name }}{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h1 class="h4 mb-0">Join {{ team.name }}</h1>
-                </div>
-                <div class="card-body">
-                    <div class="mb-4 text-center">
-                        <p class="lead">Please enter your information to join the team and take the assessment</p>
-                    </div>
-                    
-                    <form method="POST" action="">
-                        {{ form.hidden_tag() }}
-                        
-                        <div class="mb-3">
-                            {{ render_field(form.name, class="form-control form-control-lg") }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            {{ render_field(form.email, class="form-control form-control-lg") }}
-                        </div>
-                        
-                        <div class="d-grid gap-2">
-                            {{ form.submit(class="btn btn-primary btn-lg") }}
-                        </div>
-                    </form>
-                </div>
-                <div class="card-footer text-muted">
-                    <p class="mb-0 small">After providing your information, you'll be taken directly to the assessment.</p>
-                </div>
-            </div>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-5" style="padding-top: var(--space-12); padding-bottom: var(--space-12);">
+
+      <!-- Brand mark -->
+      <div class="text-center" style="margin-bottom: var(--space-8);">
+        <div style="
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 3.5rem;
+          height: 3.5rem;
+          background: var(--color-brand-light);
+          border-radius: var(--border-radius-lg);
+          margin-bottom: var(--space-4);
+        ">
+          <i class="bi bi-qr-code-scan" style="font-size: 1.75rem; color: var(--color-brand);"></i>
         </div>
+        <h1 style="
+          font-size: var(--font-size-2xl);
+          font-weight: var(--font-weight-bold);
+          color: var(--color-neutral-900);
+          margin: 0;
+          line-height: var(--line-height-heading);
+        ">Join {{ team.name }}</h1>
+        <p style="
+          color: var(--color-neutral-600);
+          font-size: var(--font-size-sm);
+          margin-top: var(--space-2);
+          margin-bottom: 0;
+        ">Enter your details below to take the Social Styles assessment</p>
+      </div>
+
+      <div class="rds-card">
+        <div class="rds-card__body">
+          <form method="POST" action="">
+            {{ form.hidden_tag() }}
+
+            <!-- Name -->
+            <div style="margin-bottom: var(--space-5);">
+              <label for="name" class="rds-label">Your name</label>
+              {{ form.name(
+                  class="rds-input" + (" rds-input--error" if form.name.errors else ""),
+                  id="name",
+                  placeholder="Jane Smith",
+                  autocomplete="name"
+              ) }}
+              {% if form.name.errors %}
+                {% for error in form.name.errors %}
+                  <p class="rds-field-error">
+                    <i class="bi bi-exclamation-circle" style="margin-right: var(--space-1);"></i>{{ error }}
+                  </p>
+                {% endfor %}
+              {% endif %}
+            </div>
+
+            <!-- Email -->
+            <div style="margin-bottom: var(--space-6);">
+              <label for="email" class="rds-label">Email address</label>
+              {{ form.email(
+                  class="rds-input" + (" rds-input--error" if form.email.errors else ""),
+                  id="email",
+                  placeholder="you@example.com",
+                  autocomplete="email"
+              ) }}
+              {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                  <p class="rds-field-error">
+                    <i class="bi bi-exclamation-circle" style="margin-right: var(--space-1);"></i>{{ error }}
+                  </p>
+                {% endfor %}
+              {% endif %}
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-rds btn-rds--primary" style="width: 100%; justify-content: center;">
+              Continue to assessment<i class="bi bi-arrow-right" style="margin-left: var(--space-2);"></i>
+            </button>
+          </form>
+        </div>
+
+        <div class="rds-card__footer text-center">
+          <p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-neutral-500);">
+            <i class="bi bi-clock" style="margin-right: var(--space-1);"></i>The assessment takes about 5 minutes to complete.
+          </p>
+        </div>
+      </div>
+
     </div>
+  </div>
 </div>
-{% endblock %} 
+{% endblock %}

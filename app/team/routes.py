@@ -26,6 +26,12 @@ def create_team():
     """Create a new team"""
     form = TeamForm()
     if form.validate_on_submit():
+        # Prevent duplicate teams with the same name for this owner
+        existing = Team.query.filter_by(name=form.name.data, owner_id=current_user.id).first()
+        if existing:
+            flash(f'You already have a team named "{form.name.data}".', 'warning')
+            return redirect(url_for('team.view_team', team_id=existing.id))
+
         team = Team(
             name=form.name.data,
             description=form.description.data,
@@ -412,17 +418,22 @@ def quick_join(token):
         flash('Invalid team link. Please ask for a new invitation.', 'danger')
         return redirect(url_for('main.index'))
     
+    # Find the active assessment
+    from ..models.assessment import Assessment
+    active_assessment = Assessment.query.first()
+    assessment_id = active_assessment.id if active_assessment else 1
+
     # If user is already logged in
     if current_user.is_authenticated:
         # If already a member of this team, go to assessment
         if team.is_member(current_user):
-            return redirect(url_for('assessment.take_assessment', assessment_id=1))
+            return redirect(url_for('assessment.take_assessment', assessment_id=assessment_id))
         # If not a member, add them to the team without confirmation
         else:
             team.add_member(current_user)
             db.session.commit()
             flash(f'You have been added to the team "{team.name}"!', 'success')
-            return redirect(url_for('assessment.take_assessment', assessment_id=1))
+            return redirect(url_for('assessment.take_assessment', assessment_id=assessment_id))
     
     # Store the team ID in session for use in post-assessment
     session['pending_team_join'] = team.id
@@ -441,11 +452,11 @@ def quick_join(token):
         if user:
             # If user exists, associate with assessment and redirect to login
             flash('An account with this email already exists. Please log in to continue.', 'info')
-            return redirect(url_for('auth.login', next=url_for('assessment.take_assessment', assessment_id=1)))
+            return redirect(url_for('auth.login', next=url_for('assessment.take_assessment', assessment_id=assessment_id)))
         else:
             # New user - proceed directly to assessment
             # We'll register them after assessment if they want
-            return redirect(url_for('assessment.take_assessment', assessment_id=1, guest=True))
+            return redirect(url_for('assessment.take_assessment', assessment_id=assessment_id, guest=True))
     
     return render_template('team/quick_register.html', 
                            form=form, 

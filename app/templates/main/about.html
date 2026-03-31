@@ -3,139 +3,326 @@
 {% block title %}About Social Styles{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <h1 class="display-4 mb-4">About Social Styles</h1>
-        <p class="lead">
-            The Social Styles framework is a powerful tool for understanding communication preferences and interpersonal behavior.
+<div class="container" style="padding-top: var(--space-12); padding-bottom: var(--space-16);">
+
+  <!-- Page hero -->
+  <div style="text-align: center; margin-bottom: var(--space-12);">
+    <div style="
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 4rem;
+      height: 4rem;
+      background: var(--color-brand-light);
+      border-radius: var(--border-radius-xl);
+      margin-bottom: var(--space-5);
+    ">
+      <i class="bi bi-diagram-3-fill" style="font-size: 2rem; color: var(--color-brand);"></i>
+    </div>
+    <h1 style="
+      font-size: var(--font-size-4xl);
+      font-weight: var(--font-weight-extrabold);
+      color: var(--color-neutral-900);
+      margin: 0 0 var(--space-4) 0;
+      line-height: var(--line-height-heading);
+    ">About Social Styles</h1>
+    <p style="
+      font-size: var(--font-size-lg);
+      color: var(--color-neutral-600);
+      max-width: 42rem;
+      margin: 0 auto;
+      line-height: var(--line-height-body);
+    ">
+      A powerful framework for understanding communication preferences and building stronger relationships.
+    </p>
+  </div>
+
+  <!-- What are Social Styles -->
+  <div class="rds-card" style="margin-bottom: var(--space-8);">
+    <div class="rds-card__body">
+      <h2 style="
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-neutral-900);
+        margin: 0 0 var(--space-4) 0;
+      ">What are Social Styles?</h2>
+      <p style="color: var(--color-neutral-700); line-height: var(--line-height-body); margin: 0 0 var(--space-4) 0;">
+        Social Styles is a model for understanding how people behave and communicate in social situations.
+        Developed in the 1960s by David Merrill and Roger Reid, it categorizes behavior along two key dimensions:
+      </p>
+      <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+        gap: var(--space-4);
+        margin: 0 0 var(--space-4) 0;
+      ">
+        <div style="
+          display: flex;
+          gap: var(--space-3);
+          align-items: flex-start;
+          background: var(--color-neutral-50);
+          border-radius: var(--border-radius-md);
+          padding: var(--space-4);
+          border: 1px solid var(--color-neutral-200);
+        ">
+          <i class="bi bi-arrow-left-right" style="color: var(--color-brand); font-size: 1.25rem; flex-shrink: 0; margin-top: 0.1rem;"></i>
+          <div>
+            <p style="font-weight: var(--font-weight-semibold); color: var(--color-neutral-900); margin: 0 0 var(--space-1) 0;">Assertiveness</p>
+            <p style="font-size: var(--font-size-sm); color: var(--color-neutral-600); margin: 0; line-height: 1.5;">The degree to which a person is perceived as trying to influence the thoughts and actions of others.</p>
+          </div>
+        </div>
+        <div style="
+          display: flex;
+          gap: var(--space-3);
+          align-items: flex-start;
+          background: var(--color-neutral-50);
+          border-radius: var(--border-radius-md);
+          padding: var(--space-4);
+          border: 1px solid var(--color-neutral-200);
+        ">
+          <i class="bi bi-heart" style="color: var(--color-brand); font-size: 1.25rem; flex-shrink: 0; margin-top: 0.1rem;"></i>
+          <div>
+            <p style="font-weight: var(--font-weight-semibold); color: var(--color-neutral-900); margin: 0 0 var(--space-1) 0;">Responsiveness</p>
+            <p style="font-size: var(--font-size-sm); color: var(--color-neutral-600); margin: 0; line-height: 1.5;">The degree to which a person is perceived as showing emotions and building relationships.</p>
+          </div>
+        </div>
+      </div>
+      <p style="color: var(--color-neutral-700); line-height: var(--line-height-body); margin: 0;">
+        These two dimensions create a matrix that defines four primary Social Styles.
+      </p>
+    </div>
+  </div>
+
+  <!-- Four styles grid -->
+  <div style="
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: var(--space-5);
+    margin-bottom: var(--space-8);
+  ">
+
+    <!-- Driver -->
+    <div class="rds-card">
+      <div class="rds-card__header" style="border-bottom: 1px solid var(--color-driver-border);">
+        <div style="display: flex; align-items: center; gap: var(--space-3);">
+          <div style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--color-driver-bg);
+            border-radius: var(--border-radius-md);
+            flex-shrink: 0;
+          ">
+            <i class="bi bi-lightning-fill" style="color: var(--color-driver); font-size: 1.125rem;"></i>
+          </div>
+          <div>
+            <h3 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--color-driver); margin: 0;">Driver</h3>
+            <p style="font-size: var(--font-size-sm); color: var(--color-neutral-500); margin: 0;">High Assertiveness, Low Responsiveness</p>
+          </div>
+        </div>
+      </div>
+      <div class="rds-card__body">
+        <p style="color: var(--color-neutral-700); line-height: var(--line-height-body); margin: 0 0 var(--space-4) 0;">
+          Drivers are direct, decisive, and results-oriented. They focus on tasks and outcomes rather than relationships.
         </p>
+        <p style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); margin: 0 0 var(--space-2) 0;">Characteristics:</p>
+        <ul style="
+          margin: 0;
+          padding-left: var(--space-5);
+          color: var(--color-neutral-600);
+          font-size: var(--font-size-sm);
+          line-height: 1.8;
+        ">
+          <li>Fast-paced and action-oriented</li>
+          <li>Direct and straightforward communication</li>
+          <li>Focus on results and efficiency</li>
+          <li>May appear impatient or controlling</li>
+        </ul>
+      </div>
     </div>
-</div>
 
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card mb-4">
-            <div class="card-body">
-                <h2 class="card-title h3">What are Social Styles?</h2>
-                <p>
-                    Social Styles is a model for understanding how people behave and communicate in social situations. 
-                    Developed in the 1960s by David Merrill and Roger Reid, it categorizes behavior along two key dimensions:
-                </p>
-                <ul>
-                    <li><strong>Assertiveness</strong>: The degree to which a person is perceived as trying to influence the thoughts and actions of others.</li>
-                    <li><strong>Responsiveness</strong>: The degree to which a person is perceived as showing emotions and building relationships.</li>
-                </ul>
-                <p>
-                    These two dimensions create a matrix that defines four primary Social Styles:
-                </p>
-            </div>
+    <!-- Expressive -->
+    <div class="rds-card">
+      <div class="rds-card__header" style="border-bottom: 1px solid var(--color-expressive-border);">
+        <div style="display: flex; align-items: center; gap: var(--space-3);">
+          <div style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--color-expressive-bg);
+            border-radius: var(--border-radius-md);
+            flex-shrink: 0;
+          ">
+            <i class="bi bi-stars" style="color: var(--color-expressive); font-size: 1.125rem;"></i>
+          </div>
+          <div>
+            <h3 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--color-expressive); margin: 0;">Expressive</h3>
+            <p style="font-size: var(--font-size-sm); color: var(--color-neutral-500); margin: 0;">High Assertiveness, High Responsiveness</p>
+          </div>
         </div>
+      </div>
+      <div class="rds-card__body">
+        <p style="color: var(--color-neutral-700); line-height: var(--line-height-body); margin: 0 0 var(--space-4) 0;">
+          Expressives are enthusiastic, creative, and people-oriented. They enjoy social interaction and are often persuasive communicators.
+        </p>
+        <p style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); margin: 0 0 var(--space-2) 0;">Characteristics:</p>
+        <ul style="
+          margin: 0;
+          padding-left: var(--space-5);
+          color: var(--color-neutral-600);
+          font-size: var(--font-size-sm);
+          line-height: 1.8;
+        ">
+          <li>Energetic and enthusiastic</li>
+          <li>Persuasive and inspiring</li>
+          <li>Enjoys recognition and approval</li>
+          <li>May appear disorganized or impulsive</li>
+        </ul>
+      </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card mb-4 h-100">
-            <div class="card-header bg-primary text-white">
-                <h3 class="card-title h5 mb-0">Driver</h3>
-            </div>
-            <div class="card-body">
-                <p><strong>High Assertiveness, Low Responsiveness</strong></p>
-                <p>Drivers are direct, decisive, and results-oriented. They focus on tasks and outcomes rather than relationships.</p>
-                <h4 class="h6">Characteristics:</h4>
-                <ul>
-                    <li>Fast-paced and action-oriented</li>
-                    <li>Direct and straightforward communication</li>
-                    <li>Focus on results and efficiency</li>
-                    <li>May appear impatient or controlling</li>
-                </ul>
-            </div>
+    <!-- Amiable -->
+    <div class="rds-card">
+      <div class="rds-card__header" style="border-bottom: 1px solid var(--color-amiable-border);">
+        <div style="display: flex; align-items: center; gap: var(--space-3);">
+          <div style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--color-amiable-bg);
+            border-radius: var(--border-radius-md);
+            flex-shrink: 0;
+          ">
+            <i class="bi bi-hand-heart-fill" style="color: var(--color-amiable); font-size: 1.125rem;"></i>
+          </div>
+          <div>
+            <h3 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--color-amiable); margin: 0;">Amiable</h3>
+            <p style="font-size: var(--font-size-sm); color: var(--color-neutral-500); margin: 0;">Low Assertiveness, High Responsiveness</p>
+          </div>
         </div>
+      </div>
+      <div class="rds-card__body">
+        <p style="color: var(--color-neutral-700); line-height: var(--line-height-body); margin: 0 0 var(--space-4) 0;">
+          Amiables are supportive, patient, and relationship-oriented. They value harmony and cooperation in their interactions.
+        </p>
+        <p style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); margin: 0 0 var(--space-2) 0;">Characteristics:</p>
+        <ul style="
+          margin: 0;
+          padding-left: var(--space-5);
+          color: var(--color-neutral-600);
+          font-size: var(--font-size-sm);
+          line-height: 1.8;
+        ">
+          <li>Supportive and cooperative</li>
+          <li>Patient and good listener</li>
+          <li>Values relationships and harmony</li>
+          <li>May avoid conflict or difficult decisions</li>
+        </ul>
+      </div>
     </div>
-    <div class="col-md-6">
-        <div class="card mb-4 h-100">
-            <div class="card-header bg-primary text-white">
-                <h3 class="card-title h5 mb-0">Expressive</h3>
-            </div>
-            <div class="card-body">
-                <p><strong>High Assertiveness, High Responsiveness</strong></p>
-                <p>Expressives are enthusiastic, creative, and people-oriented. They enjoy social interaction and are often persuasive communicators.</p>
-                <h4 class="h6">Characteristics:</h4>
-                <ul>
-                    <li>Energetic and enthusiastic</li>
-                    <li>Persuasive and inspiring</li>
-                    <li>Enjoys recognition and approval</li>
-                    <li>May appear disorganized or impulsive</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card mb-4 h-100">
-            <div class="card-header bg-primary text-white">
-                <h3 class="card-title h5 mb-0">Amiable</h3>
-            </div>
-            <div class="card-body">
-                <p><strong>Low Assertiveness, High Responsiveness</strong></p>
-                <p>Amiables are supportive, patient, and relationship-oriented. They value harmony and cooperation in their interactions.</p>
-                <h4 class="h6">Characteristics:</h4>
-                <ul>
-                    <li>Supportive and cooperative</li>
-                    <li>Patient and good listeners</li>
-                    <li>Values relationships and harmony</li>
-                    <li>May avoid conflict or difficult decisions</li>
-                </ul>
-            </div>
+    <!-- Analytical -->
+    <div class="rds-card">
+      <div class="rds-card__header" style="border-bottom: 1px solid var(--color-analytical-border);">
+        <div style="display: flex; align-items: center; gap: var(--space-3);">
+          <div style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--color-analytical-bg);
+            border-radius: var(--border-radius-md);
+            flex-shrink: 0;
+          ">
+            <i class="bi bi-bar-chart-line-fill" style="color: var(--color-analytical); font-size: 1.125rem;"></i>
+          </div>
+          <div>
+            <h3 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--color-analytical); margin: 0;">Analytical</h3>
+            <p style="font-size: var(--font-size-sm); color: var(--color-neutral-500); margin: 0;">Low Assertiveness, Low Responsiveness</p>
+          </div>
         </div>
+      </div>
+      <div class="rds-card__body">
+        <p style="color: var(--color-neutral-700); line-height: var(--line-height-body); margin: 0 0 var(--space-4) 0;">
+          Analyticals are logical, thorough, and detail-oriented. They focus on facts and data rather than emotions or relationships.
+        </p>
+        <p style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); margin: 0 0 var(--space-2) 0;">Characteristics:</p>
+        <ul style="
+          margin: 0;
+          padding-left: var(--space-5);
+          color: var(--color-neutral-600);
+          font-size: var(--font-size-sm);
+          line-height: 1.8;
+        ">
+          <li>Methodical and systematic</li>
+          <li>Detail-oriented and thorough</li>
+          <li>Values accuracy and logic</li>
+          <li>May appear overly cautious or indecisive</li>
+        </ul>
+      </div>
     </div>
-    <div class="col-md-6">
-        <div class="card mb-4 h-100">
-            <div class="card-header bg-primary text-white">
-                <h3 class="card-title h5 mb-0">Analytical</h3>
-            </div>
-            <div class="card-body">
-                <p><strong>Low Assertiveness, Low Responsiveness</strong></p>
-                <p>Analyticals are logical, thorough, and detail-oriented. They focus on facts and data rather than emotions or relationships.</p>
-                <h4 class="h6">Characteristics:</h4>
-                <ul>
-                    <li>Methodical and systematic</li>
-                    <li>Detail-oriented and thorough</li>
-                    <li>Values accuracy and logic</li>
-                    <li>May appear overly cautious or indecisive</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title h3">Why Understanding Social Styles Matters</h2>
-                <p>
-                    Understanding your own Social Style and recognizing the styles of others can help you:
-                </p>
-                <ul>
-                    <li>Communicate more effectively with different types of people</li>
-                    <li>Reduce interpersonal tension and conflict</li>
-                    <li>Build stronger relationships in both professional and personal contexts</li>
-                    <li>Adapt your approach to be more effective in various situations</li>
-                    <li>Improve teamwork and collaboration</li>
-                </ul>
-                <p>
-                    The key to using Social Styles effectively is not just identifying your own style, but learning to recognize and adapt to the styles of others—a skill known as "versatility."
-                </p>
-                <div class="text-center mt-4">
-                    <a href="{{ url_for('assessment.list_assessments') if current_user.is_authenticated else url_for('auth.register') }}" class="btn btn-primary btn-lg">
-                        Take the Assessment
-                    </a>
-                </div>
-            </div>
+  </div>
+
+  <!-- Why it matters -->
+  <div class="rds-card">
+    <div class="rds-card__body">
+      <div style="display: flex; align-items: flex-start; gap: var(--space-4); margin-bottom: var(--space-5);">
+        <div style="
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 3rem;
+          height: 3rem;
+          background: var(--color-brand-light);
+          border-radius: var(--border-radius-md);
+          flex-shrink: 0;
+        ">
+          <i class="bi bi-lightbulb-fill" style="color: var(--color-brand); font-size: 1.25rem;"></i>
         </div>
+        <div>
+          <h2 style="
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-neutral-900);
+            margin: 0 0 var(--space-2) 0;
+          ">Why understanding Social Styles matters</h2>
+          <p style="color: var(--color-neutral-700); line-height: var(--line-height-body); margin: 0;">
+            Understanding your own Social Style and recognizing the styles of others can help you:
+          </p>
+        </div>
+      </div>
+      <ul style="
+        margin: 0 0 var(--space-6) 0;
+        padding-left: var(--space-5);
+        color: var(--color-neutral-700);
+        line-height: 2;
+      ">
+        <li>Communicate more effectively with different types of people</li>
+        <li>Reduce interpersonal tension and conflict</li>
+        <li>Build stronger relationships in both professional and personal contexts</li>
+        <li>Adapt your approach to be more effective in various situations</li>
+        <li>Improve teamwork and collaboration</li>
+      </ul>
+      <p style="color: var(--color-neutral-700); line-height: var(--line-height-body); margin: 0 0 var(--space-8) 0;">
+        The key to using Social Styles effectively is not just identifying your own style, but learning to recognize and adapt to the styles of others — a skill known as <strong>"versatility."</strong>
+      </p>
+      <div style="text-align: center;">
+        <a href="{{ url_for('assessment.list_assessments') if current_user.is_authenticated else url_for('auth.register') }}"
+          class="btn-rds btn-rds--primary"
+          style="font-size: var(--font-size-base); padding: var(--space-4) var(--space-8);">
+          <i class="bi bi-play-circle" style="margin-right: var(--space-2);"></i>Take the assessment
+        </a>
+      </div>
     </div>
+  </div>
+
 </div>
-{% endblock %} 
+{% endblock %}

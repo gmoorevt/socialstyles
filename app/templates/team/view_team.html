@@ -1,155 +1,420 @@
 {% extends "base.html" %}
 
+{% block title %}{{ team.name }}{% endblock %}
+
 {% block content %}
-<div class="container my-4">
-    <!-- Team header with actions -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <div class="d-flex justify-content-between align-items-center">
-                <h2 class="mb-0">{{ team.name }}</h2>
-                <div>
-                    {% if is_owner %}
-                    <a href="{{ url_for('team.invite_members', team_id=team.id) }}" class="btn btn-light btn-sm me-2">
-                        <i class="fas fa-user-plus"></i> Invite Members
-                    </a>
-                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTeamModal">
-                        <i class="fas fa-trash"></i> Delete Team
-                    </button>
-                    {% else %}
-                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#leaveTeamModal">
-                        <i class="fas fa-sign-out-alt"></i> Leave Team
-                    </button>
-                    {% endif %}
-                </div>
-            </div>
+<div class="container" style="padding-top: var(--space-10); padding-bottom: var(--space-12);">
+
+  <!-- Page header -->
+  <div style="margin-bottom: var(--space-8);">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4);">
+      <div style="display: flex; align-items: center; gap: var(--space-4);">
+        <div style="
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 3rem;
+          height: 3rem;
+          background: var(--color-brand-light);
+          border-radius: var(--border-radius-lg);
+          flex-shrink: 0;
+        ">
+          <i class="bi bi-people-fill" style="font-size: 1.5rem; color: var(--color-brand);"></i>
         </div>
-        <div class="card-body">
-            {% if team.description %}
-            <p class="lead">{{ team.description }}</p>
+        <div>
+          <h1 style="
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-neutral-900);
+            margin: 0;
+            line-height: var(--line-height-heading);
+          ">{{ team.name }}</h1>
+          {% if team.description %}
+          <p style="
+            color: var(--color-neutral-600);
+            font-size: var(--font-size-base);
+            margin: var(--space-1) 0 0 0;
+          ">{{ team.description }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Owner actions -->
+      <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+        {% if is_owner %}
+        <a href="{{ url_for('team.invite_members', team_id=team.id) }}" class="btn-rds btn-rds--secondary">
+          <i class="bi bi-person-plus" style="margin-right: var(--space-2);"></i>Invite members
+        </a>
+        <button type="button" class="btn-rds btn-rds--ghost" data-bs-toggle="modal" data-bs-target="#deleteTeamModal"
+          style="color: var(--color-error); border-color: transparent;">
+          <i class="bi bi-trash" style="margin-right: var(--space-2);"></i>Delete team
+        </button>
+        {% else %}
+        <button type="button" class="btn-rds btn-rds--ghost" data-bs-toggle="modal" data-bs-target="#leaveTeamModal"
+          style="color: var(--color-error); border-color: transparent;">
+          <i class="bi bi-box-arrow-right" style="margin-right: var(--space-2);"></i>Leave team
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Meta info + quick actions -->
+  <div class="rds-card" style="margin-bottom: var(--space-6);">
+    <div class="rds-card__body">
+      <div style="display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: center; justify-content: space-between;">
+        <div style="display: flex; flex-wrap: wrap; gap: var(--space-6);">
+          <div>
+            <p style="font-size: var(--font-size-sm); color: var(--color-neutral-500); margin: 0;">Created by</p>
+            <p style="font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); margin: 0;">{{ team.owner.name or team.owner.email }}</p>
+          </div>
+          <div>
+            <p style="font-size: var(--font-size-sm); color: var(--color-neutral-500); margin: 0;">Created on</p>
+            <p style="font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); margin: 0;">{{ team.created_at.strftime('%B %d, %Y') }}</p>
+          </div>
+          <div>
+            <p style="font-size: var(--font-size-sm); color: var(--color-neutral-500); margin: 0;">Members</p>
+            <p style="font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); margin: 0;">{{ members|length }}</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+          <a href="{{ url_for('team.team_dashboard', team_id=team.id) }}" class="btn-rds btn-rds--primary">
+            <i class="bi bi-graph-up" style="margin-right: var(--space-2);"></i>Team dashboard
+          </a>
+          <a href="{{ url_for('team.team_presentation', team_id=team.id) }}" class="btn-rds btn-rds--secondary">
+            <i class="bi bi-display" style="margin-right: var(--space-2);"></i>Presentation mode
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team members -->
+  <div class="rds-card" style="margin-bottom: var(--space-6);">
+    <div class="rds-card__header">
+      <div style="display: flex; align-items: center; gap: var(--space-3);">
+        <i class="bi bi-person-lines-fill" style="color: var(--color-brand); font-size: 1.125rem;"></i>
+        <h2 style="
+          font-size: var(--font-size-lg);
+          font-weight: var(--font-weight-semibold);
+          color: var(--color-neutral-900);
+          margin: 0;
+        ">Team members</h2>
+        <span style="
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--color-brand-subtle);
+          color: var(--color-brand);
+          font-size: var(--font-size-sm);
+          font-weight: var(--font-weight-semibold);
+          border-radius: var(--border-radius-full);
+          padding: 0.125rem var(--space-3);
+          min-width: 1.75rem;
+        ">{{ members|length }}</span>
+      </div>
+    </div>
+    <div class="rds-card__body" style="padding-top: 0;">
+      <div style="display: flex; flex-direction: column; gap: 0;">
+        {% for member in members %}
+        <div style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: var(--space-4) 0;
+          border-bottom: 1px solid var(--color-neutral-200);
+          gap: var(--space-4);
+          {% if loop.last %}border-bottom: none;{% endif %}
+        ">
+          <div style="display: flex; align-items: center; gap: var(--space-3); min-width: 0;">
+            <!-- Avatar initials -->
+            <div style="
+              width: 2.5rem;
+              height: 2.5rem;
+              border-radius: var(--border-radius-full);
+              background: var(--color-brand-subtle);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: var(--font-weight-semibold);
+              font-size: var(--font-size-sm);
+              color: var(--color-brand);
+              flex-shrink: 0;
+            ">
+              {{ (member.user.name or member.user.email)[0]|upper }}
+            </div>
+            <div style="min-width: 0;">
+              <p style="font-weight: var(--font-weight-semibold); color: var(--color-neutral-900); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                {{ member.user.name or member.user.email }}
+              </p>
+              <p style="font-size: var(--font-size-sm); color: var(--color-neutral-500); margin: 0;">
+                Joined {{ member.joined_at.strftime('%B %d, %Y') }}
+              </p>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end;">
+            <!-- Role badge -->
+            <span style="
+              display: inline-flex;
+              align-items: center;
+              font-size: var(--font-size-sm);
+              font-weight: var(--font-weight-medium);
+              padding: 0.2rem var(--space-3);
+              border-radius: var(--border-radius-full);
+              {% if member.role == 'owner' %}
+              background: var(--color-brand-subtle);
+              color: var(--color-brand);
+              {% else %}
+              background: var(--color-neutral-100);
+              color: var(--color-neutral-600);
+              {% endif %}
+            ">
+              {% if member.role == 'owner' %}
+              <i class="bi bi-star-fill" style="margin-right: var(--space-1); font-size: 0.7rem;"></i>
+              {% endif %}
+              {{ member.role|capitalize }}
+            </span>
+
+            <!-- Social style badge -->
+            {% if member.latest_result %}
+            <span style="
+              display: inline-flex;
+              align-items: center;
+              font-size: var(--font-size-sm);
+              font-weight: var(--font-weight-medium);
+              padding: 0.2rem var(--space-3);
+              border-radius: var(--border-radius-full);
+              background: var(--color-{{ member.latest_result.social_style|lower }}-bg, var(--color-neutral-100));
+              color: var(--color-{{ member.latest_result.social_style|lower }}, var(--color-neutral-700));
+              border: 1px solid var(--color-{{ member.latest_result.social_style|lower }}-border, var(--color-neutral-200));
+            ">
+              {{ member.latest_result.social_style|capitalize }}
+            </span>
+            {% else %}
+            <span style="
+              display: inline-flex;
+              align-items: center;
+              font-size: var(--font-size-sm);
+              font-weight: var(--font-weight-medium);
+              padding: 0.2rem var(--space-3);
+              border-radius: var(--border-radius-full);
+              background: var(--color-neutral-100);
+              color: var(--color-neutral-500);
+            ">No assessment</span>
             {% endif %}
-            <p><strong>Created by:</strong> {{ team.owner.name or team.owner.email }}</p>
-            <p><strong>Created on:</strong> {{ team.created_at.strftime('%B %d, %Y') }}</p>
-            <p><strong>Members:</strong> {{ members|length }}</p>
-            
-            <div class="d-flex mt-3">
-                <a href="{{ url_for('team.team_dashboard', team_id=team.id) }}" class="btn btn-primary me-2">
-                    <i class="fas fa-chart-line"></i> Team Dashboard
-                </a>
-                <a href="{{ url_for('team.team_presentation', team_id=team.id) }}" class="btn btn-success">
-                    <i class="fas fa-desktop"></i> Presentation Mode
-                </a>
-            </div>
+
+            <!-- Remove button (owner only) -->
+            {% if is_owner and not team.is_owner(member.user) %}
+            <form action="{{ url_for('team.remove_member', team_id=team.id, user_id=member.user.id) }}" method="POST" class="d-inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit"
+                class="btn-rds btn-rds--ghost"
+                style="
+                  padding: var(--space-1) var(--space-3);
+                  font-size: var(--font-size-sm);
+                  color: var(--color-error);
+                  border-color: transparent;
+                "
+                onclick="return confirm('Remove this member from the team?')">
+                <i class="bi bi-person-dash"></i>
+              </button>
+            </form>
+            {% endif %}
+          </div>
         </div>
+        {% endfor %}
+      </div>
     </div>
-    
-    <!-- Team members -->
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white">
-            <h3 class="mb-0">Team Members</h3>
-        </div>
-        <div class="card-body">
-            <div class="list-group">
-                {% for member in members %}
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">{{ member.user.name or member.user.email }}</h5>
-                            <small class="text-muted">Joined {{ member.joined_at.strftime('%B %d, %Y') }}</small>
-                            <p class="mb-1">
-                                <span class="badge bg-{{ 'primary' if member.role == 'owner' else 'success' }}">
-                                    {{ member.role|capitalize }}
-                                </span>
-                                {% if member.latest_result %}
-                                <span class="badge bg-info ms-2">
-                                    {{ member.latest_result.social_style }}
-                                </span>
-                                {% else %}
-                                <span class="badge bg-secondary ms-2">
-                                    No assessment
-                                </span>
-                                {% endif %}
-                            </p>
-                        </div>
-                        {% if is_owner and not team.is_owner(member.user) %}
-                        <form action="{{ url_for('team.remove_member', team_id=team.id, user_id=member.user.id) }}" method="POST" class="d-inline">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to remove this member?')">
-                                <i class="fas fa-user-minus"></i> Remove
-                            </button>
-                        </form>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+  </div>
+
+  <!-- Pending invitations (owner only) -->
+  {% if is_owner and pending_invites %}
+  <div class="rds-card">
+    <div class="rds-card__header">
+      <div style="display: flex; align-items: center; gap: var(--space-3);">
+        <i class="bi bi-envelope-open" style="color: var(--color-warning); font-size: 1.125rem;"></i>
+        <h2 style="
+          font-size: var(--font-size-lg);
+          font-weight: var(--font-weight-semibold);
+          color: var(--color-neutral-900);
+          margin: 0;
+        ">Pending invitations</h2>
+        <span style="
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(196, 117, 0, 0.1);
+          color: var(--color-warning);
+          font-size: var(--font-size-sm);
+          font-weight: var(--font-weight-semibold);
+          border-radius: var(--border-radius-full);
+          padding: 0.125rem var(--space-3);
+          min-width: 1.75rem;
+        ">{{ pending_invites|length }}</span>
+      </div>
     </div>
-    
-    <!-- Pending invitations (owner only) -->
-    {% if is_owner and pending_invites %}
-    <div class="card">
-        <div class="card-header bg-warning text-dark">
-            <h3 class="mb-0">Pending Invitations</h3>
+    <div class="rds-card__body" style="padding-top: 0;">
+      {% for invite in pending_invites %}
+      <div style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-4) 0;
+        border-bottom: 1px solid var(--color-neutral-200);
+        gap: var(--space-4);
+        flex-wrap: wrap;
+        {% if loop.last %}border-bottom: none;{% endif %}
+      ">
+        <div style="display: flex; align-items: center; gap: var(--space-3);">
+          <div style="
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--border-radius-full);
+            background: rgba(196, 117, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          ">
+            <i class="bi bi-envelope" style="color: var(--color-warning);"></i>
+          </div>
+          <div>
+            <p style="font-weight: var(--font-weight-medium); color: var(--color-neutral-800); margin: 0;">{{ invite.email }}</p>
+            <p style="font-size: var(--font-size-sm); color: var(--color-neutral-500); margin: 0;">
+              Invited {{ invite.created_at.strftime('%B %d, %Y') }}
+            </p>
+          </div>
         </div>
-        <div class="card-body">
-            <ul class="list-group">
-                {% for invite in pending_invites %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ invite.email }}
-                    <small class="text-muted">Invited {{ invite.created_at.strftime('%B %d, %Y') }}</small>
-                    <span class="badge bg-warning text-dark">Pending</span>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
+        <span style="
+          display: inline-flex;
+          align-items: center;
+          font-size: var(--font-size-sm);
+          font-weight: var(--font-weight-medium);
+          padding: 0.2rem var(--space-3);
+          border-radius: var(--border-radius-full);
+          background: rgba(196, 117, 0, 0.1);
+          color: var(--color-warning);
+        ">
+          <i class="bi bi-clock" style="margin-right: var(--space-1);"></i>Pending
+        </span>
+      </div>
+      {% endfor %}
     </div>
-    {% endif %}
-    
-    <!-- Delete Team Modal -->
-    {% if is_owner %}
-    <div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="deleteTeamModalLabel">Delete Team</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to delete the team "<strong>{{ team.name }}</strong>"?</p>
-                    <p class="text-danger"><strong>This action cannot be undone.</strong></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form action="{{ url_for('team.delete_team', team_id=team.id) }}" method="POST">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="btn btn-danger">Delete Team</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% else %}
-    <!-- Leave Team Modal -->
-    <div class="modal fade" id="leaveTeamModal" tabindex="-1" aria-labelledby="leaveTeamModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title" id="leaveTeamModalLabel">Leave Team</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to leave the team "<strong>{{ team.name }}</strong>"?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form action="{{ url_for('team.leave_team', team_id=team.id) }}" method="POST">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="btn btn-warning">Leave Team</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+  </div>
+  {% endif %}
+
 </div>
-{% endblock %} 
+
+<!-- Delete Team Modal -->
+{% if is_owner %}
+<div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border: none; border-radius: var(--border-radius-xl); overflow: hidden; box-shadow: var(--shadow-xl);">
+      <div class="modal-header" style="border-bottom: 1px solid var(--color-neutral-200); padding: var(--space-6);">
+        <div style="display: flex; align-items: center; gap: var(--space-3);">
+          <div style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: rgba(193, 53, 21, 0.1);
+            border-radius: var(--border-radius-md);
+          ">
+            <i class="bi bi-exclamation-triangle-fill" style="color: var(--color-error); font-size: 1.125rem;"></i>
+          </div>
+          <h5 class="modal-title" id="deleteTeamModalLabel" style="
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-neutral-900);
+            margin: 0;
+          ">Delete team</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="padding: var(--space-6);">
+        <p style="color: var(--color-neutral-700); margin: 0 0 var(--space-3) 0;">
+          Are you sure you want to delete <strong>{{ team.name }}</strong>? All members and data will be permanently removed.
+        </p>
+        <p style="
+          color: var(--color-error);
+          font-size: var(--font-size-sm);
+          font-weight: var(--font-weight-medium);
+          margin: 0;
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+        ">
+          <i class="bi bi-exclamation-circle"></i>This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid var(--color-neutral-200); padding: var(--space-4) var(--space-6);">
+        <button type="button" class="btn-rds btn-rds--ghost" data-bs-dismiss="modal">Cancel</button>
+        <form action="{{ url_for('team.delete_team', team_id=team.id) }}" method="POST" class="d-inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn-rds" style="
+            background: var(--color-error);
+            color: var(--color-white);
+            border-color: var(--color-error);
+          ">
+            <i class="bi bi-trash" style="margin-right: var(--space-2);"></i>Delete team
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+
+<!-- Leave Team Modal -->
+<div class="modal fade" id="leaveTeamModal" tabindex="-1" aria-labelledby="leaveTeamModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border: none; border-radius: var(--border-radius-xl); overflow: hidden; box-shadow: var(--shadow-xl);">
+      <div class="modal-header" style="border-bottom: 1px solid var(--color-neutral-200); padding: var(--space-6);">
+        <div style="display: flex; align-items: center; gap: var(--space-3);">
+          <div style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: rgba(196, 117, 0, 0.1);
+            border-radius: var(--border-radius-md);
+          ">
+            <i class="bi bi-box-arrow-right" style="color: var(--color-warning); font-size: 1.125rem;"></i>
+          </div>
+          <h5 class="modal-title" id="leaveTeamModalLabel" style="
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-neutral-900);
+            margin: 0;
+          ">Leave team</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="padding: var(--space-6);">
+        <p style="color: var(--color-neutral-700); margin: 0;">
+          Are you sure you want to leave <strong>{{ team.name }}</strong>? You'll need to be re-invited to rejoin.
+        </p>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid var(--color-neutral-200); padding: var(--space-4) var(--space-6);">
+        <button type="button" class="btn-rds btn-rds--ghost" data-bs-dismiss="modal">Cancel</button>
+        <form action="{{ url_for('team.leave_team', team_id=team.id) }}" method="POST" class="d-inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn-rds" style="
+            background: var(--color-warning);
+            color: var(--color-white);
+            border-color: var(--color-warning);
+          ">
+            <i class="bi bi-box-arrow-right" style="margin-right: var(--space-2);"></i>Leave team
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
