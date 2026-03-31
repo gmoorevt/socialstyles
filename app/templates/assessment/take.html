@@ -598,6 +598,129 @@
     .scale-line-modern {
         width: 90%;
     }
+
+    /* Sticky submit button on mobile */
+    .d-grid {
+        position: sticky;
+        bottom: 0;
+        z-index: 100;
+        background: white;
+        padding: 0.75rem 0;
+        border-top: 1px solid #dee2e6;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+        margin: 0 -0.75rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    /* Reduce card header padding */
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .card-header h5 {
+        font-size: 1rem;
+    }
+
+    /* Tighter spacing between question cards */
+    .question-card.mb-4 {
+        margin-bottom: 1rem !important;
+    }
+}
+
+/* Small phones */
+@media (max-width: 576px) {
+    /* Reduce overall container padding */
+    .container.py-4 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        padding-top: 1rem !important;
+        padding-bottom: 5rem !important;
+    }
+
+    /* Single column likert options */
+    .likert-scale .rating-options {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    /* Hide the number circle on mobile - text label is sufficient */
+    .likert-label .rating-circle {
+        display: none;
+    }
+
+    /* Full-width tappable cards with just text */
+    .likert-label {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        padding: 0.875rem 1rem;
+        text-align: center;
+        min-height: 48px;
+    }
+
+    .likert-text {
+        text-align: center;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-top: 0;
+    }
+
+    /* Reduce question card padding */
+    .question-card {
+        padding: 1rem;
+    }
+
+    /* Stack question header vertically with smaller gap */
+    .question-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Smaller question number circle */
+    .question-number-circle {
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+    }
+
+    /* Smaller question title */
+    .question-title {
+        font-size: 0.95rem;
+    }
+
+    /* Hide the instruction scale on mobile - the labels are self-explanatory */
+    .scale-container {
+        display: none;
+    }
+
+    /* Reduce card body padding */
+    .card-body {
+        padding: 1rem;
+    }
+
+    /* Section description text */
+    .card-body > p.text-muted.mb-4 {
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem !important;
+    }
+
+    /* Reduce header card title */
+    .card-title.fs-2 {
+        font-size: 1.35rem !important;
+    }
+
+    /* Reduce spacing between section cards */
+    .row.mb-4 {
+        margin-bottom: 1rem !important;
+    }
+
+    /* Likert container padding */
+    .likert-container {
+        padding: 0.5rem;
+    }
 }
 </style>
 {% endblock %}

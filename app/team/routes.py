@@ -368,6 +368,30 @@ def send_team_notification(team, email):
     
     return True
 
+@team.route('/teams/<int:team_id>/members-data')
+@login_required
+def team_members_data(team_id):
+    """JSON endpoint returning team members with assessment scores for live polling."""
+    team_obj = Team.query.get_or_404(team_id)
+
+    if not team_obj.is_member(current_user) and not current_user.is_admin:
+        return jsonify({'error': 'Not authorized'}), 403
+
+    members = []
+    for membership in team_obj.members.all():
+        user = User.query.get(membership.user_id)
+        latest_result = user.get_latest_assessment_result()
+        if latest_result:
+            members.append({
+                'user_id': user.id,
+                'name': user.name,
+                'assertiveness_score': latest_result.assertiveness_score,
+                'responsiveness_score': latest_result.responsiveness_score,
+                'social_style': latest_result.social_style
+            })
+
+    return jsonify({'members': members})
+
 @team.route('/quick-join/<token>', methods=['GET', 'POST'])
 def quick_join(token):
     """Streamlined join process initiated from QR code or join link using Base62 token"""

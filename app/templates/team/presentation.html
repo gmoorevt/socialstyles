@@ -339,90 +339,77 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Connect to the WebSocket server
-            const socket = io();
-            const teamId = '{{ team_id }}';
-            
-            // Join the team-specific room
-            socket.on('connect', function() {
-                socket.emit('join', {room: `team_${teamId}`});
-                console.log('Connected to WebSocket server');
+            const teamId = {{ team_id }};
+            const POLL_INTERVAL = 5000; // 5 seconds
+            let knownMembers = {};
+
+            // Track initial members
+            document.querySelectorAll('.member-dot').forEach(dot => {
+                const userId = dot.getAttribute('data-user-id');
+                knownMembers[userId] = {
+                    assertiveness: parseFloat(dot.getAttribute('data-assertiveness')),
+                    responsiveness: parseFloat(dot.getAttribute('data-responsiveness'))
+                };
             });
-            
-            // Listen for new assessment results
-            socket.on('new_assessment_result', function(data) {
-                console.log('New assessment result received:', data);
-                
-                if (data.team_id == teamId) {
-                    // Check if this user already has a dot
-                    const existingDot = document.getElementById(`member-${data.user_id}`);
-                    
-                    if (existingDot) {
-                        // Update existing dot
-                        updateMemberPosition(
-                            existingDot, 
-                            data.assertiveness_score, 
-                            data.responsiveness_score,
-                            data.user_name
-                        );
-                        
-                        // Add shake animation
-                        existingDot.classList.add('shake-animation');
-                        setTimeout(() => {
-                            existingDot.classList.remove('shake-animation');
-                        }, 500);
-                    } else {
-                        // Add new dot
-                        addNewMember(
-                            data.user_id,
-                            data.user_name,
-                            data.assertiveness_score,
-                            data.responsiveness_score
-                        );
-                    }
+
+            // Poll for updates
+            setInterval(async () => {
+                try {
+                    const resp = await fetch(`/team/teams/${teamId}/members-data`);
+                    if (!resp.ok) return;
+                    const data = await resp.json();
+
+                    data.members.forEach(member => {
+                        const existing = knownMembers[member.user_id];
+                        const dot = document.getElementById(`member-${member.user_id}`);
+
+                        if (dot && existing) {
+                            // Check if scores changed
+                            if (existing.assertiveness !== member.assertiveness_score ||
+                                existing.responsiveness !== member.responsiveness_score) {
+                                updateMemberPosition(dot, member.assertiveness_score, member.responsiveness_score, member.name);
+                                dot.classList.add('shake-animation');
+                                setTimeout(() => dot.classList.remove('shake-animation'), 500);
+                                knownMembers[member.user_id] = {
+                                    assertiveness: member.assertiveness_score,
+                                    responsiveness: member.responsiveness_score
+                                };
+                            }
+                        } else if (!dot) {
+                            // New member
+                            addNewMember(member.user_id, member.name, member.assertiveness_score, member.responsiveness_score);
+                            knownMembers[member.user_id] = {
+                                assertiveness: member.assertiveness_score,
+                                responsiveness: member.responsiveness_score
+                            };
+                        }
+                    });
+                } catch (e) {
+                    console.error('Poll error:', e);
                 }
-            });
-            
-            // Function to update member position
+            }, POLL_INTERVAL);
+
+            function getQuadrantColor(assertiveness, responsiveness) {
+                if (assertiveness >= 2.5 && responsiveness < 2.5) return "#c62828";  // Driver
+                if (assertiveness >= 2.5 && responsiveness >= 2.5) return "#f57c00"; // Expressive
+                if (assertiveness < 2.5 && responsiveness < 2.5) return "#1565c0";   // Analytical
+                return "#2e7d32"; // Amiable
+            }
+
             function updateMemberPosition(dotElement, assertiveness, responsiveness, name) {
-                // Clamp scores to 1-4 range
                 assertiveness = Math.max(1, Math.min(parseFloat(assertiveness), 4));
                 responsiveness = Math.max(1, Math.min(parseFloat(responsiveness), 4));
-                
-                // X = Assertiveness (left=low, right=high)
-                // Y = Responsiveness (top=low, bottom=high)
                 const xPos = ((assertiveness - 1) / 3) * 100;
                 const yPos = ((responsiveness - 1) / 3) * 100;
-                
-                // Map the scores to quadrants for color coding
-                let color;
-                let style;
-                
-                if (assertiveness >= 2.5 && responsiveness < 2.5) {
-                    color = "#c62828"; // Driver: Red (top-right)
-                    style = "DRIVER";
-                } else if (assertiveness >= 2.5 && responsiveness >= 2.5) {
-                    color = "#f57c00"; // Expressive: Orange (bottom-right)
-                    style = "EXPRESSIVE";
-                } else if (assertiveness < 2.5 && responsiveness < 2.5) {
-                    color = "#1565c0"; // Analytical: Blue (top-left)
-                    style = "ANALYTICAL";
-                } else {
-                    color = "#2e7d32"; // Amiable: Green (bottom-left)
-                    style = "AMIABLE";
-                }
-                
-                // Update dot
+
                 dotElement.style.left = `${xPos}%`;
                 dotElement.style.top = `${yPos}%`;
-                dotElement.style.backgroundColor = color;
+                dotElement.style.backgroundColor = getQuadrantColor(assertiveness, responsiveness);
                 dotElement.setAttribute('data-assertiveness', assertiveness);
                 dotElement.setAttribute('data-responsiveness', responsiveness);
-                
-                // Update name label
+
                 const nameLabel = document.getElementById(`name-${dotElement.getAttribute('data-user-id')}`);
                 if (nameLabel) {
                     nameLabel.style.left = `${xPos}%`;
@@ -430,71 +417,53 @@
                     nameLabel.textContent = name;
                 }
             }
-            
-            // Function to add a new member dot
+
             function addNewMember(userId, name, assertiveness, responsiveness) {
-                const teamMembers = document.getElementById('team-members');
-                
-                // Clamp scores to 1-4 range
                 assertiveness = Math.max(1, Math.min(parseFloat(assertiveness), 4));
                 responsiveness = Math.max(1, Math.min(parseFloat(responsiveness), 4));
-                
-                // X = Assertiveness (left=low, right=high)
-                // Y = Responsiveness (top=low, bottom=high)
                 const xPos = ((assertiveness - 1) / 3) * 100;
                 const yPos = ((responsiveness - 1) / 3) * 100;
-                
-                // Map the scores to quadrants for color coding
-                let color;
-                let style;
-                
-                if (assertiveness >= 2.5 && responsiveness < 2.5) {
-                    color = "#c62828"; // Driver: Red (top-right)
-                    style = "DRIVER";
-                } else if (assertiveness >= 2.5 && responsiveness >= 2.5) {
-                    color = "#f57c00"; // Expressive: Orange (bottom-right)
-                    style = "EXPRESSIVE";
-                } else if (assertiveness < 2.5 && responsiveness < 2.5) {
-                    color = "#1565c0"; // Analytical: Blue (top-left)
-                    style = "ANALYTICAL";
-                } else {
-                    color = "#2e7d32"; // Amiable: Green (bottom-left)
-                    style = "AMIABLE";
-                }
-                
-                // Create new dot
+
                 const dot = document.createElement('div');
                 dot.className = 'member-dot member-added';
                 dot.id = `member-${userId}`;
                 dot.style.left = `${xPos}%`;
                 dot.style.top = `${yPos}%`;
-                dot.style.backgroundColor = color;
+                dot.style.backgroundColor = getQuadrantColor(assertiveness, responsiveness);
                 dot.setAttribute('data-user-id', userId);
                 dot.setAttribute('data-assertiveness', assertiveness);
                 dot.setAttribute('data-responsiveness', responsiveness);
                 dot.title = name;
-                
-                // Create name label
+
                 const nameLabel = document.createElement('div');
                 nameLabel.className = 'member-name';
                 nameLabel.id = `name-${userId}`;
                 nameLabel.style.left = `${xPos}%`;
                 nameLabel.style.top = `${yPos + 5}%`;
                 nameLabel.textContent = name;
-                
-                // Add to the DOM
+
+                const teamMembers = document.getElementById('team-members');
                 teamMembers.appendChild(dot);
                 teamMembers.appendChild(nameLabel);
+
+                // Add hover for new dots
+                dot.addEventListener('mouseenter', function() {
+                    nameLabel.style.opacity = '1';
+                    nameLabel.style.zIndex = '10';
+                });
+                dot.addEventListener('mouseleave', function() {
+                    nameLabel.style.opacity = '0.8';
+                    nameLabel.style.zIndex = '4';
+                });
             }
-            
-            // Add hover effect for member dots
+
+            // Hover effects for initial dots
             document.querySelectorAll('.member-dot').forEach(dot => {
                 dot.addEventListener('mouseenter', function() {
                     const userId = this.getAttribute('data-user-id');
                     document.getElementById(`name-${userId}`).style.opacity = '1';
                     document.getElementById(`name-${userId}`).style.zIndex = '10';
                 });
-                
                 dot.addEventListener('mouseleave', function() {
                     const userId = this.getAttribute('data-user-id');
                     document.getElementById(`name-${userId}`).style.opacity = '0.8';
