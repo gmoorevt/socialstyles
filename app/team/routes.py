@@ -372,8 +372,9 @@ def send_team_notification(team, email):
 def quick_join(token):
     """Streamlined join process initiated from QR code or join link using Base62 token"""
     try:
-        # Parse the Base62 token
-        parts = token.split('-')
+        # Parse the Base62 token: format is {id}-{random}-{team_name}
+        # Use maxsplit=2 so team names containing '-' are preserved
+        parts = token.split('-', 2)
         team_name = parts[2].replace('_', ' ') if len(parts) > 2 else None
         
         # Find team by name
