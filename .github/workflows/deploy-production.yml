@@ -96,10 +96,13 @@ jobs:
           BACKUP_FILE="$BACKUP_DIR/backup-$(date +%Y%m%d-%H%M%S).sql.gz"
 
           cd /var/www/socialstyles
-          source .env
 
-          # Extract database details from DATABASE_URL
-          DB_URL=$DATABASE_URL
+          # Read DATABASE_URL without executing .env. Sourcing fails when any
+          # value contains spaces (e.g. APP_NAME=Social Styles Assessment ->
+          # "Styles: command not found", exit 127).
+          DB_URL=$(grep -E '^DATABASE_URL=' .env | head -n1 | cut -d '=' -f2-)
+          DB_URL="${DB_URL%\"}"; DB_URL="${DB_URL#\"}"
+          DB_URL="${DB_URL%\'}"; DB_URL="${DB_URL#\'}"
 
           # Simple backup using pg_dump if PostgreSQL URL is available
           if [[ $DB_URL == postgresql://* ]]; then
