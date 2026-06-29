@@ -59,16 +59,17 @@ test.describe('Social Styles Assessment E2E Tests', () => {
       // Wait for page to load
       await expect(page.locator('h1')).toContainText('Social Styles Assessment');
 
-      // Fill out assertiveness questions (1-15)
+      // Fill out assertiveness questions (1-15). The radio input is visually
+      // hidden (opacity:0); the user clicks the styled label (for="<name>_<value>").
       for (let i = 1; i <= 15; i++) {
         const value = scenario.assertiveness[i - 1];
-        await page.click(`input[name="assertiveness_${i}"][value="${value}"]`);
+        await page.click(`label[for="assertiveness_${i}_${value}"]`);
       }
 
       // Fill out responsiveness questions (16-30)
       for (let i = 16; i <= 30; i++) {
         const value = scenario.responsiveness[i - 16];
-        await page.click(`input[name="responsiveness_${i}"][value="${value}"]`);
+        await page.click(`label[for="responsiveness_${i}_${value}"]`);
       }
 
       // Submit the assessment
@@ -77,14 +78,15 @@ test.describe('Social Styles Assessment E2E Tests', () => {
       // Wait for results page
       await page.waitForURL(/.*post-assessment.*/);
 
-      // Verify the social style result is displayed (adjust selector based on your actual page)
+      // The guest preview shows the computed SCORES (the style name is gated
+      // behind account creation). Verify the scores the UI produced — style
+      // determination from scores is covered exhaustively by the unit suite
+      // (tests/test_scoring.py, tests/test_geometry.py).
       const resultText = await page.textContent('body');
+      expect(resultText).toContain(`Assertiveness: ${scenario.expectedAssertScore}`);
+      expect(resultText).toContain(`Responsiveness: ${scenario.expectedRespScore}`);
 
-      // Check if the expected style appears in the result
-      // Note: This is a basic check - you may need to adjust based on actual page structure
-      expect(resultText).toContain(scenario.style);
-
-      console.log(`✓ Test passed: ${scenario.name} → ${scenario.style}`);
+      console.log(`✓ Test passed: ${scenario.name} → ${scenario.expectedAssertScore}/${scenario.expectedRespScore}`);
     });
   });
 
@@ -98,11 +100,13 @@ test.describe('Social Styles Assessment E2E Tests', () => {
     const questionCount = await page.locator('.question-card').count();
     expect(questionCount).toBe(30);
 
-    // Verify Likert scale options exist (1-4 for each question)
+    // Verify Likert scale options exist (1-4 for each question). The radio
+    // inputs are visually hidden (opacity:0), so assert they're attached while
+    // the styled labels are the visible, clickable targets.
     const firstQuestion = page.locator('.question-card').first();
     for (let i = 1; i <= 4; i++) {
-      await expect(firstQuestion.locator(`input[value="${i}"]`)).toBeVisible();
-      await expect(firstQuestion.locator(`label[for*="_${i}"]`)).toBeVisible();
+      await expect(firstQuestion.locator(`input[value="${i}"]`)).toBeAttached();
+      await expect(firstQuestion.locator(`label[for$="_${i}"]`)).toBeVisible();
     }
 
     console.log('✓ All questions display correctly in Likert format');
@@ -127,22 +131,26 @@ test.describe('Social Styles Assessment E2E Tests', () => {
     // Assertiveness: [3,3,2,2,3,2,3,2,3,2,3,2,3,2,3] = avg 2.53
     const assertResponses = [3,3,2,2,3,2,3,2,3,2,3,2,3,2,3];
     for (let i = 1; i <= 15; i++) {
-      await page.click(`input[name="assertiveness_${i}"][value="${assertResponses[i-1]}"]`);
+      await page.click(`label[for="assertiveness_${i}_${assertResponses[i-1]}"]`);
     }
 
     // Responsiveness: [2,2,2,2,3,2,2,3,2,2,3,2,2,3,2] = avg 2.27
     const respResponses = [2,2,2,2,3,2,2,3,2,2,3,2,2,3,2];
     for (let i = 16; i <= 30; i++) {
-      await page.click(`input[name="responsiveness_${i}"][value="${respResponses[i-16]}"]`);
+      await page.click(`label[for="responsiveness_${i}_${respResponses[i-16]}"]`);
     }
 
     await page.click('button[type="submit"]');
     await page.waitForURL(/.*post-assessment.*/);
 
+    // Assert 2.53 (>2.5) / Resp 2.27 (<2.5): with the strict-> cutoff this is
+    // DRIVER. The guest preview shows scores (2.5 / 2.3); the DRIVER
+    // determination at the boundary is asserted by tests/test_scoring.py.
     const resultText = await page.textContent('body');
-    expect(resultText).toContain('DRIVER');
+    expect(resultText).toContain('Assertiveness: 2.5');
+    expect(resultText).toContain('Responsiveness: 2.3');
 
-    console.log('✓ Boundary test passed: Correctly identified as DRIVER');
+    console.log('✓ Boundary test passed: scores 2.5 / 2.3 (DRIVER per unit tests)');
   });
 });
 
@@ -152,12 +160,12 @@ test.describe('Assessment Scoring Display Tests', () => {
     // Take a simple test
     await page.goto('http://localhost:5001/assessment/take/1?guest=True');
 
-    // Fill with known values
+    // Fill with known values (click the styled label; the radio is hidden)
     for (let i = 1; i <= 15; i++) {
-      await page.click(`input[name="assertiveness_${i}"][value="3"]`);
+      await page.click(`label[for="assertiveness_${i}_3"]`);
     }
     for (let i = 16; i <= 30; i++) {
-      await page.click(`input[name="responsiveness_${i}"][value="3"]`);
+      await page.click(`label[for="responsiveness_${i}_3"]`);
     }
 
     await page.click('button[type="submit"]');

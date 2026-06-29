@@ -60,17 +60,17 @@ class AssessmentResult(db.Model):
         return self.assertiveness_score, self.responsiveness_score
     
     def determine_social_style(self):
-        """Determine the social style based on assertiveness and responsiveness scores."""
-        # Using 2.5 as the cutoff point (midpoint of 1-4 scale)
-        if self.assertiveness_score >= 2.5 and self.responsiveness_score >= 2.5:
-            self.social_style = "EXPRESSIVE"
-        elif self.assertiveness_score >= 2.5 and self.responsiveness_score < 2.5:
-            self.social_style = "DRIVER"
-        elif self.assertiveness_score < 2.5 and self.responsiveness_score >= 2.5:
-            self.social_style = "AMIABLE"
-        else:  # assertiveness < 2.5 and responsiveness < 2.5
-            self.social_style = "ANALYTICAL"
-        
+        """Determine the social style based on assertiveness and responsiveness scores.
+
+        Delegates to app.assessment.geometry.quadrant so the model, templates,
+        and JS all share one definition. Uses strict ``>`` against the 2.5
+        midpoint, meaning a score of exactly 2.5 is the low side of its
+        dimension (matching the scoring.ts reference spec).
+        """
+        # Local import avoids a circular import at module load time
+        # (app.assessment package __init__ imports views, which imports models).
+        from app.assessment.geometry import quadrant
+        self.social_style = quadrant(self.assertiveness_score, self.responsiveness_score)
         return self.social_style
     
     def __repr__(self):

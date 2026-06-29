@@ -1,12 +1,84 @@
 /**
- * Social Styles Grid Interactive Features
+ * Social Styles Grid — shared geometry + interactive features.
+ *
+ * The position/quadrant math here is the JavaScript mirror of
+ * app/assessment/geometry.py and MUST stay numerically identical.
+ * tests/test_geometry.py asserts parity between the two by running this
+ * module under Node. Keep the formulas in sync.
  */
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all social styles grids on the page
-    initializeSocialStylesGrids();
-});
+(function (global) {
+    'use strict';
 
-function initializeSocialStylesGrids() {
+    var LO = 1, HI = 4, MIDPOINT = 2.5;
+    var SVG_ORIGIN = 50, SVG_SPAN = 300;
+    var QUADRANT_COLORS = {
+        ANALYTICAL: '#1565c0',
+        DRIVER: '#c62828',
+        AMIABLE: '#2e7d32',
+        EXPRESSIVE: '#f57c00'
+    };
+
+    function clampNormalize(value, lo, hi) {
+        return (Math.min(Math.max(value, lo), hi) - lo) / (hi - lo);
+    }
+
+    // Returns [nx, ny] in 0..1. See geometry.py normalize_position.
+    function normalizePosition(assertiveness, responsiveness) {
+        return [clampNormalize(assertiveness, LO, HI), clampNormalize(responsiveness, LO, HI)];
+    }
+
+    // Returns [x, y] in the 400x400 SVG grid (plot area 50-350).
+    function svgPosition(assertiveness, responsiveness) {
+        var n = normalizePosition(assertiveness, responsiveness);
+        return [SVG_ORIGIN + n[0] * SVG_SPAN, SVG_ORIGIN + n[1] * SVG_SPAN];
+    }
+
+    // Returns [xPct, yPct] for the percentage-positioned grid.
+    function percentPosition(assertiveness, responsiveness) {
+        var n = normalizePosition(assertiveness, responsiveness);
+        return [n[0] * 100, n[1] * 100];
+    }
+
+    // Strict '>' against the midpoint — 2.5 is the LOW side.
+    function quadrant(assertiveness, responsiveness) {
+        var highA = assertiveness > MIDPOINT;
+        var highR = responsiveness > MIDPOINT;
+        if (highA && highR) return 'EXPRESSIVE';
+        if (highA && !highR) return 'DRIVER';
+        if (!highA && highR) return 'AMIABLE';
+        return 'ANALYTICAL';
+    }
+
+    function quadrantColor(assertiveness, responsiveness) {
+        return QUADRANT_COLORS[quadrant(assertiveness, responsiveness)];
+    }
+
+    var SocialStylesGrid = {
+        LO: LO, HI: HI, MIDPOINT: MIDPOINT,
+        QUADRANT_COLORS: QUADRANT_COLORS,
+        normalizePosition: normalizePosition,
+        svgPosition: svgPosition,
+        percentPosition: percentPosition,
+        quadrant: quadrant,
+        quadrantColor: quadrantColor
+    };
+
+    global.SocialStylesGrid = SocialStylesGrid;
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = SocialStylesGrid;
+    }
+
+    // ---- DOM interactivity (browser only) ----
+    if (typeof document === 'undefined') {
+        return;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize all social styles grids on the page
+        initializeSocialStylesGrids();
+    });
+
+    function initializeSocialStylesGrids() {
     const svgGrids = document.querySelectorAll('.social-styles-svg');
     
     svgGrids.forEach(svg => {
@@ -116,4 +188,5 @@ function initializeSocialStylesGrids() {
             });
         });
     });
-} 
+}
+})(typeof globalThis !== 'undefined' ? globalThis : this);

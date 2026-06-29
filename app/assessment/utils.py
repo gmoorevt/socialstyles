@@ -11,22 +11,33 @@ from datetime import datetime
 
 def generate_social_style_chart(assertiveness_score, responsiveness_score):
     """Generate a chart showing the user's position in the Social Styles grid.
-    
+
+    The chart orientation matches the web SVG grids:
+      - X-axis: Assertiveness (left=Asks/low, right=Tells/high)
+      - Y-axis: Responsiveness (top=Controls/low, bottom=Emotes/high)
+      - Top-left: ANALYTICAL, Top-right: DRIVER
+      - Bottom-left: AMIABLE, Bottom-right: EXPRESSIVE
+
     Args:
-        assertiveness_score (float): The user's assertiveness score (1-5)
-        responsiveness_score (float): The user's responsiveness score (1-5)
-        
+        assertiveness_score (float): The user's assertiveness score (1-4)
+        responsiveness_score (float): The user's responsiveness score (1-4)
+
     Returns:
         str: Base64-encoded image of the chart
     """
     # Create figure and axis
     fig, ax = plt.figure(figsize=(8, 8)), plt.subplot(111)
-    
+
     # Set up the plot (1-4 scale to match scoring system)
     ax.set_xlim(1, 4)
     ax.set_ylim(1, 4)
-    ax.set_xlabel('Assertiveness', fontsize=14)
-    ax.set_ylabel('Responsiveness', fontsize=14)
+
+    # Invert Y-axis so high responsiveness is at bottom,
+    # matching the web SVG grids and the PRD spec
+    ax.invert_yaxis()
+
+    ax.set_xlabel('Assertiveness  (ASKS \u2190 \u2192 TELLS)', fontsize=13)
+    ax.set_ylabel('Responsiveness  (CONTROLS \u2190 \u2192 EMOTES)', fontsize=13)
     ax.set_title('Social Styles Assessment Results', fontsize=16)
 
     # Add grid lines
@@ -35,35 +46,41 @@ def generate_social_style_chart(assertiveness_score, responsiveness_score):
     # Add quadrant lines at 2.5 (midpoint of 1-4 scale)
     ax.axhline(y=2.5, color='black', linestyle='-', alpha=0.5)
     ax.axvline(x=2.5, color='black', linestyle='-', alpha=0.5)
-    
-    # Add quadrant labels (adjusted for 1-4 scale with 2.5 cutoff)
-    ax.text(1.75, 1.75, 'ANALYTICAL', ha='center', va='center', fontsize=12)
-    ax.text(3.25, 1.75, 'DRIVER', ha='center', va='center', fontsize=12)
-    ax.text(1.75, 3.25, 'AMIABLE', ha='center', va='center', fontsize=12)
-    ax.text(3.25, 3.25, 'EXPRESSIVE', ha='center', va='center', fontsize=12)
-    
+
+    # Add quadrant labels — after Y-inversion:
+    # low Y values (1.75) are at TOP, high Y values (3.25) are at BOTTOM
+    ax.text(1.75, 1.75, 'ANALYTICAL', ha='center', va='center', fontsize=12,
+            color='#1565c0', fontweight='bold')
+    ax.text(3.25, 1.75, 'DRIVER', ha='center', va='center', fontsize=12,
+            color='#c62828', fontweight='bold')
+    ax.text(1.75, 3.25, 'AMIABLE', ha='center', va='center', fontsize=12,
+            color='#2e7d32', fontweight='bold')
+    ax.text(3.25, 3.25, 'EXPRESSIVE', ha='center', va='center', fontsize=12,
+            color='#e65100', fontweight='bold')
+
     # Plot the user's position
     ax.plot(assertiveness_score, responsiveness_score, 'ro', markersize=10)
-    
-    # Add a text label with the exact scores
+
+    # Add a text label with the exact scores — offset away from dot
+    # With inverted Y, "above" the dot visually means a lower Y value
     ax.text(
-        assertiveness_score, 
-        responsiveness_score + 0.2, 
-        f'({assertiveness_score:.2f}, {responsiveness_score:.2f})', 
-        ha='center', 
-        va='bottom', 
+        assertiveness_score,
+        responsiveness_score - 0.2,
+        f'({assertiveness_score:.2f}, {responsiveness_score:.2f})',
+        ha='center',
+        va='bottom',
         fontsize=10
     )
-    
+
     # Save the plot to a bytes buffer
     buf = io.BytesIO()
     plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
     plt.close(fig)
     buf.seek(0)
-    
+
     # Convert to base64 for embedding in HTML
     img_str = base64.b64encode(buf.getvalue()).decode('utf-8')
-    
+
     return f'data:image/png;base64,{img_str}'
 
 def get_social_style_description(social_style):

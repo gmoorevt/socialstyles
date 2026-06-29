@@ -160,12 +160,17 @@ class AssessmentCalculator:
 
     @staticmethod
     def determine_social_style(assert_score, resp_score):
-        """Determine social style based on scores"""
-        if assert_score >= 2.5 and resp_score >= 2.5:
+        """Determine social style based on scores.
+
+        Strict ``>`` against the 2.5 midpoint (a score of exactly 2.5 is the
+        LOW side of its dimension), matching the scoring.ts reference spec and
+        app/assessment/geometry.quadrant.
+        """
+        if assert_score > 2.5 and resp_score > 2.5:
             return "EXPRESSIVE"
-        elif assert_score >= 2.5 and resp_score < 2.5:
+        elif assert_score > 2.5 and resp_score <= 2.5:
             return "DRIVER"
-        elif assert_score < 2.5 and resp_score >= 2.5:
+        elif assert_score <= 2.5 and resp_score > 2.5:
             return "AMIABLE"
         else:
             return "ANALYTICAL"
@@ -249,11 +254,12 @@ def run_tests():
 
     # Check boundary conditions
     print("\n1. Boundary Validation (2.5 cutoff):")
+    # Strict '>' cutoff: exactly 2.5 is the LOW side; you must exceed 2.5 to be high.
     boundary_tests = [
-        (2.49, 2.49, "ANALYTICAL"),
-        (2.50, 2.49, "DRIVER"),
-        (2.49, 2.50, "AMIABLE"),
-        (2.50, 2.50, "EXPRESSIVE"),
+        (2.50, 2.50, "ANALYTICAL"),  # both at cutoff -> low/low
+        (2.51, 2.50, "DRIVER"),      # assert above, resp at cutoff (low)
+        (2.50, 2.51, "AMIABLE"),     # resp above, assert at cutoff (low)
+        (2.51, 2.51, "EXPRESSIVE"),  # both above cutoff
     ]
 
     for assert_val, resp_val, expected in boundary_tests:

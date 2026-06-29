@@ -40,6 +40,11 @@ def create_app(config_name):
     mail.init_app(app)
     csrf.init_app(app)
 
+    # Bind Socket.IO to the app so socketio.run() / live events work.
+    # Without this, wsgi.py's socketio.run(app) crashes (eio is None).
+    from app.websockets import init_websockets
+    init_websockets(app)
+
     # Register blueprints
     from app.main import main as main_blueprint
     app.register_blueprint(main_blueprint)
@@ -55,7 +60,18 @@ def create_app(config_name):
 
     from app.admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint, url_prefix='/admin')
-    
+
+    # Expose the shared score->position helpers to all templates so every grid
+    # renderer derives from one source of truth (app/assessment/geometry.py).
+    from app.assessment import geometry
+    app.jinja_env.globals.update(
+        svg_position=geometry.svg_position,
+        percent_position=geometry.percent_position,
+        quadrant=geometry.quadrant,
+        quadrant_color=geometry.quadrant_color,
+        style_color=geometry.style_color,
+    )
+
     # Configure error handlers
     @app.errorhandler(404)
     def page_not_found(e):

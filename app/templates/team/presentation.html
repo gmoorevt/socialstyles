@@ -115,25 +115,25 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
-        .assertiveness-high {
+        .responsiveness-low {
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
         }
-        
-        .assertiveness-low {
+
+        .responsiveness-high {
             bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
         }
-        
-        .responsiveness-high {
+
+        .assertiveness-high {
             right: 10px;
             top: 50%;
             transform: translateY(-50%);
         }
-        
-        .responsiveness-low {
+
+        .assertiveness-low {
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
@@ -277,10 +277,10 @@
                     <div class="horizontal-axis"></div>
                     
                     <!-- Axis labels -->
-                    <div class="axis-label assertiveness-high">CONTROLS</div>
-                    <div class="axis-label assertiveness-low">EMOTES</div>
-                    <div class="axis-label responsiveness-high">TELLS</div>
-                    <div class="axis-label responsiveness-low">ASKS</div>
+                    <div class="axis-label responsiveness-low">CONTROLS</div>
+                    <div class="axis-label responsiveness-high">EMOTES</div>
+                    <div class="axis-label assertiveness-high">TELLS</div>
+                    <div class="axis-label assertiveness-low">ASKS</div>
                 </div>
                 
                 <!-- Quadrant labels -->
@@ -295,29 +295,16 @@
                     {% set assertiveness = member.result.assertiveness_score %}
                     {% set responsiveness = member.result.responsiveness_score %}
                     
-                    <!-- Clamp scores to 1-4 range and map to position -->
+                    <!-- Clamp scores to 1-4 range (used by the data attributes below) -->
                     {% set assertiveness = [1, [assertiveness, 4]|min]|max %}
                     {% set responsiveness = [1, [responsiveness, 4]|min]|max %}
-                    
-                    <!-- X = Assertiveness (left=ASKS/low, right=TELLS/high) -->
-                    <!-- Y = Responsiveness (top=CONTROLS/low, bottom=EMOTES/high) -->
-                    {% set x_pos = (assertiveness - 1) / 3 * 100 %}
-                    {% set y_pos = (responsiveness - 1) / 3 * 100 %}
-                    
-                    <!-- Map the scores to quadrants for color coding -->
-                    {% if assertiveness >= 2.5 and responsiveness < 2.5 %}
-                        {% set color = "#c62828" %} <!-- Driver: Red (top-right) -->
-                        {% set style = "DRIVER" %}
-                    {% elif assertiveness >= 2.5 and responsiveness >= 2.5 %}
-                        {% set color = "#f57c00" %} <!-- Expressive: Orange (bottom-right) -->
-                        {% set style = "EXPRESSIVE" %}
-                    {% elif assertiveness < 2.5 and responsiveness < 2.5 %}
-                        {% set color = "#1565c0" %} <!-- Analytical: Blue (top-left) -->
-                        {% set style = "ANALYTICAL" %}
-                    {% else %}
-                        {% set color = "#2e7d32" %} <!-- Amiable: Green (bottom-left) -->
-                        {% set style = "AMIABLE" %}
-                    {% endif %}
+
+                    {# Position + quadrant via the shared transform (app/assessment/geometry.py). #}
+                    {# X = Assertiveness (left=ASKS/low, right=TELLS/high); #}
+                    {# Y = Responsiveness (top=CONTROLS/low, bottom=EMOTES/high). #}
+                    {% set x_pos, y_pos = percent_position(assertiveness, responsiveness) %}
+                    {% set style = quadrant(assertiveness, responsiveness) %}
+                    {% set color = quadrant_color(assertiveness, responsiveness) %}
                     
                     <div class="member-dot" 
                          id="member-{{ member.user.id }}"
@@ -339,6 +326,7 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/social_styles_grid.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const teamId = {{ team_id }};
@@ -391,18 +379,16 @@
                 }
             }, POLL_INTERVAL);
 
+            // Position + color derive from the shared transform
+            // (app/static/js/social_styles_grid.js, mirrors geometry.py).
             function getQuadrantColor(assertiveness, responsiveness) {
-                if (assertiveness >= 2.5 && responsiveness < 2.5) return "#c62828";  // Driver
-                if (assertiveness >= 2.5 && responsiveness >= 2.5) return "#f57c00"; // Expressive
-                if (assertiveness < 2.5 && responsiveness < 2.5) return "#1565c0";   // Analytical
-                return "#2e7d32"; // Amiable
+                return window.SocialStylesGrid.quadrantColor(assertiveness, responsiveness);
             }
 
             function updateMemberPosition(dotElement, assertiveness, responsiveness, name) {
                 assertiveness = Math.max(1, Math.min(parseFloat(assertiveness), 4));
                 responsiveness = Math.max(1, Math.min(parseFloat(responsiveness), 4));
-                const xPos = ((assertiveness - 1) / 3) * 100;
-                const yPos = ((responsiveness - 1) / 3) * 100;
+                const [xPos, yPos] = window.SocialStylesGrid.percentPosition(assertiveness, responsiveness);
 
                 dotElement.style.left = `${xPos}%`;
                 dotElement.style.top = `${yPos}%`;
@@ -421,8 +407,7 @@
             function addNewMember(userId, name, assertiveness, responsiveness) {
                 assertiveness = Math.max(1, Math.min(parseFloat(assertiveness), 4));
                 responsiveness = Math.max(1, Math.min(parseFloat(responsiveness), 4));
-                const xPos = ((assertiveness - 1) / 3) * 100;
-                const yPos = ((responsiveness - 1) / 3) * 100;
+                const [xPos, yPos] = window.SocialStylesGrid.percentPosition(assertiveness, responsiveness);
 
                 const dot = document.createElement('div');
                 dot.className = 'member-dot member-added';

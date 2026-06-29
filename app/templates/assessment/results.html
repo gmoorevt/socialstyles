@@ -514,4 +514,26 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/social_styles_grid.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const data = document.getElementById('result-data');
+        if (!data) return;
+
+        const assertiveness = parseFloat(data.dataset.assertiveness);
+        const responsiveness = parseFloat(data.dataset.responsiveness);
+        if (isNaN(assertiveness) || isNaN(responsiveness)) return;
+
+        // Map scores to SVG coordinates via the shared transform
+        // (app/static/js/social_styles_grid.js, mirrors geometry.py).
+        const [x, y] = window.SocialStylesGrid.svgPosition(assertiveness, responsiveness);
+
+        const marker = document.getElementById('user-marker');
+        const pulse = document.getElementById('user-pulse-animation');
+        const label = document.getElementById('user-label');
+
+        if (marker) { marker.setAttribute('cx', x); marker.setAttribute('cy', y); }
+        if (pulse)  { pulse.setAttribute('cx', x);  pulse.setAttribute('cy', y); }
+        if (label)  { label.setAttribute('x', x);   label.setAttribute('y', y - 15); }
+    });
+</script>
 {% endblock %}

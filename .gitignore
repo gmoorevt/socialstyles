@@ -197,5 +197,9 @@ htmlcov/
 .pytest_cache/
 
 # Kubernetes
-kubeconfig test-results/
+kubeconfig
 resources/
+
+# Playwright / test artifacts
+test-results/
+playwright-report/

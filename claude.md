@@ -7,7 +7,7 @@
 **Current Version:** 1.4.0
 **Repository:** https://github.com/gmoorevt/socialstyles
 **Production URL:** https://teamsocialstyles.com
-**Server IP:** 134.209.128.212
+**Server IP:** 134.199.243.119
 
 ## Project Architecture
 
@@ -67,12 +67,16 @@ social-styles/
 - **Scoring Algorithm:**
   - Assertiveness score: Average of responses 1-15
   - Responsiveness score: Average of responses 16-30
-  - Cutoff point: 2.5 (midpoint of 1-4 scale)
-- **Social Style Determination:**
-  - **DRIVER:** High assertiveness (≥2.5), Low responsiveness (<2.5)
-  - **EXPRESSIVE:** High assertiveness (≥2.5), High responsiveness (≥2.5)
-  - **AMIABLE:** Low assertiveness (<2.5), High responsiveness (≥2.5)
-  - **ANALYTICAL:** Low assertiveness (<2.5), Low responsiveness (<2.5)
+  - Cutoff point: 2.5 (midpoint of 1-4 scale), compared with strict `>` — a
+    score of **exactly 2.5 is the LOW side** of its dimension (per the
+    scoring.ts reference spec)
+- **Social Style Determination** (single source of truth:
+  `app/assessment/geometry.py:quadrant`, mirrored in
+  `app/static/js/social_styles_grid.js`):
+  - **DRIVER:** High assertiveness (>2.5), Low responsiveness (≤2.5)
+  - **EXPRESSIVE:** High assertiveness (>2.5), High responsiveness (>2.5)
+  - **AMIABLE:** Low assertiveness (≤2.5), High responsiveness (>2.5)
+  - **ANALYTICAL:** Low assertiveness (≤2.5), Low responsiveness (≤2.5)
 
 ### 2. User Management
 - Registration and authentication system
@@ -270,7 +274,7 @@ Interactive deployment script with options:
 4. Individual deployment steps
 
 **Configuration variables in script:**
-- `DROPLET_IP`: 134.209.128.212
+- `DROPLET_IP`: 134.199.243.119
 - `DOMAIN_NAME`: teamsocialstyles.com
 - `GITHUB_REPO`: Repository URL
 - `GITHUB_BRANCH`: Branch to deploy
@@ -286,10 +290,10 @@ Interactive deployment script with options:
 **Verify deployment:**
 ```bash
 # Check service status
-ssh -i ~/.ssh/id_ed25519 root@134.209.128.212 "systemctl status socialstyles.service"
+ssh -i ~/.ssh/id_ed25519 root@134.199.243.119 "systemctl status socialstyles.service"
 
 # View logs
-ssh -i ~/.ssh/id_ed25519 root@134.209.128.212 "journalctl -u socialstyles.service -f"
+ssh -i ~/.ssh/id_ed25519 root@134.199.243.119 "journalctl -u socialstyles.service -f"
 ```
 
 ## File Paths Reference
@@ -378,7 +382,7 @@ pytest  # Run test suite
 ### Cloudflare Issues
 - SSL/TLS mode: Set to "Flexible" (Cloudflare handles SSL termination)
 - Temporarily disable proxy to test direct connection
-- Check DNS A record points to 134.209.128.212
+- Check DNS A record points to 134.199.243.119
 
 ### CSRF Errors
 - `WTF_CSRF_SSL_STRICT = False` for compatibility
@@ -411,11 +415,23 @@ def calculate_scores(self):
     # Returns tuple: (assertiveness_score, responsiveness_score)
 ```
 
-**Social Style Determination** (`app/models/assessment.py:61`)
+**Social Style Determination** (`app/models/assessment.py`)
 ```python
 def determine_social_style(self):
-    """Determine the social style based on assertiveness and responsiveness scores."""
+    """Determine the social style based on assertiveness and responsiveness scores.
+    Delegates to app.assessment.geometry.quadrant (strict > 2.5 midpoint)."""
     # Returns: "EXPRESSIVE" | "DRIVER" | "AMIABLE" | "ANALYTICAL"
+```
+
+**Score → grid position** (`app/assessment/geometry.py`) — single source of
+truth shared by all renderers (results SVG, team dashboard, presentation,
+matplotlib PDF) and mirrored in `app/static/js/social_styles_grid.js`:
+```python
+def normalize_position(assertiveness, responsiveness):
+    """Return (nx, ny) in 0..1. ny: 0 = low resp (top), 1 = high resp (bottom)."""
+def svg_position(...)      # -> (50 + nx*300, 50 + ny*300)   for the 400x400 SVG grid
+def percent_position(...)  # -> (nx*100, ny*100)             for the presentation grid
+def quadrant(...)          # -> style name (strict > 2.5 cutoff)
 ```
 
 **Password Reset Token** (`app/models/user.py:48`)

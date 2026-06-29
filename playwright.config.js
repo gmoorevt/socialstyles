@@ -3,7 +3,7 @@ const { defineConfig, devices } = require('@playwright/test');
 
 module.exports = defineConfig({
   testDir: './',
-  testMatch: ['test_e2e_assessment.js', 'test_regression.js'],
+  testMatch: ['test_e2e_assessment.js', 'test_regression.js', 'test_auth_ui.spec.js'],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
