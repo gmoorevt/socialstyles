@@ -135,6 +135,10 @@ jobs:
           # Navigate to app directory
           cd ${{ env.APP_DIR }}
 
+          # The repo is owned by the socialstyles user; the deploy SSH user
+          # differs, so git aborts with "dubious ownership" without this.
+          git config --global --add safe.directory ${{ env.APP_DIR }}
+
           # Store current version for rollback
           PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "unknown")
           echo "Previous version: $PREVIOUS_VERSION"
