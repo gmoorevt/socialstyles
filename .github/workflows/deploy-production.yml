@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   workflow_dispatch:  # Allow manual trigger
 
+# Needed so the deploy job can push the version tag (rollback relies on tags).
+permissions:
+  contents: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -200,6 +204,9 @@ jobs:
 
     - name: Push deployment tag
       if: success()
+      # The app is already deployed and health-checked by this point; a tag
+      # push hiccup must not flip a healthy deploy to failed.
+      continue-on-error: true
       run: |
         git push origin ${{ env.DEPLOY_VERSION }}
 
